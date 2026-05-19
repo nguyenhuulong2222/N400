@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Civics Practice — Free U.S. Naturalization Test Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d2052;
+    --navy-mid: #1a3478;
+    --navy-light: #2a4a9e;
+    --red: #b22234;
+    --red-light: #cc3344;
+    --white: #ffffff;
+    --bg: #f7f8fc;
+    --bg-card: #ffffff;
+    --text: #0d1f3c;
+    --text-mid: #334166;
+    --text-muted: #6b7a99;
+    --border: #dde2ef;
+    --correct: #16a34a;
+    --correct-bg: #f0fdf4;
+    --correct-border: #bbf7d0;
+    --wrong: #dc2626;
+    --wrong-bg: #fef2f2;
+    --wrong-border: #fecaca;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(13,32,82,0.09);
+    --shadow-hover: 0 8px 32px rgba(13,32,82,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* American flag top stripe */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg,
+      var(--navy) 0%, var(--navy) 33.3%,
+      var(--white) 33.3%, var(--white) 66.6%,
+      var(--red) 66.6%, var(--red) 100%);
+    z-index: 1000;
+  }
+
+  .app-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+    padding-top: 36px;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    text-align: center;
+    padding: 32px 0 24px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+  }
+
+  .site-header p {
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .badge-navy {
+    background: var(--navy);
+    color: white;
+  }
+
+  .badge-red {
+    background: var(--red-light);
+    color: white;
+  }
+
+  .badge-disclaimer {
+    background: #fff3f3;
+    color: var(--red);
+    border: 1px solid #fecaca;
+    font-weight: 400;
+    text-transform: none;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── ONBOARDING ── */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .section-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .route-cards { display: grid; gap: 12px; }
+
+  .route-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: 'Source Serif 4', serif;
+    box-shadow: var(--shadow);
+  }
+
+  .route-card:hover {
+    border-color: var(--navy-light);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .route-card.selected {
+    border-color: var(--navy);
+    background: #f0f4ff;
+    box-shadow: var(--shadow-hover);
+  }
+
+  .rc-badge {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--red);
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .route-card.selected .rc-badge { color: var(--navy); }
+
+  .rc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 5px;
+  }
+
+  .rc-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .rc-stats {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .rc-stat {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #eef1fa;
+    color: var(--navy-mid);
+  }
+
+  .route-card.selected .rc-stat {
+    background: var(--navy);
+    color: white;
+  }
+
+  /* ── LANGUAGE ── */
+  .lang-section { margin-top: 24px; }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .lang-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+    color: var(--text-mid);
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .lang-btn:hover, .lang-btn.selected {
+    border-color: var(--navy);
+    background: #f0f4ff;
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .lang-btn .flag { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* ── PRIMARY BUTTON ── */
+  .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 16px rgba(13,32,82,0.25);
+  }
+
+  .btn-primary:hover {
+    background: var(--navy-mid);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(13,32,82,0.3);
+  }
+
+  .btn-primary:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text-mid);
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    width: 100%;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+
+  /* ── QUIZ HEADER ── */
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .quiz-mode-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+  }
+
+  .score-display { display: flex; gap: 10px; }
+
+  .score-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .score-pill.correct {
+    background: var(--correct-bg);
+    color: var(--correct);
+    border: 1.5px solid var(--correct-border);
+  }
+
+  .score-pill.wrong {
+    background: var(--wrong-bg);
+    color: var(--wrong);
+    border: 1.5px solid var(--wrong-border);
+  }
+
+  /* ── PROGRESS ── */
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--navy), var(--navy-light));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 26px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--navy), var(--navy-light));
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .q-text-translated {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .q-note {
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #fff3f3;
+    border-radius: 8px;
+    border-left: 3px solid var(--red);
+    font-weight: 600;
+  }
+
+  .audio-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg);
+    color: var(--text-mid);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Source Serif 4', serif;
+  }
+
+  .audio-btn:hover {
+    border-color: var(--navy);
+    color: var(--navy);
+    background: #f0f4ff;
+  }
+
+  /* ── ANSWER OPTIONS ── */
+  .answer-section { margin-bottom: 16px; }
+
+  .answer-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .answer-options { display: grid; gap: 9px; }
+
+  .answer-opt {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    color: var(--text);
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .answer-opt .opt-letter {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    background: var(--bg);
+  }
+
+  .answer-opt:hover:not(:disabled) {
+    border-color: var(--navy-light);
+    background: #f0f4ff;
+    transform: translateX(3px);
+  }
+
+  .answer-opt:hover:not(:disabled) .opt-letter {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: white;
+  }
+
+  .answer-opt.selected-correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+
+  .answer-opt.selected-correct .opt-letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: white;
+  }
+
+  .answer-opt.selected-wrong {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+  }
+
+  .answer-opt.selected-wrong .opt-letter {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: white;
+  }
+
+  .answer-opt.show-correct {
+    border-color: rgba(22,163,74,0.4);
+    background: rgba(240,253,244,0.6);
+  }
+
+  .answer-opt:disabled { cursor: default; }
+
+  /* ── FEEDBACK ── */
+  .feedback-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    animation: fadeUp 0.22s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-box.correct {
+    background: var(--correct-bg);
+    border: 1.5px solid var(--correct-border);
+  }
+
+  .feedback-box.wrong {
+    background: var(--wrong-bg);
+    border: 1.5px solid var(--wrong-border);
+  }
+
+  .fb-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .feedback-box.correct .fb-title { color: var(--correct); }
+  .feedback-box.wrong .fb-title { color: var(--wrong); }
+
+  .fb-answer {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+
+  .btn-next {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: white;
+    border: 2px solid var(--navy);
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-next:hover {
+    background: var(--navy);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(13,32,82,0.2);
+  }
+
+  /* ── RESULT ── */
+  .result-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    animation: cardIn 0.35s ease both;
+  }
+
+  .result-icon {
+    font-size: 60px;
+    display: block;
+    margin-bottom: 16px;
+    animation: iconPop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+  }
+
+  @keyframes iconPop {
+    from { opacity: 0; transform: scale(0.4); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .result-verdict {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 900;
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .result-verdict.pass { color: var(--correct); }
+  .result-verdict.fail { color: var(--red); }
+
+  .result-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .result-stat {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 10px;
+  }
+
+  .rs-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--navy);
+    display: block;
+  }
+
+  .rs-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+  }
+
+  .result-actions { display: grid; gap: 10px; }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .site-footer a { color: var(--navy-light); text-decoration: none; }
+  .site-footer a:hover { text-decoration: underline; }
+
+  .legal-box {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    text-align: left;
+  }
+
+  .legal-box strong {
+    color: var(--text-mid);
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .legal-box a { color: var(--navy-light); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .lang-grid { grid-template-columns: repeat(2, 1fr); }
+    .question-card { padding: 22px 18px; }
+    .result-card { padding: 28px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <h1>Civics Practice Test</h1>
+    <p>Free practice for the U.S. naturalization civics exam</p>
+    <div class="badge-row">
+      <span class="badge badge-navy">100% Free</span>
+      <span class="badge badge-red">No Account</span>
+      <span class="badge badge-navy">No Ads</span>
+    </div>
+    <div class="badge-row">
+      <span class="badge badge-disclaimer">Not affiliated with or endorsed by USCIS or the U.S. government</span>
+    </div>
+  </header>
+
+  <!-- ══ SCREEN 1: ONBOARDING ══ -->
+  <div id="screen-onboard" class="screen active">
+
+    <h2 class="section-title">Which version do you need?</h2>
+    <p class="section-sub">Your version depends on when you filed Form N-400. Choose below.</p>
+
+    <div class="route-cards">
+      <button class="route-card" data-route="2025" onclick="selectRoute(this)">
+        <div class="rc-badge">✦ New · Filed Oct 20, 2025 or later</div>
+        <div class="rc-title">2025 Civics Practice</div>
+        <div class="rc-desc">Updated question bank — for recent applicants.</div>
+        <div class="rc-stats">
+          <span class="rc-stat">128 Questions</span>
+          <span class="rc-stat">20 Asked</span>
+          <span class="rc-stat">12 to Pass</span>
+        </div>
+      </button>
+
+      <button class="route-card" data-route="2008" onclick="selectRoute(this)">
+        <div class="rc-badge">Filed before Oct 20, 2025</div>
+        <div class="rc-title">2008 Civics Practice</div>
+        <div class="rc-desc">The original test — still used for earlier applications.</div>
+        <div class="rc-stats">
+          <span class="rc-stat">100 Questions</span>
+          <span class="rc-stat">10 Asked</span>
+          <span class="rc-stat">6 to Pass</span>
+        </div>
+      </button>
+
+      <button class="route-card" data-route="6520" onclick="selectRoute(this)">
+        <div class="rc-badge">Age 65+ · Resident 20+ years</div>
+        <div class="rc-title">65/20 Exemption Practice</div>
+        <div class="rc-desc">Shorter test. Study only the 20 starred questions.</div>
+        <div class="rc-stats">
+          <span class="rc-stat">20 Questions</span>
+          <span class="rc-stat">10 Asked</span>
+          <span class="rc-stat">6 to Pass</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="lang-section">
+      <div class="section-label">Display language</div>
+      <div class="lang-grid">
+        <button class="lang-btn selected" data-lang="en" onclick="selectLang(this)">
+          <span class="flag">🇺🇸</span>English
+        </button>
+        <button class="lang-btn" data-lang="vi" onclick="selectLang(this)">
+          <span class="flag">🇻🇳</span>Tiếng Việt
+        </button>
+        <button class="lang-btn" data-lang="es" onclick="selectLang(this)">
+          <span class="flag">🇲🇽</span>Español
+        </button>
+        <button class="lang-btn" data-lang="zh" onclick="selectLang(this)">
+          <span class="flag">🇨🇳</span>中文
+        </button>
+        <button class="lang-btn" data-lang="tl" onclick="selectLang(this)">
+          <span class="flag">🇵🇭</span>Filipino
+        </button>
+        <button class="lang-btn" data-lang="ko" onclick="selectLang(this)">
+          <span class="flag">🇰🇷</span>한국어
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-start" disabled onclick="startQuiz()">
+      Start Practice Session →
+    </button>
+  </div>
+
+  <!-- ══ SCREEN 2: QUIZ ══ -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <span class="quiz-mode-label" id="quiz-mode-label">2025 Test</span>
+      <div class="score-display">
+        <span class="score-pill correct">✓ <span id="score-correct">0</span></span>
+        <span class="score-pill wrong">✗ <span id="score-wrong">0</span></span>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div id="question-area"></div>
+    <div id="feedback-area"></div>
+    <div id="action-area"></div>
+  </div>
+
+  <!-- ══ SCREEN 3: RESULT ══ -->
+  <div id="screen-result" class="screen">
+    <div class="result-card">
+      <span class="result-icon" id="result-icon">🎉</span>
+      <div class="result-verdict" id="result-verdict">PASSED</div>
+      <p class="result-sub" id="result-sub"></p>
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="rs-num" id="res-correct">0</span>
+          <span class="rs-label">Correct</span>
+        </div>
+        <div class="result-stat">
+          <span class="rs-num" id="res-wrong">0</span>
+          <span class="rs-label">Wrong</span>
+        </div>
+        <div class="result-stat">
+          <span class="rs-num" id="res-total">0</span>
+          <span class="rs-label">Asked</span>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="restartQuiz()">Practice Again</button>
+        <button class="btn-outline" onclick="goHome()">Change Version or Language</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    Questions from official <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank">USCIS study materials</a> (public domain · 17 U.S.C. § 105)<br>
+    Verify current answers at <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates" target="_blank">uscis.gov/citizenship/testupdates</a>
+  </footer>
+
+  <div class="legal-box">
+    <strong>Legal Notice</strong>
+    This is an independent, free civic education resource. It is <em>not</em> affiliated with, authorized, endorsed, or approved by U.S. Citizenship and Immigration Services (USCIS), the Department of Homeland Security (DHS), or any U.S. government agency. Civics questions are sourced from official USCIS public domain materials (17 U.S.C. § 105). This app does not provide legal advice. For official materials, visit <a href="https://www.uscis.gov" target="_blank">uscis.gov</a>. For immigration legal help, consult a licensed attorney or accredited representative.
+  </div>
+
+</div>
+
+<script>
+// ══ DATA ══
+const QUESTIONS = {
+  "2025": [
+    { id:1,  q:"What is the supreme law of the land?",
+      a:["the Constitution"], distractors:["the Declaration of Independence","the Bill of Rights","Federal law"],
+      vi:"Luật tối cao của đất nước là gì?", vi_a:"Hiến pháp",
+      es:"¿Cuál es la ley suprema del país?", es_a:"La Constitución" },
+    { id:2,  q:"What does the Constitution do?",
+      a:["sets up the government","defines the government","protects basic rights of Americans"], distractors:["Declares independence from Britain","Creates political parties","Establishes the military draft"],
+      vi:"Hiến pháp làm gì?", vi_a:"Thiết lập chính phủ và bảo vệ quyền cơ bản của người Mỹ",
+      es:"¿Qué hace la Constitución?", es_a:"Establece el gobierno y protege los derechos básicos" },
+    { id:3,  q:"The idea of self-government is in the first three words of the Constitution. What are these words?",
+      a:["We the People"], distractors:["We the Government","In God We","Life Liberty Happiness"],
+      vi:"Ba từ đầu tiên của Hiến pháp là gì?", vi_a:"We the People (Chúng ta là nhân dân)",
+      es:"¿Cuáles son las primeras tres palabras de la Constitución?", es_a:"We the People" },
+    { id:4,  q:"What is an amendment?",
+      a:["a change to the Constitution","an addition to the Constitution"], distractors:["A new law passed by Congress","A presidential executive order","A Supreme Court ruling"],
+      vi:"Tu chính án là gì?", vi_a:"Một sự thay đổi hoặc bổ sung vào Hiến pháp",
+      es:"¿Qué es una enmienda?", es_a:"Un cambio o adición a la Constitución" },
+    { id:5,  q:"What do we call the first ten amendments to the Constitution?",
+      a:["the Bill of Rights"], distractors:["the Declaration of Rights","the Freedom Amendments","the Original Amendments"],
+      vi:"Mười tu chính án đầu tiên được gọi là gì?", vi_a:"Tuyên ngôn Nhân quyền (Bill of Rights)",
+      es:"¿Cómo llamamos a las primeras diez enmiendas?", es_a:"La Declaración de Derechos" },
+    { id:6,  q:"What is one right or freedom from the First Amendment?",
+      a:["speech","religion","assembly","press","petition the government"], distractors:["right to bear arms","right to vote","right to a fair trial"],
+      vi:"Một quyền hoặc tự do từ Tu chính án thứ nhất là gì?", vi_a:"Tự do ngôn luận, tôn giáo, hội họp, báo chí, hoặc kiến nghị chính phủ",
+      es:"¿Cuál es un derecho de la Primera Enmienda?", es_a:"Libertad de expresión, religión, reunión, prensa o petición" },
+    { id:7,  q:"How many amendments does the Constitution have?",
+      a:["twenty-seven (27)"], distractors:["ten (10)","twenty-five (25)","thirty (30)"],
+      vi:"Hiến pháp có bao nhiêu tu chính án?", vi_a:"Hai mươi bảy (27)",
+      es:"¿Cuántas enmiendas tiene la Constitución?", es_a:"Veintisiete (27)" },
+    { id:8,  q:"What did the Declaration of Independence do?",
+      a:["announced our independence from Great Britain","declared our independence from Great Britain","said that the United States is free from Great Britain"], distractors:["Created the Constitution","Ended the Civil War","Established the Supreme Court"],
+      vi:"Bản Tuyên ngôn Độc lập đã làm gì?", vi_a:"Tuyên bố độc lập của chúng ta khỏi Anh Quốc",
+      es:"¿Qué hizo la Declaración de Independencia?", es_a:"Declaró la independencia de Gran Bretaña" },
+    { id:9,  q:"What are two rights in the Declaration of Independence?",
+      a:["life","liberty","pursuit of happiness"], distractors:["freedom of speech","right to vote","right to bear arms"],
+      vi:"Hai quyền trong Tuyên ngôn Độc lập là gì?", vi_a:"Cuộc sống, tự do, và mưu cầu hạnh phúc",
+      es:"¿Cuáles son dos derechos en la Declaración de Independencia?", es_a:"Vida, libertad y búsqueda de la felicidad" },
+    { id:10, q:"What is freedom of religion?",
+      a:["You can practice any religion, or not practice a religion."], distractors:["The government chooses your religion","Only Christians have religious freedom","You must practice a religion"],
+      vi:"Tự do tôn giáo là gì?", vi_a:"Bạn có thể theo bất kỳ tôn giáo nào, hoặc không theo tôn giáo nào.",
+      es:"¿Qué es la libertad de religión?", es_a:"Puedes practicar cualquier religión, o ninguna." },
+    { id:11, q:"What is the economic system in the United States?",
+      a:["capitalist economy","market economy"], distractors:["socialist economy","communist economy","planned economy"],
+      vi:"Hệ thống kinh tế của Hoa Kỳ là gì?", vi_a:"Nền kinh tế tư bản / kinh tế thị trường",
+      es:"¿Cuál es el sistema económico de EE.UU.?", es_a:"Economía capitalista / economía de mercado" },
+    { id:12, q:"What is the rule of law?",
+      a:["Everyone must follow the law.","Leaders must obey the law.","No one is above the law."], distractors:["Only citizens must follow the law","The President makes all laws","Laws only apply in courts"],
+      vi:"Pháp quyền là gì?", vi_a:"Mọi người đều phải tuân theo luật pháp. Không ai đứng trên luật pháp.",
+      es:"¿Qué es el estado de derecho?", es_a:"Todos deben seguir la ley. Nadie está por encima de la ley." },
+    { id:13, q:"Name one branch or part of the government.",
+      a:["Congress","legislative","President","executive","the courts","judicial"], distractors:["The military","The police","The Federal Reserve"],
+      vi:"Hãy đặt tên một nhánh của chính phủ.", vi_a:"Quốc hội (lập pháp), Tổng thống (hành pháp), hoặc Tòa án (tư pháp)",
+      es:"Nombre una rama del gobierno.", es_a:"El Congreso, el Presidente, o los tribunales" },
+    { id:14, q:"What stops one branch of government from becoming too powerful?",
+      a:["checks and balances","separation of powers"], distractors:["The military","Elections alone","Public opinion"],
+      vi:"Điều gì ngăn một nhánh trở nên quá quyền lực?", vi_a:"Kiểm tra và cân bằng / phân chia quyền lực",
+      es:"¿Qué impide que una rama sea demasiado poderosa?", es_a:"Los controles y equilibrios / la separación de poderes" },
+    { id:15, q:"Who is in charge of the executive branch?",
+      a:["the President"], distractors:["the Vice President","the Speaker of the House","the Chief Justice"],
+      vi:"Ai phụ trách nhánh hành pháp?", vi_a:"Tổng thống",
+      es:"¿Quién está a cargo de la rama ejecutiva?", es_a:"El Presidente" },
+    { id:16, q:"Who makes federal laws?",
+      a:["Congress","Senate and House of Representatives","the legislature"], distractors:["The President","The Supreme Court","State governors"],
+      vi:"Ai làm luật liên bang?", vi_a:"Quốc hội (Thượng viện và Hạ viện)",
+      es:"¿Quién hace las leyes federales?", es_a:"El Congreso" },
+    { id:17, q:"What are the two parts of the U.S. Congress?",
+      a:["the Senate and House of Representatives"], distractors:["the House and Supreme Court","the Senate and President","Democrats and Republicans"],
+      vi:"Hai nhánh của Quốc hội là gì?", vi_a:"Thượng viện và Hạ viện",
+      es:"¿Cuáles son las dos partes del Congreso?", es_a:"El Senado y la Cámara de Representantes" },
+    { id:18, q:"How many U.S. Senators are there?",
+      a:["one hundred (100)"], distractors:["fifty (50)","four hundred thirty-five (435)","two hundred (200)"],
+      vi:"Có bao nhiêu Thượng nghị sĩ Mỹ?", vi_a:"Một trăm (100)",
+      es:"¿Cuántos senadores hay?", es_a:"Cien (100)" },
+    { id:19, q:"We elect a U.S. Senator for how many years?",
+      a:["six (6)"], distractors:["two (2)","four (4)","eight (8)"],
+      vi:"Thượng nghị sĩ được bầu trong bao nhiêu năm?", vi_a:"Sáu (6) năm",
+      es:"¿Por cuántos años elegimos a un senador?", es_a:"Seis (6) años" },
+    { id:20, q:"How many voting members are in the House of Representatives?",
+      a:["four hundred thirty-five (435)"], distractors:["one hundred (100)","two hundred (200)","five hundred (500)"],
+      vi:"Hạ viện có bao nhiêu thành viên có quyền bỏ phiếu?", vi_a:"Bốn trăm ba mươi lăm (435)",
+      es:"¿Cuántos miembros votantes hay en la Cámara?", es_a:"Cuatrocientos treinta y cinco (435)" },
+    { id:28, q:"What is the name of the President of the United States now?",
+      a:["Donald Trump","Trump"], distractors:["Joe Biden","Barack Obama","Kamala Harris"],
+      dynamic: true, dynamic_note:"⚡ Answer must reflect the President serving at time of your interview.",
+      vi:"Tổng thống Hoa Kỳ hiện nay tên là gì?", vi_a:"Donald Trump",
+      es:"¿Cuál es el nombre del Presidente ahora?", es_a:"Donald Trump" },
+    { id:29, q:"What is the name of the Vice President of the United States now?",
+      a:["JD Vance","Vance"], distractors:["Kamala Harris","Mike Pence","Tim Walz"],
+      dynamic: true, dynamic_note:"⚡ Answer must reflect the Vice President serving at time of your interview.",
+      vi:"Phó Tổng thống Hoa Kỳ hiện nay tên là gì?", vi_a:"JD Vance",
+      es:"¿Cuál es el nombre del Vicepresidente ahora?", es_a:"JD Vance" },
+    { id:75, q:"What was one important thing Abraham Lincoln did?",
+      a:["freed the slaves","saved the Union","led the United States during the Civil War"], distractors:["Won World War II","Wrote the Constitution","Ended World War I"],
+      vi:"Một điều quan trọng Abraham Lincoln đã làm là gì?", vi_a:"Giải phóng nô lệ / bảo tồn Liên bang / lãnh đạo trong Nội chiến",
+      es:"¿Qué hizo Abraham Lincoln?", es_a:"Liberó a los esclavos / preservó la Unión" },
+    { id:95, q:"What are two rights of everyone living in the United States?",
+      a:["freedom of expression","freedom of speech","freedom of assembly","freedom to petition the government","freedom of religion","the right to bear arms"], distractors:["right to vote","right to run for federal office","right to a government job"],
+      vi:"Hai quyền của mọi người sống ở Hoa Kỳ là gì?", vi_a:"Tự do ngôn luận, tôn giáo, hội họp, kiến nghị, hoặc quyền mang vũ khí",
+      es:"¿Cuáles son dos derechos de toda persona en EE.UU.?", es_a:"Libertad de expresión, religión, reunión, petición o derecho a portar armas" },
+    { id:100,q:"Name one promise you make when you become a United States citizen.",
+      a:["give up loyalty to other countries","defend the Constitution and laws of the United States","obey the laws of the United States","be loyal to the United States"], distractors:["Pay extra taxes","Never travel abroad","Give up your native language"],
+      vi:"Một lời hứa khi trở thành công dân Mỹ là gì?", vi_a:"Từ bỏ lòng trung thành với quốc gia khác / bảo vệ Hiến pháp / vâng theo luật pháp Mỹ",
+      es:"¿Cuál es una promesa al convertirse en ciudadano?", es_a:"Renunciar la lealtad a otros países / defender la Constitución" },
+  ]
+};
+
+QUESTIONS["2008"] = QUESTIONS["2025"].slice(0, 15);
+QUESTIONS["6520"] = QUESTIONS["2025"].slice(0, 20);
+
+// ══ STATE ══
+let state = { route:null, lang:'en', questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20 };
+
+const ROUTE_CONFIG = {
+  "2025": { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
+  "2008": { passThreshold:6,  failThreshold:5,  askCount:10, label:"2008 Test · 100 Questions" },
+  "6520": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 Exemption · 20 Questions" },
+};
+
+// ══ UI ══
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function selectRoute(el) {
+  document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.route = el.dataset.route;
+  document.getElementById('btn-start').disabled = false;
+}
+
+function selectLang(el) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.lang = el.dataset.lang;
+}
+
+// ══ QUIZ ENGINE ══
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  const cfg = ROUTE_CONFIG[state.route];
+  Object.assign(state, { ...cfg, questions: shuffle([...QUESTIONS[state.route]]).slice(0, cfg.askCount), qIndex:0, correct:0, wrong:0, answered:false });
+  document.getElementById('quiz-mode-label').textContent = cfg.label;
+  updateScore();
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function updateScore() {
+  document.getElementById('score-correct').textContent = state.correct;
+  document.getElementById('score-wrong').textContent = state.wrong;
+  const pct = ((state.correct + state.wrong) / state.askCount) * 100;
+  document.getElementById('progress-fill').style.width = Math.min(pct,100)+'%';
+}
+
+function getT(q, field) {
+  const l = state.lang;
+  if (l==='vi' && q.vi) return field==='q' ? q.vi : q.vi_a;
+  if (l==='es' && q.es) return field==='q' ? q.es : q.es_a;
+  return null;
+}
+
+function renderQuestion() {
+  const q = state.questions[state.qIndex];
+  state.answered = false;
+  const wrongPool = shuffle(q.distractors||[]).slice(0,3);
+  const opts = shuffle([q.a[0], ...wrongPool]);
+  const letters = ['A','B','C','D'];
+  const tq = getT(q,'q');
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-card">
+      <div class="q-number">Question ${state.qIndex+1} of ${state.askCount}</div>
+      <div class="q-text">${q.q}</div>
+      ${tq ? `<div class="q-text-translated">${tq}</div>` : ''}
+      ${q.dynamic ? `<div class="q-note">${q.dynamic_note}</div>` : ''}
+      <button class="audio-btn" onclick="speakText('${q.q.replace(/'/g,"\\'")}')">🔊 Listen</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-label">Choose your answer</div>
+      <div class="answer-options" id="opts">
+        ${opts.map((opt,i) => `
+          <button class="answer-opt" data-opt="${opt.replace(/"/g,'&quot;')}" onclick="selectAnswer(this,'${opt.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">
+            <span class="opt-letter">${letters[i]}</span>
+            <span>${opt}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('action-area').innerHTML = '';
+}
+
+function norm(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,''); }
+
+function selectAnswer(el, chosen) {
+  if (state.answered) return;
+  state.answered = true;
+  const q = state.questions[state.qIndex];
+  const isCorrect = q.a.some(a => norm(chosen).includes(norm(a)) || norm(a).includes(norm(chosen)));
+
+  document.querySelectorAll('.answer-opt').forEach(opt => {
+    opt.disabled = true;
+    const v = opt.dataset.opt;
+    const isThisCorrect = q.a.some(a => norm(v).includes(norm(a)) || norm(a).includes(norm(v)));
+    if (opt===el) opt.classList.add(isCorrect?'selected-correct':'selected-wrong');
+    else if (isThisCorrect) opt.classList.add('show-correct');
+  });
+
+  isCorrect ? state.correct++ : state.wrong++;
+  updateScore();
+
+  const ended = state.correct >= state.passThreshold || state.wrong >= state.failThreshold;
+  const ta = getT(q,'a');
+
+  document.getElementById('feedback-area').innerHTML = `
+    <div class="feedback-box ${isCorrect?'correct':'wrong'}">
+      <div class="fb-title">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>
+      <div class="fb-answer">
+        ${isCorrect ? 'Well done.' : `Accepted: <strong>${q.a.join(' / ')}</strong>`}
+        ${ta ? `<br><em>${ta}</em>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('action-area').innerHTML = `
+    <button class="btn-next" onclick="${ended ? 'showResult()' : 'nextQuestion()'}">
+      ${ended ? 'See Results →' : 'Next Question →'}
+    </button>`;
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  if (state.qIndex >= state.questions.length) { showResult(); return; }
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showResult() {
+  const passed = state.correct >= state.passThreshold;
+  const total = state.correct + state.wrong;
+  document.getElementById('result-icon').textContent = passed ? '🎉' : '📚';
+  document.getElementById('result-verdict').textContent = passed ? 'PASSED' : 'NOT YET';
+  document.getElementById('result-verdict').className = 'result-verdict '+(passed?'pass':'fail');
+  document.getElementById('result-sub').textContent = passed
+    ? `You answered ${state.correct} correctly — enough to pass. Keep practicing to build confidence!`
+    : `You got ${state.correct} correct. You need ${state.passThreshold} to pass. Keep going!`;
+  document.getElementById('res-correct').textContent = state.correct;
+  document.getElementById('res-wrong').textContent = state.wrong;
+  document.getElementById('res-total').textContent = total;
+  showScreen('result');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartQuiz() { startQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
+function goHome() { showScreen('onboard'); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; u.rate=0.88;
+  window.speechSynthesis.speak(u);
+}
+</script>
+</body>
+</html>
