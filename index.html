@@ -366,6 +366,98 @@
     color: white;
   }
 
+  /* Meta-route variant: clicking opens the sub-selector instead of starting */
+  .route-card.meta-active {
+    border-color: var(--navy);
+    background: #f0f4ff;
+    box-shadow: var(--shadow-hover);
+  }
+  .route-card.meta-active .rc-badge { color: var(--navy); }
+
+  /* Collapsible 65/20 filing-date sub-selector — smooth animation in/out */
+  .subselect-65 {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+  }
+  .subselect-65.expanded {
+    max-height: 360px;
+    opacity: 1;
+    margin: -2px 0 6px;
+  }
+
+  .subselect-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+    padding: 14px 18px 6px;
+  }
+
+  .subselect-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 4px;
+  }
+
+  @media (max-width: 480px) {
+    .subselect-grid { grid-template-columns: 1fr; }
+  }
+
+  .route-suboption {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+    color: var(--text);
+    font-family: 'Source Serif 4', serif;
+    box-shadow: 0 2px 8px rgba(13,32,82,0.06);
+  }
+  .route-suboption:hover {
+    border-color: var(--navy-light);
+    background: #f8faff;
+  }
+  .route-suboption.selected {
+    border-color: var(--navy);
+    background: #f0f4ff;
+    box-shadow: 0 4px 16px rgba(13,32,82,0.15);
+  }
+  .rso-when {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 3px;
+  }
+  .rso-detail {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* Translation-hint pill shown next to suggested vi/es text */
+  .trans-hint {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    background: #eef1fa;
+    border: 1px solid #d8def0;
+    border-radius: 10px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    vertical-align: 2px;
+  }
+
   /* ── LANGUAGE ── */
   .lang-section { margin-top: 24px; }
 
@@ -1168,16 +1260,30 @@
         </div>
       </button>
 
-      <button class="route-card" data-route="6520" onclick="selectRoute(this)">
+      <button class="route-card" data-route="6520_meta" onclick="selectRoute(this)">
         <div class="rc-badge">Age 65+ · Resident 20+ years</div>
         <div class="rc-title">65/20 Exemption Practice</div>
-        <div class="rc-desc">Shorter test. Study only the 20 starred questions.</div>
+        <div class="rc-desc">Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.</div>
         <div class="rc-stats">
           <span class="rc-stat">20 Questions</span>
           <span class="rc-stat">10 Asked</span>
           <span class="rc-stat">6 to Pass</span>
         </div>
       </button>
+
+      <div class="subselect-65" id="subselect-65" aria-hidden="true">
+        <div class="subselect-label">When did you file Form N-400?</div>
+        <div class="subselect-grid">
+          <button class="route-suboption" data-route="6520_2025" onclick="selectRoute(this)">
+            <div class="rso-when">Oct 20, 2025 or later</div>
+            <div class="rso-detail">Uses the 2025 starred subset</div>
+          </button>
+          <button class="route-suboption" data-route="6520_2008" onclick="selectRoute(this)">
+            <div class="rso-when">Before Oct 20, 2025</div>
+            <div class="rso-detail">Uses the 2008 starred subset</div>
+          </button>
+        </div>
+      </div>
 
       <button class="route-card" data-route="5020" onclick="selectRoute(this)">
         <div class="rc-badge">Age 50+ · Resident 20+ years</div>
@@ -1303,7 +1409,9 @@
 // ══ DATA: 128 USCIS Civics Test Questions (2025 version, M-1778 09/25) ══
 // Question text + accepted answers are verbatim from USCIS public-domain
 // material (17 U.S.C. § 105). Distractors are written for this app.
-// q.starred — one of 20 questions for 65/20 special consideration.
+// q.starred_6520 — one of 20 questions for the 65/20 starred subset.
+// q.vi_suggested / q.es_suggested — translation is unofficial (not in the
+//   USCIS 2008 multilingual PDFs); shown with a "translation hint" pill.
 // q.dynamic + q.officialField — answer pulled from CURRENT_OFFICIALS at render.
 // q.stateField — answer pulled from STATE_DATA[userState] at render.
 // q.excluded — skipped (requires data we do not ship, e.g. district-level rep).
@@ -1312,8 +1420,8 @@ const QUESTIONS_2025 = [
   // A: Principles of American Government
   { id:1, q:"What is the form of government of the United States?",
     a:["Republic","Constitution-based federal republic","Representative democracy"],
-    distractors:["Direct democracy","Constitutional monarchy","Parliamentary democracy"] },
-  { id:2, starred:true, q:"What is the supreme law of the land?",
+    distractors:["Direct democracy","Constitutional monarchy","Parliamentary democracy"], vi: "Hình thức chính phủ của Hoa Kỳ là gì?", vi_a: ["Cộng hòa", "Cộng hòa liên bang dựa trên hiến pháp", "Dân chủ đại diện"], vi_suggested: true, es: "¿Cuál es la forma de gobierno de los Estados Unidos?", es_a: ["República", "República federal basada en la constitución", "Democracia representativa"], es_suggested: true },
+  { id:2, starred_6520:true, q:"What is the supreme law of the land?",
     a:["U.S. Constitution","Constitution","the Constitution"],
     distractors:["The Declaration of Independence","The Bill of Rights","Federal statutes"], vi: "Luật cao nhất của quốc gia là gì?", vi_a: ["Hiến Pháp"], es: "¿Cuál es la ley suprema de la nación?", es_a: ["la Constitución"] },
   { id:3, q:"Name one thing the U.S. Constitution does.",
@@ -1321,29 +1429,29 @@ const QUESTIONS_2025 = [
     distractors:["Declares war on Britain","Establishes political parties","Sets the federal tax rate"], vi: "Hiến Pháp có mục đích gì?", vi_a: ["thiết lập chánh phủ", "mô tả tổ chức chánh phủ", "bảo vệ các quyền căn bản của người dân Hoa Kỳ"], es: "¿Qué hace la Constitución?", es_a: ["establece el gobierno", "define el gobierno", "protege los derechos básicos de los ciudadanos estadounidenses"] },
   { id:4, q:"The U.S. Constitution starts with the words We the People. What does We the People mean?",
     a:["Self-government","Popular sovereignty","Consent of the governed","People should govern themselves","Social contract"],
-    distractors:["Rule by the wealthy","Government chooses the people","Inherited monarchy"] },
+    distractors:["Rule by the wealthy","Government chooses the people","Inherited monarchy"], vi: "Hiến Pháp Hoa Kỳ bắt đầu bằng những chữ \"Chúng tôi, người dân\". \"Chúng tôi, người dân\" có nghĩa là gì?", vi_a: ["Tự quản trị", "Chủ quyền nhân dân", "Sự đồng ý của người được cai trị", "Người dân nên tự cai trị mình", "Khế ước xã hội"], vi_suggested: true, es: "La Constitución de los Estados Unidos comienza con las palabras \"Nosotros, el pueblo\". ¿Qué significa \"Nosotros, el pueblo\"?", es_a: ["Autogobierno", "Soberanía popular", "Consentimiento de los gobernados", "El pueblo debe gobernarse a sí mismo", "Contrato social"], es_suggested: true },
   { id:5, q:"How are changes made to the U.S. Constitution?",
     a:["Amendments","The amendment process"],
-    distractors:["Presidential executive order","Supreme Court ruling","Congressional resolution"] },
+    distractors:["Presidential executive order","Supreme Court ruling","Congressional resolution"], vi: "Hiến Pháp Hoa Kỳ được sửa đổi bằng cách nào?", vi_a: ["Tu chính án", "Quy trình tu chính"], vi_suggested: true, es: "¿Cómo se hacen los cambios a la Constitución de los Estados Unidos?", es_a: ["Enmiendas", "El proceso de enmienda"], es_suggested: true },
   { id:6, q:"What does the Bill of Rights protect?",
     a:["The basic rights of Americans","Rights of Americans","The basic rights of people living in the United States","Rights of people living in the United States"],
-    distractors:["The powers of the President","The borders of the United States","The federal budget"] },
-  { id:7, starred:true, q:"How many amendments does the U.S. Constitution have?",
+    distractors:["The powers of the President","The borders of the United States","The federal budget"], vi: "Tuyên Ngôn Nhân Quyền bảo vệ điều gì?", vi_a: ["Các quyền căn bản của người Mỹ", "Quyền của người Mỹ", "Các quyền căn bản của người sống tại Hoa Kỳ", "Quyền của người sống tại Hoa Kỳ"], vi_suggested: true, es: "¿Qué protege la Carta de Derechos?", es_a: ["Los derechos básicos de los estadounidenses", "Los derechos de los estadounidenses", "Los derechos básicos de las personas que viven en los Estados Unidos", "Los derechos de las personas que viven en los Estados Unidos"], es_suggested: true },
+  { id:7, starred_6520:true, q:"How many amendments does the U.S. Constitution have?",
     a:["Twenty-seven (27)","Twenty-seven","27"],
     distractors:["Ten (10)","Twenty-five (25)","Thirty (30)"], vi: "Hiến Pháp có bao nhiêu tu chính án?", vi_a: ["hai mươi bảy (27)"], es: "¿Cuántas enmiendas tiene la Constitución?", es_a: ["veintisiete (27)"] },
   { id:8, q:"Why is the Declaration of Independence important?",
     a:["It says America is free from British control.","It says all people are created equal.","It identifies inherent rights.","It identifies individual freedoms."],
-    distractors:["It created the Constitution.","It ended the Civil War.","It established the Supreme Court."] },
+    distractors:["It created the Constitution.","It ended the Civil War.","It established the Supreme Court."], vi: "Vì sao Bản Tuyên Ngôn Độc Lập quan trọng?", vi_a: ["Nó tuyên bố nước Mỹ thoát khỏi sự kiểm soát của Anh Quốc.", "Nó nói rằng mọi người sinh ra đều bình đẳng.", "Nó xác định các quyền cố hữu.", "Nó xác định các quyền tự do cá nhân."], vi_suggested: true, es: "¿Por qué es importante la Declaración de Independencia?", es_a: ["Dice que los Estados Unidos es libre del control británico.", "Dice que todas las personas son creadas iguales.", "Identifica los derechos inherentes.", "Identifica las libertades individuales."], es_suggested: true },
   { id:9, q:"What founding document said the American colonies were free from Britain?",
     a:["Declaration of Independence"],
-    distractors:["The Constitution","The Articles of Confederation","The Bill of Rights"] },
+    distractors:["The Constitution","The Articles of Confederation","The Bill of Rights"], vi: "Văn kiện sáng lập nào tuyên bố các thuộc địa Hoa Kỳ thoát khỏi Anh Quốc?", vi_a: ["Bản Tuyên Ngôn Độc Lập"], vi_suggested: true, es: "¿Qué documento fundacional decía que las colonias americanas eran libres de Gran Bretaña?", es_a: ["La Declaración de Independencia"], es_suggested: true },
   { id:10, q:"Name two important ideas from the Declaration of Independence and the U.S. Constitution.",
     a:["Equality","Liberty","Social contract","Natural rights","Limited government","Self-government"],
-    distractors:["Monarchy","Mandatory state religion","Hereditary nobility"] },
+    distractors:["Monarchy","Mandatory state religion","Hereditary nobility"], vi: "Cho biết hai ý tưởng quan trọng từ Bản Tuyên Ngôn Độc Lập và Hiến Pháp Hoa Kỳ.", vi_a: ["Bình đẳng", "Tự do", "Khế ước xã hội", "Quyền tự nhiên", "Chính phủ giới hạn", "Tự quản trị"], vi_suggested: true, es: "Mencione dos ideas importantes de la Declaración de Independencia y la Constitución de los Estados Unidos.", es_a: ["Igualdad", "Libertad", "Contrato social", "Derechos naturales", "Gobierno limitado", "Autogobierno"], es_suggested: true },
   { id:11, q:"The words Life, Liberty, and the pursuit of Happiness are in what founding document?",
     a:["Declaration of Independence"],
-    distractors:["The Constitution","The Bill of Rights","The Federalist Papers"] },
-  { id:12, starred:true, q:"What is the economic system of the United States?",
+    distractors:["The Constitution","The Bill of Rights","The Federalist Papers"], vi: "Những chữ \"Sự sống, Tự do, và Theo đuổi Hạnh phúc\" nằm trong văn kiện sáng lập nào?", vi_a: ["Bản Tuyên Ngôn Độc Lập"], vi_suggested: true, es: "¿Las palabras \"Vida, Libertad y la búsqueda de la Felicidad\" están en qué documento fundacional?", es_a: ["La Declaración de Independencia"], es_suggested: true },
+  { id:12, starred_6520:true, q:"What is the economic system of the United States?",
     a:["Capitalism","Free market economy","Capitalist economy","Market economy"],
     distractors:["Socialism","Communism","Centrally planned economy"], vi: "Hệ thống kinh tế của Hoa Kỳ gọi là gì?", vi_a: ["kinh tế tư bản", "kinh tế thị trường"], es: "¿Cuál es el sistema económico de los Estados Unidos?", es_a: ["economía capitalista", "economía de mercado"] },
   { id:13, q:"What is the rule of law?",
@@ -1351,27 +1459,27 @@ const QUESTIONS_2025 = [
     distractors:["Only citizens must follow the law","The President writes all laws","Laws only apply in courts"], vi: "\"Thượng tôn luật pháp\" là gì?", vi_a: ["Mọi người đều phải tuân theo luật pháp.", "Cả các người lãnh đạo đều phải tuân theo luật pháp.", "Nhà cầm quyền phải tuân theo luật pháp.", "Không ai được ở trên pháp luật cả."], es: "¿En qué consiste el “estado de derecho” (ley y orden)?", es_a: ["Todos deben obedecer la ley", "Los líderes deben obedecer la ley", "El gobierno debe obedecer la ley", "Nadie está por encima de la ley"] },
   { id:14, q:"Many documents influenced the U.S. Constitution. Name one.",
     a:["Declaration of Independence","Articles of Confederation","Federalist Papers","Anti-Federalist Papers","Virginia Declaration of Rights","Fundamental Orders of Connecticut","Mayflower Compact","Iroquois Great Law of Peace"],
-    distractors:["The U.S. Tax Code","The Pledge of Allegiance","The Treaty of Versailles"] },
+    distractors:["The U.S. Tax Code","The Pledge of Allegiance","The Treaty of Versailles"], vi: "Nhiều văn kiện đã ảnh hưởng đến Hiến Pháp Hoa Kỳ. Hãy nêu một.", vi_a: ["Bản Tuyên Ngôn Độc Lập", "Các Điều Khoản Hợp Bang", "Các Bài Báo Liên Bang", "Các Bài Báo Chống Liên Bang", "Bản Tuyên Ngôn Quyền của Virginia", "Sắc Lệnh Căn Bản của Connecticut", "Hiệp Ước Mayflower", "Đại Luật Hòa Bình Iroquois"], vi_suggested: true, es: "Muchos documentos influyeron en la Constitución de los Estados Unidos. Mencione uno.", es_a: ["Declaración de Independencia", "Artículos de la Confederación", "Documentos Federalistas", "Documentos Antifederalistas", "Declaración de Derechos de Virginia", "Órdenes Fundamentales de Connecticut", "Pacto del Mayflower", "Gran Ley de la Paz de los Iroqueses"], es_suggested: true },
   { id:15, q:"There are three branches of government. Why?",
     a:["So one part does not become too powerful","Checks and balances","Separation of powers"],
-    distractors:["To save money","To match the number of states","Because the Constitution has three articles"] },
+    distractors:["To save money","To match the number of states","Because the Constitution has three articles"], vi: "Có ba ngành chính phủ. Vì sao?", vi_a: ["Để một ngành không trở nên quá quyền lực", "Kiểm tra và cân bằng", "Phân quyền"], vi_suggested: true, es: "Hay tres ramas del gobierno. ¿Por qué?", es_a: ["Para que ninguna parte se vuelva demasiado poderosa", "Pesos y contrapesos", "Separación de poderes"], es_suggested: true },
 
   // B: System of Government
   { id:16, q:"Name the three branches of government.",
     a:["Legislative, executive, and judicial","Congress, president, and the courts"],
-    distractors:["Federal, state, and local","Senate, House, and President","Army, Navy, and Air Force"] },
+    distractors:["Federal, state, and local","Senate, House, and President","Army, Navy, and Air Force"], vi: "Hãy nêu ba ngành chính phủ.", vi_a: ["Lập pháp, hành pháp, và tư pháp", "Quốc Hội, Tổng Thống, và các tòa án"], vi_suggested: true, es: "Mencione las tres ramas del gobierno.", es_a: ["Legislativa, ejecutiva y judicial", "Congreso, presidente y los tribunales"], es_suggested: true },
   { id:17, q:"The President of the United States is in charge of which branch of government?",
     a:["Executive branch","Executive"],
-    distractors:["Legislative branch","Judicial branch","Military branch"] },
+    distractors:["Legislative branch","Judicial branch","Military branch"], vi: "Tổng Thống Hoa Kỳ điều hành ngành nào của chính phủ?", vi_a: ["Ngành hành pháp", "Hành pháp"], vi_suggested: true, es: "¿De qué rama del gobierno está a cargo el Presidente de los Estados Unidos?", es_a: ["Rama ejecutiva", "Ejecutiva"], es_suggested: true },
   { id:18, q:"What part of the federal government writes laws?",
     a:["U.S. Congress","Congress","U.S. legislature","National legislature","Legislative branch"],
     distractors:["The President","The Supreme Court","The Cabinet"], vi: "Ai làm luật liên bang?", vi_a: ["Quốc Hội", "Thượng và Hạ Nghị Viện", "Ngành Lập Pháp (của Liên Bang hay Quốc Gia)"], es: "¿Quién crea las leyes federales?", es_a: ["el Congreso", "el Senado y la Cámara (de Representantes)", "la legislatura (nacional o de los Estados Unidos)"] },
   { id:19, q:"What are the two parts of the U.S. Congress?",
     a:["Senate and House of Representatives","Senate and House"],
     distractors:["The House and Supreme Court","The Senate and President","Democrats and Republicans"], vi: "Hai phần của Quốc Hội Hoa Kỳ là gì?", vi_a: ["Thượng và Hạ Nghị Viện"], es: "¿Cuáles son las dos partes que integran el Congreso de los Estados Unidos?", es_a: ["el Senado y la Cámara (de Representantes)"] },
-  { id:20, starred:true, q:"Name one power of the U.S. Congress.",
+  { id:20, starred_6520:true, q:"Name one power of the U.S. Congress.",
     a:["Writes laws","Declares war","Makes the federal budget"],
-    distractors:["Vetoes bills","Appoints federal judges","Commands the military"] },
+    distractors:["Vetoes bills","Appoints federal judges","Commands the military"], vi: "Hãy nêu một quyền hạn của Quốc Hội Hoa Kỳ.", vi_a: ["Soạn thảo luật", "Tuyên chiến", "Lập ngân sách liên bang"], vi_suggested: true, es: "Mencione un poder del Congreso de los Estados Unidos.", es_a: ["Crear leyes", "Declarar la guerra", "Hacer el presupuesto federal"], es_suggested: true },
   { id:21, q:"How many U.S. senators are there?",
     a:["One hundred (100)","One hundred","100"],
     distractors:["Fifty (50)","Four hundred thirty-five (435)","Two hundred (200)"], vi: "Có bao nhiêu Thượng Nghị Sĩ Liên Bang?", vi_a: ["một trăm (100)"], es: "¿Cuántos senadores de los Estados Unidos hay?", es_a: ["cien (100)"] },
@@ -1389,16 +1497,16 @@ const QUESTIONS_2025 = [
     distractors:["Four (4) years","Six (6) years","One (1) year"], vi: "Chúng ta bầu dân biểu cho mấy năm?", vi_a: ["hai năm (2)"], es: "¿De cuántos años es el término de elección de un representante de los Estados Unidos?", es_a: ["dos (2)"] },
   { id:26, q:"Why do U.S. representatives serve shorter terms than U.S. senators?",
     a:["To more closely follow public opinion"],
-    distractors:["To save money on elections","Because the House is less important","To match the budget cycle"] },
+    distractors:["To save money on elections","Because the House is less important","To match the budget cycle"], vi: "Vì sao Dân Biểu Hoa Kỳ có nhiệm kỳ ngắn hơn Thượng Nghị Sĩ Hoa Kỳ?", vi_a: ["Để theo sát ý dân hơn"], vi_suggested: true, es: "¿Por qué los representantes de los Estados Unidos sirven términos más cortos que los senadores de los Estados Unidos?", es_a: ["Para seguir más de cerca la opinión pública"], es_suggested: true },
   { id:27, q:"How many senators does each state have?",
     a:["Two (2)","Two","2"],
-    distractors:["One (1)","Three (3)","It depends on population"] },
+    distractors:["One (1)","Three (3)","It depends on population"], vi: "Mỗi tiểu bang có bao nhiêu Thượng Nghị Sĩ?", vi_a: ["Hai (2)", "Hai", "2"], vi_suggested: true, es: "¿Cuántos senadores tiene cada estado?", es_a: ["Dos (2)", "Dos", "2"], es_suggested: true },
   { id:28, q:"Why does each state have two senators?",
     a:["Equal representation (for small states)","Equal representation","The Great Compromise","Connecticut Compromise"],
-    distractors:["Because there were two original parties","To balance House districts","To match the number of branches"] },
+    distractors:["Because there were two original parties","To balance House districts","To match the number of branches"], vi: "Vì sao mỗi tiểu bang có hai Thượng Nghị Sĩ?", vi_a: ["Đại diện bình đẳng (cho các tiểu bang nhỏ)", "Đại diện bình đẳng", "Đại Thỏa Hiệp", "Thỏa Hiệp Connecticut"], vi_suggested: true, es: "¿Por qué cada estado tiene dos senadores?", es_a: ["Representación igualitaria (para los estados pequeños)", "Representación igualitaria", "El Gran Compromiso", "Compromiso de Connecticut"], es_suggested: true },
   { id:29, excluded:true, q:"Name your U.S. representative.",
     helpNote:"Depends on your congressional district. Look up your rep at house.gov/representatives/find-your-representative.", vi: "Cho biết tên dân biểu của bạn.", vi_a: ["Câu trả lời sẽ thay đổi tùy nơi."], es: "Dé el nombre de su representante a nivel nacional.", es_a: ["Las respuestas variarán."] },
-  { id:30, starred:true, dynamic:true, officialField:"speaker",
+  { id:30, starred_6520:true, dynamic:true, officialField:"speaker",
     q:"What is the name of the Speaker of the House of Representatives now?",
     dynamic_note:"⚡ Answer must reflect the Speaker serving at time of your interview. Check uscis.gov/citizenship/testupdates.",
     distractors:["Nancy Pelosi","Kevin McCarthy","Hakeem Jeffries"], vi: "Chủ Tịch Hạ Viện hiện thời tên gì?", vi_a: ["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Chủ Tịch Hạ viện Dân Biểu Hoa Kỳ."], es: "¿Cómo se llama el Presidente actual de la Cámara de Representantes?", es_a: ["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Portavoz de la Cámara de Representantes."] },
@@ -1407,27 +1515,27 @@ const QUESTIONS_2025 = [
     distractors:["Only their political party","All Americans","Their congressional district"], vi: "Thượng-nghị-sĩ đại diện ai?", vi_a: ["Tất cả người dân trong tiểu bang"], es: "¿A quiénes representa un senador de los Estados Unidos?", es_a: ["a todas las personas del estado"] },
   { id:32, q:"Who elects U.S. senators?",
     a:["Citizens from their state","Voters in their state","People of their state"],
-    distractors:["The state legislature","The President","The House of Representatives"] },
+    distractors:["The state legislature","The President","The House of Representatives"], vi: "Ai bầu Thượng Nghị Sĩ Hoa Kỳ?", vi_a: ["Công dân của tiểu bang đó", "Cử tri của tiểu bang đó", "Người dân của tiểu bang đó"], vi_suggested: true, es: "¿Quién elige a los senadores de los Estados Unidos?", es_a: ["Los ciudadanos de su estado", "Los votantes de su estado", "La gente de su estado"], es_suggested: true },
   { id:33, q:"Who does a member of the House of Representatives represent?",
     a:["Citizens in their congressional district","Citizens in their district","People from their congressional district","People in their district"],
-    distractors:["Their entire state","All Americans","Their political party"] },
+    distractors:["Their entire state","All Americans","Their political party"], vi: "Một thành viên Hạ Nghị Viện đại diện cho ai?", vi_a: ["Công dân trong khu vực bầu cử của họ", "Công dân trong khu vực của họ", "Người dân từ khu vực bầu cử của họ", "Người dân trong khu vực của họ"], vi_suggested: true, es: "¿A quiénes representa un miembro de la Cámara de Representantes?", es_a: ["A los ciudadanos de su distrito congresional", "A los ciudadanos de su distrito", "A las personas de su distrito congresional", "A las personas de su distrito"], es_suggested: true },
   { id:34, q:"Who elects members of the House of Representatives?",
     a:["Citizens from their congressional district","Citizens from their district","Voters in their district"],
-    distractors:["The state governor","The President","The Senate"] },
+    distractors:["The state governor","The President","The Senate"], vi: "Ai bầu các thành viên của Hạ Nghị Viện?", vi_a: ["Công dân trong khu vực bầu cử của họ", "Công dân từ khu vực của họ", "Cử tri trong khu vực của họ"], vi_suggested: true, es: "¿Quién elige a los miembros de la Cámara de Representantes?", es_a: ["Los ciudadanos de su distrito congresional", "Los ciudadanos de su distrito", "Los votantes en su distrito"], es_suggested: true },
   { id:35, q:"Some states have more representatives than other states. Why?",
     a:["Because of the state's population","The state's population","Because they have more people","Some states have more people"],
     distractors:["Because of the state's size in square miles","Because of how long the state has been in the Union","Because of state tax revenue"], vi: "Tại sao có những tiểu bang có nhiều đại biểu hơn các tiểu bang khác?", vi_a: ["(Vì) dân số tiểu bang đó", "(Vì) tiểu bang đó đông dân hơn", "(Vì) một số tiểu bang đông dân hơn tiểu bang khác"], es: "¿Por qué tienen algunos estados más representantes que otros?", es_a: ["(debido a) la población del estado", "(debido a que) tienen más gente", "(debido a que) algunos estados tienen más gente"] },
-  { id:36, starred:true, q:"The President of the United States is elected for how many years?",
+  { id:36, starred_6520:true, q:"The President of the United States is elected for how many years?",
     a:["Four (4) years","Four years","4 years"],
     distractors:["Two (2) years","Six (6) years","Eight (8) years"], vi: "Nhiệm kỳ Tổng Thống là mấy năm?", vi_a: ["Bốn (4) năm"], es: "¿De cuántos años es el término de elección de un presidente?", es_a: ["cuatro (4)"] },
   { id:37, q:"The President of the United States can serve only two terms. Why?",
     a:["Because of the 22nd Amendment","The 22nd Amendment","To keep the president from becoming too powerful"],
-    distractors:["Because of the 19th Amendment","Because of the Bill of Rights","Because Congress voted on it"] },
-  { id:38, starred:true, dynamic:true, officialField:"president",
+    distractors:["Because of the 19th Amendment","Because of the Bill of Rights","Because Congress voted on it"], vi: "Tổng Thống Hoa Kỳ chỉ có thể phục vụ hai nhiệm kỳ. Vì sao?", vi_a: ["Vì Tu Chính Án thứ 22", "Tu Chính Án thứ 22", "Để Tổng Thống không trở nên quá quyền lực"], vi_suggested: true, es: "El Presidente de los Estados Unidos solo puede servir dos términos. ¿Por qué?", es_a: ["Debido a la 22a Enmienda", "La 22a Enmienda", "Para evitar que el presidente se vuelva demasiado poderoso"], es_suggested: true },
+  { id:38, starred_6520:true, dynamic:true, officialField:"president",
     q:"What is the name of the President of the United States now?",
     dynamic_note:"⚡ Answer must reflect the President serving at time of your interview. Check uscis.gov/citizenship/testupdates.",
     distractors:["Joe Biden","Barack Obama","Kamala Harris"], vi: "Hiện nay tên Tổng Thống Hoa Kỳ là gì?", vi_a: ["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Tổng Thống Hoa Kỳ."], es: "¿Cómo se llama el actual Presidente de los Estados Unidos?", es_a: ["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Presidente de Estados Unidos."] },
-  { id:39, starred:true, dynamic:true, officialField:"vp",
+  { id:39, starred_6520:true, dynamic:true, officialField:"vp",
     q:"What is the name of the Vice President of the United States now?",
     dynamic_note:"⚡ Answer must reflect the Vice President serving at time of your interview. Check uscis.gov/citizenship/testupdates.",
     distractors:["Kamala Harris","Mike Pence","Tim Walz"], vi: "Hiện nay tên Phó Tổng Thống Hoa Kỳ là gì?", vi_a: ["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Phó Tổng Thống Hoa Kỳ."], es: "¿Cómo se llama el actual Vicepresidente de los Estados Unidos?", es_a: ["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Vice Presidente de Estados Unidos."] },
@@ -1436,22 +1544,22 @@ const QUESTIONS_2025 = [
     distractors:["The Speaker of the House","The Secretary of State","The Chief Justice"], vi: "Nếu Tổng Thống không còn làm việc được nữa, ai sẽ thay thế làm Tổng Thống?", vi_a: ["Phó Tổng Thống"], es: "Si el Presidente ya no puede cumplir sus funciones, ¿quién se convierte en Presidente?", es_a: ["el Vicepresidente"] },
   { id:41, q:"Name one power of the president.",
     a:["Signs bills into law","Vetoes bills","Enforces laws","Commander in Chief of the military","Commander in Chief","Chief diplomat","Appoints federal judges"],
-    distractors:["Writes federal laws","Declares war alone","Removes Supreme Court justices"] },
+    distractors:["Writes federal laws","Declares war alone","Removes Supreme Court justices"], vi: "Hãy nêu một quyền hạn của Tổng Thống.", vi_a: ["Ký các đạo luật thành luật", "Phủ quyết các đạo luật", "Thực thi luật pháp", "Tổng Tư Lệnh quân đội", "Tổng Tư Lệnh", "Trưởng ngành ngoại giao", "Bổ nhiệm thẩm phán liên bang"], vi_suggested: true, es: "Mencione un poder del presidente.", es_a: ["Firma proyectos de ley para convertirlos en leyes", "Veta proyectos de ley", "Hace cumplir las leyes", "Comandante en Jefe del ejército", "Comandante en Jefe", "Diplomático principal", "Nombra jueces federales"], es_suggested: true },
   { id:42, q:"Who is Commander in Chief of the U.S. military?",
     a:["The President of the United States","The President","President"],
     distractors:["The Secretary of Defense","The Chairman of the Joint Chiefs","The Speaker of the House"], vi: "Ai là Tổng Tư Lệnh quân đội?", vi_a: ["Tổng Thống"], es: "¿Quién es el Comandante en Jefe de las Fuerzas Armadas?", es_a: ["el Presidente"] },
   { id:43, q:"Who signs bills to become laws?",
     a:["The President of the United States","The President","President"],
     distractors:["The Speaker of the House","The Chief Justice","The Senate majority leader"], vi: "Ai sẽ ký dự thảo luật thành luật?", vi_a: ["Tổng Thống"], es: "¿Quién firma los proyectos de ley para convertirlos en ley?", es_a: ["el Presidente"] },
-  { id:44, starred:true, q:"Who vetoes bills?",
+  { id:44, starred_6520:true, q:"Who vetoes bills?",
     a:["The President of the United States","The President","President"],
     distractors:["The Supreme Court","The Speaker of the House","Congress"], vi: "Ai có quyền phủ quyết các dự luật?", vi_a: ["Tổng Thống"], es: "¿Quién veta los proyectos de ley?", es_a: ["el Presidente"] },
   { id:45, q:"Who appoints federal judges?",
     a:["The President of the United States","The President","President"],
-    distractors:["The Senate","The Chief Justice","The House of Representatives"] },
+    distractors:["The Senate","The Chief Justice","The House of Representatives"], vi: "Ai bổ nhiệm thẩm phán liên bang?", vi_a: ["Tổng Thống Hoa Kỳ", "Tổng Thống", "Tổng thống"], vi_suggested: true, es: "¿Quién nombra a los jueces federales?", es_a: ["El Presidente de los Estados Unidos", "El Presidente", "Presidente"], es_suggested: true },
   { id:46, q:"The executive branch has many parts. Name one.",
     a:["President of the United States","The President","Cabinet","Federal departments and agencies"],
-    distractors:["The Supreme Court","The House of Representatives","State governors"] },
+    distractors:["The Supreme Court","The House of Representatives","State governors"], vi: "Ngành hành pháp có nhiều bộ phận. Hãy nêu một.", vi_a: ["Tổng Thống Hoa Kỳ", "Tổng Thống", "Nội Các", "Các bộ và cơ quan liên bang"], vi_suggested: true, es: "La rama ejecutiva tiene muchas partes. Mencione una.", es_a: ["Presidente de los Estados Unidos", "El Presidente", "Gabinete", "Departamentos y agencias federales"], es_suggested: true },
   { id:47, q:"What does the President's Cabinet do?",
     a:["Advises the President of the United States","Advises the President","Advises the president"],
     distractors:["Writes laws","Decides court cases","Elects the President"], vi: "Nội các của Tổng Thống làm gì?", vi_a: ["Cố vấn cho Tổng Thống"], es: "¿Qué hace el Gabinete del Presidente?", es_a: ["asesora al Presidente"] },
@@ -1460,14 +1568,14 @@ const QUESTIONS_2025 = [
     distractors:["Speaker of the House","Chief Justice","Senate Majority Leader"], vi: "Kể ra Hai chức vụ trong hàng nội các.", vi_a: ["Bộ Trưởng Canh Nông", "Bộ Trưởng Thương Mại", "Bộ Trưởng Quốc Phòng", "Bộ Trưởng Giáo Dục", "Bộ Trưởng Năng Lượng", "Bộ Trưởng Y Tế và Phục Vụ Nhân Sinh", "Bộ Trưởng Nội An", "Bộ Trưởng Gia Cư và Phát Triển Đô Thị", "Bộ Trưởng Nội Vụ", "Bộ Trưởng Lao Động", "Bộ Trưởng Ngoại Giao", "Bộ Trưởng Giao Thông", "Bộ Trưởng Ngân Khố hay Tài Chính", "Bộ Trưởng Cựu Chiến Binh", "Bộ Trưởng Tư Pháp", "Phó Tổng Thống"], es: "¿Cuáles son dos puestos a nivel de gabinete?", es_a: ["Secretario de Agricultura", "Secretario de Comercio", "Secretario de Defensa", "Secretario de Educación", "Secretario de Energía", "Secretario de Salud y Servicios Humanos", "Secretario de Seguridad Nacional", "Secretario de Vivienda y Desarrollo Urbano", "Secretario del Interior", "Secretario del Trabajo", "Secretario de Estado", "Secretario de Transporte", "Secretario del Tesoro", "Secretario de Asuntos de los Veteranos", "Procurador General", "Vicepresidente"] },
   { id:49, q:"Why is the Electoral College important?",
     a:["It decides who is elected president.","It provides a compromise between the popular election of the president and congressional selection."],
-    distractors:["It writes federal laws.","It serves as a backup for the Supreme Court.","It controls the federal budget."] },
+    distractors:["It writes federal laws.","It serves as a backup for the Supreme Court.","It controls the federal budget."], vi: "Vì sao Cử Tri Đoàn quan trọng?", vi_a: ["Cử Tri Đoàn quyết định ai được bầu làm Tổng Thống.", "Cử Tri Đoàn tạo sự thỏa hiệp giữa bầu cử phổ thông và sự lựa chọn của Quốc Hội."], vi_suggested: true, es: "¿Por qué es importante el Colegio Electoral?", es_a: ["Decide quién es elegido presidente.", "Provee un compromiso entre la elección popular del presidente y la selección del Congreso."], es_suggested: true },
   { id:50, q:"What is one part of the judicial branch?",
     a:["Supreme Court","Federal Courts"],
-    distractors:["Congress","The Cabinet","State legislatures"] },
+    distractors:["Congress","The Cabinet","State legislatures"], vi: "Hãy nêu một bộ phận của ngành tư pháp.", vi_a: ["Tòa Án Tối Cao", "Các tòa án liên bang"], vi_suggested: true, es: "¿Cuál es una parte de la rama judicial?", es_a: ["La Corte Suprema", "Los Tribunales Federales"], es_suggested: true },
   { id:51, q:"What does the judicial branch do?",
     a:["Reviews laws","Explains laws","Resolves disputes about the law","Decides if a law goes against the Constitution"],
     distractors:["Writes federal laws","Commands the military","Sets foreign policy"], vi: "Ngành tư pháp làm gì?", vi_a: ["duyệt lại luật lệ", "cắt nghĩa luật lệ", "giải quyết tranh cãi (bất hòa)", "quyết định xem luật có đi ngược lại hiến pháp không"], es: "¿Qué hace la rama judicial?", es_a: ["revisa las leyes", "explica las leyes", "resuelve disputas (desacuerdos)", "decide si una ley va en contra de la Constitución"] },
-  { id:52, starred:true, q:"What is the highest court in the United States?",
+  { id:52, starred_6520:true, q:"What is the highest court in the United States?",
     a:["Supreme Court","The Supreme Court"],
     distractors:["Federal Court of Appeals","U.S. District Court","International Court of Justice"], vi: "Tòa án cao nhất ở Hoa Kỳ là gì?", vi_a: ["Tối Cao Pháp Viện"], es: "¿Cuál es el tribunal más alto de los Estados Unidos?", es_a: ["la Corte Suprema"] },
   { id:53, q:"How many seats are on the Supreme Court?",
@@ -1475,13 +1583,13 @@ const QUESTIONS_2025 = [
     distractors:["Seven (7)","Eleven (11)","Five (5)"], vi: "Có bao nhiêu thẩm phán ở Tối Cao Pháp Viện?", vi_a: ["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết số Thẩm Phán của Tòa Án Tối Cao Pháp Viện."], es: "¿Cuántos jueces hay en la Corte Suprema?", es_a: ["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el número de jueces en la Corte Suprema."] },
   { id:54, q:"How many Supreme Court justices are usually needed to decide a case?",
     a:["Five (5)","Five","5"],
-    distractors:["Two (2)","Seven (7)","Nine (9)"] },
+    distractors:["Two (2)","Seven (7)","Nine (9)"], vi: "Thông thường cần bao nhiêu thẩm phán Tòa Án Tối Cao để quyết định một vụ án?", vi_a: ["Năm (5)", "Năm", "5"], vi_suggested: true, es: "¿Cuántos jueces de la Corte Suprema se necesitan usualmente para decidir un caso?", es_a: ["Cinco (5)", "Cinco", "5"], es_suggested: true },
   { id:55, q:"How long do Supreme Court justices serve?",
     a:["For life","Life","Lifetime appointment","Until retirement","Retirement"],
-    distractors:["Six (6) years","Twelve (12) years","Twenty (20) years"] },
+    distractors:["Six (6) years","Twelve (12) years","Twenty (20) years"], vi: "Thẩm phán Tòa Án Tối Cao phục vụ trong bao lâu?", vi_a: ["Suốt đời", "Đời", "Bổ nhiệm trọn đời", "Cho đến khi về hưu", "Về hưu"], vi_suggested: true, es: "¿Cuánto tiempo sirven los jueces de la Corte Suprema?", es_a: ["De por vida", "Vida", "Nombramiento vitalicio", "Hasta la jubilación", "Jubilación"], es_suggested: true },
   { id:56, q:"Supreme Court justices serve for life. Why?",
     a:["To be independent of politics","To be independent","To limit outside political influence","To limit outside influence"],
-    distractors:["To save money","Because they are appointed by the President","Because Congress voted on it"] },
+    distractors:["To save money","Because they are appointed by the President","Because Congress voted on it"], vi: "Thẩm phán Tòa Án Tối Cao phục vụ trọn đời. Vì sao?", vi_a: ["Để độc lập với chính trị", "Để được độc lập", "Để hạn chế ảnh hưởng chính trị bên ngoài", "Để hạn chế ảnh hưởng bên ngoài"], vi_suggested: true, es: "Los jueces de la Corte Suprema sirven de por vida. ¿Por qué?", es_a: ["Para ser independientes de la política", "Para ser independientes", "Para limitar la influencia política externa", "Para limitar la influencia externa"], es_suggested: true },
   { id:57, dynamic:true, officialField:"chiefJustice",
     q:"Who is the Chief Justice of the United States now?",
     dynamic_note:"⚡ Answer must reflect the Chief Justice serving at time of your interview. Check uscis.gov/citizenship/testupdates.",
@@ -1494,8 +1602,8 @@ const QUESTIONS_2025 = [
     distractors:["Print money","Declare war on another country","Sign treaties with foreign nations"], vi: "Theo Hiến Pháp, các tiểu bang có một số quyền. Một trong những quyền này là gì?", vi_a: ["cung cấp trường học và giáo dục", "bảo vệ dân chúng (cảnh sát)", "bảo vệ an toàn (các sở cứu hỏa)", "cấp bằng lái xe", "chia vùng và chấp thuận cách xử dụng đất đai"], es: "De acuerdo a nuestra Constitución, algunos poderes pertenecen a los estados. ¿Cuál es un poder de los estados?", es_a: ["proveer escuelas y educación", "proveer protección (policía)", "proveer seguridad (cuerpos de bomberos)", "conceder licencias de conducir", "aprobar la zonificación y uso de la tierra"] },
   { id:60, q:"What is the purpose of the 10th Amendment?",
     a:["Powers not given to the federal government belong to the states or to the people.","Powers not given to the federal government belong to the states or the people."],
-    distractors:["It guarantees the right to bear arms.","It establishes freedom of speech.","It abolishes slavery."] },
-  { id:61, starred:true, q:"Who is the governor of your state now?",
+    distractors:["It guarantees the right to bear arms.","It establishes freedom of speech.","It abolishes slavery."], vi: "Mục đích của Tu Chính Án thứ 10 là gì?", vi_a: ["Các quyền không trao cho chính phủ liên bang thuộc về các tiểu bang hoặc nhân dân.", "Các quyền không trao cho chính phủ liên bang thuộc về tiểu bang hoặc nhân dân."], vi_suggested: true, es: "¿Cuál es el propósito de la 10a Enmienda?", es_a: ["Los poderes no otorgados al gobierno federal pertenecen a los estados o al pueblo.", "Los poderes no otorgados al gobierno federal pertenecen a los estados o el pueblo."], es_suggested: true },
+  { id:61, starred_6520:true, q:"Who is the governor of your state now?",
     stateField:"governor",
     helpNote:"Answer depends on your state. Verify current governor at usa.gov/state-governments.", vi: "Thống Đốc tiểu bang của bạn tên gì?", vi_a: ["Câu trả lời tùy tiểu bang."], es: "¿Quién es el gobernador actual de su estado?", es_a: ["Las respuestas variarán."] },
   { id:62, q:"What is the capital of your state?",
@@ -1508,37 +1616,37 @@ const QUESTIONS_2025 = [
     distractors:["Only landowners can vote.","Only people who served in the military can vote.","You must pass a literacy test to vote."], vi: "Có bốn tu chính án Hiến Pháp về việc ai có quyền bầu cử. Kể ra Một trong các thứ đó.", vi_a: ["Công dân mười tám (18) tuổi và hơn (được đi bầu).", "Không phải trả (thuế bầu cử) để được bầu.", "Bất cứ công dân nào cũng được bầu (phụ nữ và nam giới đều được bầu).", "Nam giới của bất cứ chủng tộc nào (cũng đều được bầu)."], es: "Existen cuatro enmiendas a la Constitución sobre quién puede votar. Describa una de ellas.", es_a: ["Ciudadanos de dieciocho (18) años en adelante (pueden votar).", "No se exige pagar un impuesto para votar (el impuesto para acudir a las urnas o “poll tax” en inglés).", "Cualquier ciudadano puede votar. (Tanto mujeres como hombres pueden votar).", "Un hombre ciudadano de cualquier raza (puede votar)."] },
   { id:64, q:"Who can vote in federal elections, run for federal office, and serve on a jury in the United States?",
     a:["Citizens","Citizens of the United States","U.S. citizens"],
-    distractors:["Any resident","Anyone born in North America","All taxpayers"] },
+    distractors:["Any resident","Anyone born in North America","All taxpayers"], vi: "Ai có thể bầu cử liên bang, tranh cử chức vụ liên bang, và làm bồi thẩm đoàn tại Hoa Kỳ?", vi_a: ["Công dân", "Công dân Hoa Kỳ", "Công dân Mỹ"], vi_suggested: true, es: "¿Quién puede votar en elecciones federales, postularse para un cargo federal y servir en un jurado en los Estados Unidos?", es_a: ["Ciudadanos", "Ciudadanos de los Estados Unidos", "Ciudadanos estadounidenses"], es_suggested: true },
   { id:65, q:"What are three rights of everyone living in the United States?",
     a:["Freedom of expression","Freedom of speech","Freedom of assembly","Freedom to petition the government","Freedom of religion","The right to bear arms"],
     distractors:["The right to vote in federal elections","The right to run for federal office","The right to a government job"], vi: "Cho biết ba quyền của mỗi người sống ở Hoa Kỳ?", vi_a: ["tự do phát biểu ý kiến", "tự do ngôn luận", "tự do hội họp", "tự do thỉnh nguyện chính quyền", "tự do tín ngưỡng", "quyền mang vũ khí tự vệ"], es: "¿Cuáles son tres derechos que pueden ejercer todas las personas que viven en los Estados Unidos?", es_a: ["libertad de expresión", "libertad de la palabra", "libertad de reunión", "libertad para peticionar al gobierno", "libertad de religión", "derecho a portar armas"] },
-  { id:66, starred:true, q:"What do we show loyalty to when we say the Pledge of Allegiance?",
+  { id:66, starred_6520:true, q:"What do we show loyalty to when we say the Pledge of Allegiance?",
     a:["The United States","The flag"],
     distractors:["The Constitution alone","The President","Our state government"], vi: "Khi nói Lời Tuyên Thệ Trung Thành (Pledge of Allegiance), chúng ta chứng tỏ sự trung thành với cái gì?", vi_a: ["Hoa Kỳ", "Lá cờ"], es: "¿A qué demostramos nuestra lealtad cuando decimos el Juramento de Lealtad (Pledge of Allegiance)?", es_a: ["a los Estados Unidos", "a la bandera"] },
   { id:67, q:"Name two promises that new citizens make in the Oath of Allegiance.",
     a:["Give up loyalty to other countries","Defend the Constitution","Obey the laws of the United States","Serve in the military","Serve the nation","Be loyal to the United States"],
-    distractors:["Pay extra taxes for life","Never travel outside the U.S.","Give up your native language"] },
+    distractors:["Pay extra taxes for life","Never travel outside the U.S.","Give up your native language"], vi: "Hãy nêu hai lời hứa mà công dân mới đưa ra trong Lời Tuyên Thệ Trung Thành.", vi_a: ["Từ bỏ lòng trung thành với các quốc gia khác", "Bảo vệ Hiến Pháp", "Tuân theo luật pháp Hoa Kỳ", "Phục vụ trong quân đội", "Phục vụ quốc gia", "Trung thành với Hoa Kỳ"], vi_suggested: true, es: "Mencione dos promesas que hacen los nuevos ciudadanos en el Juramento de Lealtad.", es_a: ["Renunciar a la lealtad a otros países", "Defender la Constitución", "Obedecer las leyes de los Estados Unidos", "Servir en el ejército", "Servir a la nación", "Ser leal a los Estados Unidos"], es_suggested: true },
   { id:68, q:"How can people become United States citizens?",
     a:["Be born in the United States, under the conditions set by the 14th Amendment","Be born in the United States","Naturalize","Naturalization","Derive citizenship"],
-    distractors:["Pay a one-time citizenship fee","Marry any U.S. resident","Live in the U.S. for one year"] },
+    distractors:["Pay a one-time citizenship fee","Marry any U.S. resident","Live in the U.S. for one year"], vi: "Người dân có thể trở thành công dân Hoa Kỳ bằng cách nào?", vi_a: ["Sinh ra tại Hoa Kỳ, theo các điều kiện của Tu Chính Án thứ 14", "Sinh ra tại Hoa Kỳ", "Nhập tịch", "Quá trình nhập tịch", "Thừa hưởng quốc tịch"], vi_suggested: true, es: "¿Cómo pueden las personas convertirse en ciudadanos de los Estados Unidos?", es_a: ["Nacer en los Estados Unidos, bajo las condiciones establecidas por la 14a Enmienda", "Nacer en los Estados Unidos", "Naturalizarse", "Naturalización", "Derivar la ciudadanía"], es_suggested: true },
   { id:69, q:"What are two examples of civic participation in the United States?",
     a:["Vote","Run for office","Join a political party","Help with a campaign","Join a civic group","Join a community group","Give an elected official your opinion","Contact elected officials","Support or oppose an issue or policy","Write to a newspaper"],
-    distractors:["Pay a private lobbyist","Cross state lines","Move to another country"] },
+    distractors:["Pay a private lobbyist","Cross state lines","Move to another country"], vi: "Hai ví dụ về sự tham gia công dân tại Hoa Kỳ là gì?", vi_a: ["Đi bầu", "Tranh cử", "Gia nhập đảng chính trị", "Giúp đỡ chiến dịch tranh cử", "Tham gia nhóm dân sự", "Tham gia nhóm cộng đồng", "Cho viên chức được bầu ý kiến của bạn", "Liên lạc với viên chức được bầu", "Ủng hộ hoặc phản đối một vấn đề hoặc chính sách", "Viết thư cho báo"], vi_suggested: true, es: "¿Cuáles son dos ejemplos de participación cívica en los Estados Unidos?", es_a: ["Votar", "Postularse para un cargo", "Afiliarse a un partido político", "Ayudar en una campaña", "Unirse a un grupo cívico", "Unirse a un grupo comunitario", "Dar su opinión a un funcionario electo", "Contactar a funcionarios electos", "Apoyar u oponerse a un asunto o política", "Escribir a un periódico"], es_suggested: true },
   { id:70, q:"What is one way Americans can serve their country?",
     a:["Vote","Pay taxes","Obey the law","Serve in the military","Run for office","Work for local, state, or federal government","Work for the government"],
-    distractors:["Avoid politics","Watch the news daily","Travel abroad often"] },
+    distractors:["Avoid politics","Watch the news daily","Travel abroad often"], vi: "Người Mỹ có thể phục vụ đất nước bằng cách nào?", vi_a: ["Đi bầu", "Đóng thuế", "Tuân theo luật pháp", "Phục vụ trong quân đội", "Tranh cử", "Làm việc cho chính phủ địa phương, tiểu bang, hoặc liên bang", "Làm việc cho chính phủ"], vi_suggested: true, es: "¿Cuál es una manera en que los estadounidenses pueden servir a su país?", es_a: ["Votar", "Pagar impuestos", "Obedecer la ley", "Servir en el ejército", "Postularse para un cargo", "Trabajar para el gobierno local, estatal o federal", "Trabajar para el gobierno"], es_suggested: true },
   { id:71, q:"Why is it important to pay federal taxes?",
     a:["Required by law","All people pay to fund the federal government","Required by the Constitution","16th Amendment","Civic duty"],
-    distractors:["So you can vote","To get a passport","To get a driver's license"] },
+    distractors:["So you can vote","To get a passport","To get a driver's license"], vi: "Vì sao đóng thuế liên bang là quan trọng?", vi_a: ["Luật pháp đòi hỏi", "Mọi người đều đóng để tài trợ cho chính phủ liên bang", "Hiến Pháp đòi hỏi", "Tu Chính Án thứ 16", "Bổn phận công dân"], vi_suggested: true, es: "¿Por qué es importante pagar impuestos federales?", es_a: ["Requerido por la ley", "Todas las personas pagan para financiar al gobierno federal", "Requerido por la Constitución", "La 16a Enmienda", "Deber cívico"], es_suggested: true },
   { id:72, q:"It is important for all men age 18 through 25 to register for the Selective Service. Name one reason why.",
     a:["Required by law","Civic duty","Makes the draft fair, if needed","Makes the draft fair"],
-    distractors:["So they can vote","To get a job","To get a driver's license"] },
+    distractors:["So they can vote","To get a job","To get a driver's license"], vi: "Tất cả nam giới từ 18 đến 25 tuổi phải ghi danh Sở Quân Vụ. Hãy nêu một lý do.", vi_a: ["Luật pháp đòi hỏi", "Bổn phận công dân", "Để việc gọi nhập ngũ công bằng, nếu cần", "Để việc gọi nhập ngũ công bằng"], vi_suggested: true, es: "Es importante que todos los hombres de 18 a 25 años se inscriban en el Servicio Militar Selectivo. Mencione una razón.", es_a: ["Requerido por la ley", "Deber cívico", "Hace que el reclutamiento sea justo, si es necesario", "Hace que el reclutamiento sea justo"], es_suggested: true },
 
   // AMERICAN HISTORY — A: Colonial Period and Independence
   { id:73, q:"The colonists came to America for many reasons. Name one.",
     a:["Freedom","Political liberty","Religious freedom","Economic opportunity","Escape persecution","To escape persecution"],
     distractors:["To join the British military","To collect taxes","To found a monarchy"], vi: "Một trong những lý do khiến người di dân thời thuộc địa tới Mỹ Châu là gì?", vi_a: ["tự do", "tự do chính trị", "tự do tôn giáo", "cơ hội kinh tế", "hành xử tôn giáo của mình", "tránh sự áp bức"], es: "¿Cuál es una razón por la que los colonos vinieron a América?", es_a: ["libertad", "libertad política", "libertad religiosa", "oportunidad económica", "para practicar su religión", "para huir de la persecución"] },
-  { id:74, starred:true, q:"Who lived in America before the Europeans arrived?",
+  { id:74, starred_6520:true, q:"Who lived in America before the Europeans arrived?",
     a:["American Indians","Native Americans","Indians"],
     distractors:["The British","The French","The Vikings only"], vi: "Những ai sống tại Mỹ trước khi người Âu Châu tới?", vi_a: ["người da đỏ Mỹ Châu", "thổ dân Mỹ Châu"], es: "¿Quiénes vivían en lo que hoy conocemos como los Estados Unidos antes de la llegada de los europeos?", es_a: ["Indios americanos", "Nativos americanos"] },
   { id:75, q:"What group of people was taken and sold as slaves?",
@@ -1546,11 +1654,11 @@ const QUESTIONS_2025 = [
     distractors:["Native Americans","Asians","Europeans"], vi: "Nhóm người nào được mang tới Mỹ Châu và bán làm nô lệ?", vi_a: ["người Phi Châu", "người từ Phi Châu"], es: "¿Qué grupo de personas fue traído a los Estados Unidos y vendidos como esclavos?", es_a: ["Africanos", "gente de África"] },
   { id:76, q:"What war did the Americans fight to win independence from Britain?",
     a:["American Revolution","The Revolutionary War","Revolutionary War","War for Independence","War for American Independence"],
-    distractors:["The Civil War","The War of 1812","World War I"] },
+    distractors:["The Civil War","The War of 1812","World War I"], vi: "Người Mỹ đã chiến đấu trong cuộc chiến nào để giành độc lập khỏi Anh Quốc?", vi_a: ["Cách Mạng Mỹ", "Cuộc Chiến Cách Mạng", "Chiến Tranh Cách Mạng", "Chiến Tranh Giành Độc Lập", "Chiến Tranh Giành Độc Lập Hoa Kỳ"], vi_suggested: true, es: "¿Qué guerra pelearon los estadounidenses para ganar la independencia de Gran Bretaña?", es_a: ["La Revolución Americana", "La Guerra Revolucionaria", "Guerra Revolucionaria", "Guerra de Independencia", "Guerra de la Independencia Americana"], es_suggested: true },
   { id:77, q:"Name one reason why the Americans declared independence from Britain.",
     a:["High taxes","Taxation without representation","British soldiers stayed in Americans' houses","Boarding","Quartering","They did not have self-government","Boston Massacre","Boston Tea Party","Tea Act","Stamp Act","Sugar Act","Townshend Acts","Intolerable Acts","Coercive Acts"],
-    distractors:["The French invaded","Britain abolished the monarchy","Britain refused to trade"] },
-  { id:78, starred:true, q:"Who wrote the Declaration of Independence?",
+    distractors:["The French invaded","Britain abolished the monarchy","Britain refused to trade"], vi: "Hãy nêu một lý do người Mỹ tuyên bố độc lập khỏi Anh Quốc.", vi_a: ["Thuế cao", "Đánh thuế mà không có đại diện", "Lính Anh ở trong nhà dân Mỹ", "Trú quân", "Cấp trú", "Họ không có quyền tự quản", "Vụ Tàn Sát Boston", "Tiệc Trà Boston", "Đạo Luật Trà", "Đạo Luật Tem", "Đạo Luật Đường", "Đạo Luật Townshend", "Đạo Luật Không Thể Dung Thứ", "Đạo Luật Cưỡng Bức"], vi_suggested: true, es: "Mencione una razón por la que los estadounidenses declararon su independencia de Gran Bretaña.", es_a: ["Impuestos altos", "Tributación sin representación", "Los soldados británicos se hospedaban en las casas de los estadounidenses", "Alojamiento", "Acuartelamiento", "No tenían autogobierno", "Masacre de Boston", "Motín del Té de Boston", "Ley del Té", "Ley del Timbre", "Ley del Azúcar", "Leyes Townshend", "Leyes Intolerables", "Leyes Coercitivas"], es_suggested: true },
+  { id:78, starred_6520:true, q:"Who wrote the Declaration of Independence?",
     a:["Thomas Jefferson","Jefferson"],
     distractors:["George Washington","Benjamin Franklin","James Madison"], vi: "Ai viết Bản Tuyên Ngôn Độc Lập?", vi_a: ["(Thomas) Jefferson"], es: "¿Quién escribió la Declaración de Independencia?", es_a: ["(Thomas) Jefferson"] },
   { id:79, q:"When was the Declaration of Independence adopted?",
@@ -1558,34 +1666,34 @@ const QUESTIONS_2025 = [
     distractors:["July 4, 1789","December 7, 1776","September 17, 1787"], vi: "Bản Tuyên Ngôn Độc Lập được chấp nhận lúc nào?", vi_a: ["4 Tháng Bẩy 1776"], es: "¿Cuándo fue adoptada la Declaración de Independencia?", es_a: ["el 4 de julio de 1776"] },
   { id:80, q:"The American Revolution had many important events. Name one.",
     a:["Battle of Bunker Hill","Bunker Hill","Declaration of Independence","Washington Crossing the Delaware","Battle of Trenton","Battle of Saratoga","Saratoga","Valley Forge","Battle of Yorktown","Yorktown","British surrender at Yorktown"],
-    distractors:["The Battle of Gettysburg","The Boston Marathon","The Mexican-American War"] },
+    distractors:["The Battle of Gettysburg","The Boston Marathon","The Mexican-American War"], vi: "Cách Mạng Mỹ có nhiều sự kiện quan trọng. Hãy nêu một.", vi_a: ["Trận Bunker Hill", "Bunker Hill", "Bản Tuyên Ngôn Độc Lập", "Washington vượt sông Delaware", "Trận Trenton", "Trận Saratoga", "Saratoga", "Valley Forge", "Trận Yorktown", "Yorktown", "Anh Quốc đầu hàng tại Yorktown"], vi_suggested: true, es: "La Revolución Americana tuvo muchos eventos importantes. Mencione uno.", es_a: ["Batalla de Bunker Hill", "Bunker Hill", "Declaración de Independencia", "El cruce del Delaware por Washington", "Batalla de Trenton", "Batalla de Saratoga", "Saratoga", "Valley Forge", "Batalla de Yorktown", "Yorktown", "Rendición británica en Yorktown"], es_suggested: true },
   { id:81, q:"There were 13 original states. Name five.",
     a:["New Hampshire","Massachusetts","Rhode Island","Connecticut","New York","New Jersey","Pennsylvania","Delaware","Maryland","Virginia","North Carolina","South Carolina","Georgia"],
     distractors:["Ohio","Vermont","Kentucky"], vi: "Có 13 tiểu bang nguyên thủy. Cho biết năm tiểu bang.", vi_a: ["New Hampshire", "Massachusetts", "Rhode Island", "Connecticut", "New York", "New Jersey", "Pennsylvania", "Delaware", "Maryland", "Virginia", "North Carolina", "South Carolina", "Georgia"], es: "Había 13 estados originales. Nombre cinco.", es_a: ["Nueva Hampshire", "Massachusetts", "Rhode Island", "Connecticut", "Nueva York", "Nueva Jersey", "Pensilvania", "Delaware", "Maryland", "Virginia", "Carolina del Norte", "Carolina del Sur", "Georgia"] },
   { id:82, q:"What founding document was written in 1787?",
     a:["U.S. Constitution","Constitution","the Constitution"],
-    distractors:["Declaration of Independence","Bill of Rights","Articles of Confederation"] },
+    distractors:["Declaration of Independence","Bill of Rights","Articles of Confederation"], vi: "Văn kiện sáng lập nào được viết vào năm 1787?", vi_a: ["Hiến Pháp Hoa Kỳ", "Hiến Pháp", "Bản Hiến Pháp"], vi_suggested: true, es: "¿Qué documento fundacional fue escrito en 1787?", es_a: ["La Constitución de los Estados Unidos", "La Constitución", "Constitución"], es_suggested: true },
   { id:83, q:"The Federalist Papers supported the passage of the U.S. Constitution. Name one of the writers.",
     a:["James Madison","Madison","Alexander Hamilton","Hamilton","John Jay","Jay","Publius"],
     distractors:["Thomas Jefferson","George Washington","Benjamin Franklin"], vi: "Các bài tham luận gọi là Federalist Papers có mục đích hỗ trợ việc thông qua Hiến Pháp Hoa Kỳ. Kể tên một trong những người viết tham luận.", vi_a: ["(James) Madison", "(Alexander) Hamilton", "(John) Jay", "Publius"], es: "Los escritos conocidos como “Los Documentos Federalistas” respaldaron la aprobación de la Constitución de los Estados Unidos. Nombre uno de sus autores.", es_a: ["(James) Madison", "(Alexander) Hamilton", "(John) Jay", "Publius"] },
   { id:84, q:"Why were the Federalist Papers important?",
     a:["They helped people understand the Constitution.","Helped people understand the Constitution","They supported passing the Constitution.","Supported passing the Constitution"],
-    distractors:["They declared independence from Britain.","They ended the Civil War.","They created the Bill of Rights."] },
+    distractors:["They declared independence from Britain.","They ended the Civil War.","They created the Bill of Rights."], vi: "Vì sao Các Bài Báo Liên Bang quan trọng?", vi_a: ["Chúng giúp người dân hiểu Hiến Pháp.", "Giúp người dân hiểu Hiến Pháp", "Chúng ủng hộ việc thông qua Hiến Pháp.", "Ủng hộ việc thông qua Hiến Pháp"], vi_suggested: true, es: "¿Por qué fueron importantes los Documentos Federalistas?", es_a: ["Ayudaron a las personas a entender la Constitución.", "Ayudaron a las personas a entender la Constitución", "Apoyaron la aprobación de la Constitución.", "Apoyaron la aprobación de la Constitución"], es_suggested: true },
   { id:85, q:"Benjamin Franklin is famous for many things. Name one.",
     a:["Founded the first free public libraries","First Postmaster General of the United States","First Postmaster General","Helped write the Declaration of Independence","Inventor","U.S. diplomat","Diplomat"],
     distractors:["Wrote the Constitution by himself","Led the Continental Army","Was the first President"], vi: "Một việc gì làm Benjamin Franklin nổi tiếng?", vi_a: ["nhà ngoại giao Hoa Kỳ", "thành viên già nhất của Đại Hội Lập Hiến", "Tổng Giám Đốc Bưu Điện đầu tiên của Hoa Kỳ", "người viết cuốn lịch \"Poor Richard's Almanac\"", "khởi công xây các thư viện miễn phí đầu tiên của Hoa Kỳ"], es: "Mencione una razón por la que es famoso Benjamin Franklin.", es_a: ["diplomático americano", "el miembro de mayor edad de la Convención Constitucional", "primer Director General de Correos de Estados Unidos", "autor de “Poor Richard’s Almanac” (Almanaque del Pobre Richard)", "fundó las primeras bibliotecas gratuitas"] },
-  { id:86, starred:true, q:"George Washington is famous for many things. Name one.",
+  { id:86, starred_6520:true, q:"George Washington is famous for many things. Name one.",
     a:["Father of Our Country","First president of the United States","First president","General of the Continental Army","President of the Constitutional Convention"],
-    distractors:["Wrote the Declaration of Independence","Invented the lightbulb","Founded the Federalist Papers"] },
+    distractors:["Wrote the Declaration of Independence","Invented the lightbulb","Founded the Federalist Papers"], vi: "George Washington nổi tiếng vì nhiều điều. Hãy nêu một.", vi_a: ["Cha của Tổ Quốc", "Tổng Thống đầu tiên của Hoa Kỳ", "Tổng Thống đầu tiên", "Tướng chỉ huy Quân Đội Lục Địa", "Chủ Tịch Hội Nghị Lập Hiến"], vi_suggested: true, es: "George Washington es famoso por muchas cosas. Mencione una.", es_a: ["Padre de Nuestro País", "Primer presidente de los Estados Unidos", "Primer presidente", "General del Ejército Continental", "Presidente de la Convención Constitucional"], es_suggested: true },
   { id:87, q:"Thomas Jefferson is famous for many things. Name one.",
     a:["Writer of the Declaration of Independence","Wrote the Declaration of Independence","Third president of the United States","Third president","Doubled the size of the United States","Louisiana Purchase","First Secretary of State","Founded the University of Virginia","Writer of the Virginia Statute on Religious Freedom"],
-    distractors:["Led the Civil War","Wrote the Bill of Rights","Was the first President"] },
+    distractors:["Led the Civil War","Wrote the Bill of Rights","Was the first President"], vi: "Thomas Jefferson nổi tiếng vì nhiều điều. Hãy nêu một.", vi_a: ["Người viết Bản Tuyên Ngôn Độc Lập", "Đã viết Bản Tuyên Ngôn Độc Lập", "Tổng Thống thứ ba của Hoa Kỳ", "Tổng Thống thứ ba", "Đã tăng gấp đôi diện tích Hoa Kỳ", "Vụ Mua Đất Louisiana", "Bộ Trưởng Ngoại Giao đầu tiên", "Sáng lập Đại Học Virginia", "Người viết Đạo Luật Tự Do Tôn Giáo Virginia"], vi_suggested: true, es: "Thomas Jefferson es famoso por muchas cosas. Mencione una.", es_a: ["Autor de la Declaración de Independencia", "Escribió la Declaración de Independencia", "Tercer presidente de los Estados Unidos", "Tercer presidente", "Duplicó el tamaño de los Estados Unidos", "La Compra de Luisiana", "Primer Secretario de Estado", "Fundó la Universidad de Virginia", "Autor del Estatuto de Virginia para la Libertad Religiosa"], es_suggested: true },
   { id:88, q:"James Madison is famous for many things. Name one.",
     a:["Father of the Constitution","Fourth president of the United States","Fourth president","President during the War of 1812","One of the writers of the Federalist Papers"],
-    distractors:["First Secretary of the Treasury","Wrote the Declaration of Independence","Led the Continental Army"] },
+    distractors:["First Secretary of the Treasury","Wrote the Declaration of Independence","Led the Continental Army"], vi: "James Madison nổi tiếng vì nhiều điều. Hãy nêu một.", vi_a: ["Cha Đẻ của Hiến Pháp", "Tổng Thống thứ tư của Hoa Kỳ", "Tổng Thống thứ tư", "Tổng Thống trong thời kỳ Chiến Tranh năm 1812", "Một trong những tác giả của Các Bài Báo Liên Bang"], vi_suggested: true, es: "James Madison es famoso por muchas cosas. Mencione una.", es_a: ["Padre de la Constitución", "Cuarto presidente de los Estados Unidos", "Cuarto presidente", "Presidente durante la Guerra de 1812", "Uno de los autores de los Documentos Federalistas"], es_suggested: true },
   { id:89, q:"Alexander Hamilton is famous for many things. Name one.",
     a:["First Secretary of the Treasury","Secretary of the Treasury","One of the writers of the Federalist Papers","Helped establish the First Bank of the United States","First Bank of the United States","Aide to General George Washington","Member of the Continental Congress"],
-    distractors:["First President","Wrote the Declaration of Independence","Founded Harvard University"] },
+    distractors:["First President","Wrote the Declaration of Independence","Founded Harvard University"], vi: "Alexander Hamilton nổi tiếng vì nhiều điều. Hãy nêu một.", vi_a: ["Bộ Trưởng Ngân Khố đầu tiên", "Bộ Trưởng Ngân Khố", "Một trong những tác giả của Các Bài Báo Liên Bang", "Giúp thành lập Ngân Hàng Đầu Tiên của Hoa Kỳ", "Ngân Hàng Đầu Tiên của Hoa Kỳ", "Phụ tá của Tướng George Washington", "Thành viên Đại Hội Lục Địa"], vi_suggested: true, es: "Alexander Hamilton es famoso por muchas cosas. Mencione una.", es_a: ["Primer Secretario del Tesoro", "Secretario del Tesoro", "Uno de los autores de los Documentos Federalistas", "Ayudó a establecer el Primer Banco de los Estados Unidos", "Primer Banco de los Estados Unidos", "Ayudante del General George Washington", "Miembro del Congreso Continental"], es_suggested: true },
 
   // AMERICAN HISTORY — B: 1800s
   { id:90, q:"What territory did the United States buy from France in 1803?",
@@ -1599,8 +1707,8 @@ const QUESTIONS_2025 = [
     distractors:["The Revolutionary War","World War II","The War of 1812"], vi: "Tên gọi của cuộc chiến trên đất Hoa Kỳ giữa miền Bắc và miền Nam là gì.", vi_a: ["Nội chiến", "Chiến tranh giữa các Tiểu Bang"], es: "Dé el nombre de la guerra entre el Norte y el Sur de los Estados Unidos.", es_a: ["la Guerra Civil", "la Guerra entre los Estados"] },
   { id:93, q:"The Civil War had many important events. Name one.",
     a:["Battle of Fort Sumter","Fort Sumter","Emancipation Proclamation","Battle of Vicksburg","Vicksburg","Battle of Gettysburg","Gettysburg","Sherman's March","Surrender at Appomattox","Appomattox","Battle of Antietam","Antietam","Sharpsburg","Lincoln was assassinated.","Lincoln was assassinated","Assassination of Lincoln"],
-    distractors:["D-Day","Pearl Harbor","Battle of Yorktown"] },
-  { id:94, starred:true, q:"Abraham Lincoln is famous for many things. Name one.",
+    distractors:["D-Day","Pearl Harbor","Battle of Yorktown"], vi: "Nội Chiến có nhiều sự kiện quan trọng. Hãy nêu một.", vi_a: ["Trận Pháo Đài Sumter", "Pháo Đài Sumter", "Tuyên Ngôn Giải Phóng Nô Lệ", "Trận Vicksburg", "Vicksburg", "Trận Gettysburg", "Gettysburg", "Cuộc Tiến Quân của Sherman", "Đầu hàng tại Appomattox", "Appomattox", "Trận Antietam", "Antietam", "Sharpsburg", "Lincoln bị ám sát.", "Lincoln bị ám sát", "Vụ ám sát Lincoln"], vi_suggested: true, es: "La Guerra Civil tuvo muchos eventos importantes. Mencione uno.", es_a: ["Batalla de Fort Sumter", "Fort Sumter", "Proclamación de Emancipación", "Batalla de Vicksburg", "Vicksburg", "Batalla de Gettysburg", "Gettysburg", "La Marcha de Sherman", "Rendición en Appomattox", "Appomattox", "Batalla de Antietam", "Antietam", "Sharpsburg", "Lincoln fue asesinado.", "Lincoln fue asesinado", "Asesinato de Lincoln"], es_suggested: true },
+  { id:94, starred_6520:true, q:"Abraham Lincoln is famous for many things. Name one.",
     a:["Freed the slaves","Emancipation Proclamation","Saved the Union","Preserved the Union","Led the United States during the Civil War","16th president of the United States","16th president","Delivered the Gettysburg Address","Gettysburg Address"],
     distractors:["First president of the United States","Wrote the Constitution","Founded the Federalist Party"], vi: "Một điều quan trọng mà Abraham Lincoln làm là gì?", vi_a: ["giải phóng nô lệ (Tuyên Ngôn Giải Phóng)", "giữ gìn (hoặc bảo tồn) đoàn kết Quốc Gia", "lãnh đạo Hoa Kỳ trong Cuộc Nội Chiến"], es: "¿Cuál fue una cosa importante que hizo Abraham Lincoln?", es_a: ["liberó a los esclavos (Proclamación de la Emancipación)", "salvó (o preservó) la Unión", "presidió los Estados Unidos durante la Guerra Civil"] },
   { id:95, q:"What did the Emancipation Proclamation do?",
@@ -1608,16 +1716,16 @@ const QUESTIONS_2025 = [
     distractors:["Ended World War I","Established the right to vote","Founded the Republican Party"], vi: "Tuyên Ngôn Giải Phóng làm gì?", vi_a: ["giải phóng nô lệ", "giải phóng nô lệ thuộc tập hợp (nhóm) các tiểu bang ly khai miền Nam", "giải phóng nô lệ ở các tiểu bang miền Nam", "giải phóng nô lệ ở đa số các tiểu bang miền Nam"], es: "¿Qué hizo la Proclamación de la Emancipación?", es_a: ["liberó a los esclavos", "liberó a los esclavos de la Confederación", "liberó a los esclavos en los estados de la Confederación", "liberó a los esclavos en la mayoría de los estados del sur"] },
   { id:96, q:"What U.S. war ended slavery?",
     a:["The Civil War","Civil War"],
-    distractors:["The American Revolution","The War of 1812","World War I"] },
+    distractors:["The American Revolution","The War of 1812","World War I"], vi: "Cuộc chiến tranh Hoa Kỳ nào đã chấm dứt chế độ nô lệ?", vi_a: ["Nội Chiến", "Cuộc Nội Chiến"], vi_suggested: true, es: "¿Qué guerra de los Estados Unidos puso fin a la esclavitud?", es_a: ["La Guerra Civil", "Guerra Civil"], es_suggested: true },
   { id:97, q:"What amendment says all persons born or naturalized in the United States, and subject to the jurisdiction thereof, are U.S. citizens?",
     a:["14th Amendment","Fourteenth Amendment","14"],
-    distractors:["1st Amendment","13th Amendment","19th Amendment"] },
+    distractors:["1st Amendment","13th Amendment","19th Amendment"], vi: "Tu Chính Án nào nói rằng tất cả những người sinh ra hoặc nhập tịch tại Hoa Kỳ, và chịu quyền tài phán của Hoa Kỳ, đều là công dân Hoa Kỳ?", vi_a: ["Tu Chính Án thứ 14", "Tu Chính Án Thứ Mười Bốn", "14"], vi_suggested: true, es: "¿Qué enmienda dice que todas las personas nacidas o naturalizadas en los Estados Unidos, y sujetas a su jurisdicción, son ciudadanos de los Estados Unidos?", es_a: ["La 14a Enmienda", "Decimocuarta Enmienda", "14"], es_suggested: true },
   { id:98, q:"When did all men get the right to vote?",
     a:["After the Civil War","During Reconstruction","15th Amendment","Fifteenth Amendment","1870"],
-    distractors:["1776","1920","After World War II"] },
+    distractors:["1776","1920","After World War II"], vi: "Khi nào tất cả nam giới có quyền bầu cử?", vi_a: ["Sau Nội Chiến", "Trong thời Tái Thiết", "Tu Chính Án thứ 15", "Tu Chính Án Thứ Mười Lăm", "1870"], vi_suggested: true, es: "¿Cuándo recibieron todos los hombres el derecho al voto?", es_a: ["Después de la Guerra Civil", "Durante la Reconstrucción", "La 15a Enmienda", "Decimoquinta Enmienda", "1870"], es_suggested: true },
   { id:99, q:"Name one leader of the women's rights movement in the 1800s.",
     a:["Susan B. Anthony","Elizabeth Cady Stanton","Sojourner Truth","Harriet Tubman","Lucretia Mott","Lucy Stone"],
-    distractors:["Eleanor Roosevelt","Rosa Parks","Hillary Clinton"] },
+    distractors:["Eleanor Roosevelt","Rosa Parks","Hillary Clinton"], vi: "Hãy nêu một lãnh đạo của phong trào quyền phụ nữ trong thập niên 1800.", vi_a: ["Susan B. Anthony", "Elizabeth Cady Stanton", "Sojourner Truth", "Harriet Tubman", "Lucretia Mott", "Lucy Stone"], vi_suggested: true, es: "Mencione un líder del movimiento por los derechos de la mujer en los años 1800.", es_a: ["Susan B. Anthony", "Elizabeth Cady Stanton", "Sojourner Truth", "Harriet Tubman", "Lucretia Mott", "Lucy Stone"], es_suggested: true },
 
   // C: Recent American History and Other Important Historical Information
   { id:100, q:"Name one war fought by the United States in the 1900s.",
@@ -1625,58 +1733,58 @@ const QUESTIONS_2025 = [
     distractors:["The Civil War","The American Revolution","The Mexican-American War"], vi: "Cho biết một cuộc chiến mà Hoa Kỳ tham dự vào thập niên 1900.", vi_a: ["Thế Chiến Thứ Nhất", "Thế Chiến Thứ Hai", "Chiến Tranh Cao Ly (Triều Tiên)", "Chiến Tranh Việt Nam", "Chiến tranh Vùng Vịnh (Ba Tư)"], es: "Mencione una guerra durante los años 1900 en la que peleó los Estados Unidos.", es_a: ["la Primera Guerra Mundial", "la Segunda Guerra Mundial", "la Guerra de Corea", "la Guerra de Vietnam", "la Guerra del Golfo (Pérsico)"] },
   { id:101, q:"Why did the United States enter World War I?",
     a:["Because Germany attacked U.S. ships","Germany attacked U.S. ships","To support the Allied Powers","To oppose the Central Powers"],
-    distractors:["To stop the spread of communism","Because Japan attacked Pearl Harbor","Because Britain attacked U.S. ships"] },
+    distractors:["To stop the spread of communism","Because Japan attacked Pearl Harbor","Because Britain attacked U.S. ships"], vi: "Vì sao Hoa Kỳ tham gia Thế Chiến Thứ Nhất?", vi_a: ["Vì Đức tấn công tàu Hoa Kỳ", "Đức tấn công tàu Hoa Kỳ", "Để ủng hộ phe Đồng Minh", "Để chống lại các Cường Quốc Trung Tâm"], vi_suggested: true, es: "¿Por qué entró Estados Unidos en la Primera Guerra Mundial?", es_a: ["Porque Alemania atacó barcos estadounidenses", "Alemania atacó barcos estadounidenses", "Para apoyar a los Aliados", "Para oponerse a las Potencias Centrales"], es_suggested: true },
   { id:102, q:"When did all women get the right to vote?",
     a:["1920","After World War I","19th Amendment","Nineteenth Amendment"],
-    distractors:["1776","1870","During the Civil War"] },
+    distractors:["1776","1870","During the Civil War"], vi: "Khi nào tất cả phụ nữ có quyền bầu cử?", vi_a: ["1920", "Sau Thế Chiến Thứ Nhất", "Tu Chính Án thứ 19", "Tu Chính Án Thứ Mười Chín"], vi_suggested: true, es: "¿Cuándo recibieron todas las mujeres el derecho al voto?", es_a: ["1920", "Después de la Primera Guerra Mundial", "La 19a Enmienda", "Decimonovena Enmienda"], es_suggested: true },
   { id:103, q:"What was the Great Depression?",
     a:["Longest economic recession in modern history","The longest economic recession in modern history"],
-    distractors:["A war fought in Europe","A presidential election","A type of natural disaster"] },
+    distractors:["A war fought in Europe","A presidential election","A type of natural disaster"], vi: "Đại Khủng Hoảng là gì?", vi_a: ["Cuộc suy thoái kinh tế dài nhất trong lịch sử hiện đại", "Cuộc suy thoái kinh tế dài nhất trong lịch sử cận đại"], vi_suggested: true, es: "¿Qué fue la Gran Depresión?", es_a: ["La recesión económica más larga de la historia moderna", "La recesión económica más larga en la historia moderna"], es_suggested: true },
   { id:104, q:"When did the Great Depression start?",
     a:["The Great Crash","1929","Stock market crash of 1929","Stock market crash"],
-    distractors:["1919","1939","1945"] },
+    distractors:["1919","1939","1945"], vi: "Đại Khủng Hoảng bắt đầu khi nào?", vi_a: ["Sự Sụp Đổ Lớn", "1929", "Vụ sụp đổ thị trường chứng khoán năm 1929", "Vụ sụp đổ thị trường chứng khoán"], vi_suggested: true, es: "¿Cuándo comenzó la Gran Depresión?", es_a: ["El Gran Crac", "1929", "El crac de la bolsa de 1929", "El crac de la bolsa"], es_suggested: true },
   { id:105, q:"Who was president during the Great Depression and World War II?",
     a:["Franklin Roosevelt","Franklin D. Roosevelt","FDR"],
     distractors:["Herbert Hoover","Harry Truman","Woodrow Wilson"], vi: "Ai là Tổng Thống trong thời kỳ Khủng Hoảng Kinh Tế và Thế Chiến Thứ Hai?", vi_a: ["(Franklin) Roosevelt"], es: "¿Quién era presidente durante la Gran Depresión y la Segunda Guerra Mundial?", es_a: ["(Franklin) Roosevelt"] },
   { id:106, q:"Why did the United States enter World War II?",
     a:["Bombing of Pearl Harbor","Pearl Harbor","Japanese attacked Pearl Harbor","To support the Allied Powers","To oppose the Axis Powers"],
-    distractors:["To stop slavery","Because Germany invaded Mexico","To gain new territories"] },
+    distractors:["To stop slavery","Because Germany invaded Mexico","To gain new territories"], vi: "Vì sao Hoa Kỳ tham gia Thế Chiến Thứ Hai?", vi_a: ["Vụ ném bom Trân Châu Cảng", "Trân Châu Cảng", "Nhật Bản tấn công Trân Châu Cảng", "Để ủng hộ phe Đồng Minh", "Để chống lại phe Trục"], vi_suggested: true, es: "¿Por qué entró Estados Unidos en la Segunda Guerra Mundial?", es_a: ["El bombardeo de Pearl Harbor", "Pearl Harbor", "Los japoneses atacaron Pearl Harbor", "Para apoyar a los Aliados", "Para oponerse a las Potencias del Eje"], es_suggested: true },
   { id:107, q:"Dwight Eisenhower is famous for many things. Name one.",
     a:["General during World War II","President during the Korean War","President at the end of the Korean War","34th president of the United States","34th president","Signed the Federal-Aid Highway Act of 1956","Federal-Aid Highway Act of 1956","Created the Interstate System"],
-    distractors:["First President of the United States","Led the Continental Army","Wrote the Declaration of Independence"] },
+    distractors:["First President of the United States","Led the Continental Army","Wrote the Declaration of Independence"], vi: "Dwight Eisenhower nổi tiếng vì nhiều điều. Hãy nêu một.", vi_a: ["Tướng trong Thế Chiến Thứ Hai", "Tổng Thống trong thời Chiến Tranh Triều Tiên", "Tổng Thống vào cuối Chiến Tranh Triều Tiên", "Tổng Thống thứ 34 của Hoa Kỳ", "Tổng Thống thứ 34", "Ký Đạo Luật Hỗ Trợ Xa Lộ Liên Bang năm 1956", "Đạo Luật Hỗ Trợ Xa Lộ Liên Bang năm 1956", "Tạo ra Hệ Thống Xa Lộ Liên Tiểu Bang"], vi_suggested: true, es: "Dwight Eisenhower es famoso por muchas cosas. Mencione una.", es_a: ["General durante la Segunda Guerra Mundial", "Presidente durante la Guerra de Corea", "Presidente al final de la Guerra de Corea", "34o presidente de los Estados Unidos", "34o presidente", "Firmó la Ley Federal de Ayuda a las Carreteras de 1956", "Ley Federal de Ayuda a las Carreteras de 1956", "Creó el Sistema Interestatal"], es_suggested: true },
   { id:108, q:"Who was the United States' main rival during the Cold War?",
     a:["Soviet Union","USSR","Russia"],
-    distractors:["Germany","China","Japan"] },
+    distractors:["Germany","China","Japan"], vi: "Đối thủ chính của Hoa Kỳ trong thời Chiến Tranh Lạnh là ai?", vi_a: ["Liên Bang Xô Viết", "Liên Xô", "Nga"], vi_suggested: true, es: "¿Quién fue el principal rival de los Estados Unidos durante la Guerra Fría?", es_a: ["La Unión Soviética", "URSS", "Rusia"], es_suggested: true },
   { id:109, q:"During the Cold War, what was one main concern of the United States?",
     a:["Communism","Nuclear war"],
     distractors:["Fascism","Climate change","Inflation"], vi: "Trong thời kỳ Chiến Tranh Lạnh, quan tâm chính của Hoa Kỳ là gì?", vi_a: ["Chủ Nghĩa Cộng Sản"], es: "Durante la Guerra Fría, ¿cuál era la principal preocupación de los Estados Unidos?", es_a: ["Comunismo"] },
   { id:110, q:"Why did the United States enter the Korean War?",
     a:["To stop the spread of communism"],
-    distractors:["To support the Axis Powers","To force Iraq from Kuwait","To respond to a terrorist attack"] },
+    distractors:["To support the Axis Powers","To force Iraq from Kuwait","To respond to a terrorist attack"], vi: "Vì sao Hoa Kỳ tham gia Chiến Tranh Triều Tiên?", vi_a: ["Để ngăn chặn sự lan rộng của chủ nghĩa cộng sản"], vi_suggested: true, es: "¿Por qué entró Estados Unidos en la Guerra de Corea?", es_a: ["Para detener la expansión del comunismo"], es_suggested: true },
   { id:111, q:"Why did the United States enter the Vietnam War?",
     a:["To stop the spread of communism"],
-    distractors:["To free people from slavery","To respond to Pearl Harbor","To support the British Empire"] },
+    distractors:["To free people from slavery","To respond to Pearl Harbor","To support the British Empire"], vi: "Vì sao Hoa Kỳ tham gia Chiến Tranh Việt Nam?", vi_a: ["Để ngăn chặn sự lan rộng của chủ nghĩa cộng sản"], vi_suggested: true, es: "¿Por qué entró Estados Unidos en la Guerra de Vietnam?", es_a: ["Para detener la expansión del comunismo"], es_suggested: true },
   { id:112, q:"What did the civil rights movement do?",
     a:["Fought to end racial discrimination","Ended racial discrimination","To end racial discrimination"],
-    distractors:["Ended World War II","Created the Federal Reserve","Built the interstate highway system"] },
-  { id:113, starred:true, q:"Martin Luther King, Jr. is famous for many things. Name one.",
+    distractors:["Ended World War II","Created the Federal Reserve","Built the interstate highway system"], vi: "Phong trào dân quyền đã làm gì?", vi_a: ["Đấu tranh chấm dứt sự phân biệt chủng tộc", "Chấm dứt sự phân biệt chủng tộc", "Để chấm dứt sự phân biệt chủng tộc"], vi_suggested: true, es: "¿Qué hizo el movimiento por los derechos civiles?", es_a: ["Luchó para acabar con la discriminación racial", "Acabó con la discriminación racial", "Para acabar con la discriminación racial"], es_suggested: true },
+  { id:113, starred_6520:true, q:"Martin Luther King, Jr. is famous for many things. Name one.",
     a:["Fought for civil rights","Worked for equality for all Americans","Worked to ensure that people would not be judged by the color of their skin but by the content of their character"],
     distractors:["Was the first African American President","Wrote the Constitution","Invented the telephone"], vi: "Martin Luther King, Jr. đã làm gì?", vi_a: ["tranh đấu cho dân quyền", "hoạt động nhằm mang lại bình đẳng cho mọi người Mỹ"], es: "¿Qué hizo Martin Luther King, Jr.?", es_a: ["luchó por los derechos civiles", "trabajó por la igualdad de todos los ciudadanos americanos"] },
   { id:114, q:"Why did the United States enter the Persian Gulf War?",
     a:["To force the Iraqi military from Kuwait","To force Iraq from Kuwait","To free Kuwait"],
-    distractors:["To respond to the September 11 attacks","To stop the spread of communism","To support Vietnam"] },
-  { id:115, starred:true, q:"What major event happened on September 11, 2001 in the United States?",
+    distractors:["To respond to the September 11 attacks","To stop the spread of communism","To support Vietnam"], vi: "Vì sao Hoa Kỳ tham gia Chiến Tranh Vùng Vịnh?", vi_a: ["Để buộc quân đội Iraq rút khỏi Kuwait", "Để buộc Iraq rời khỏi Kuwait", "Để giải phóng Kuwait"], vi_suggested: true, es: "¿Por qué entró Estados Unidos en la Guerra del Golfo Pérsico?", es_a: ["Para forzar al ejército iraquí a salir de Kuwait", "Para forzar a Iraq a salir de Kuwait", "Para liberar Kuwait"], es_suggested: true },
+  { id:115, starred_6520:true, q:"What major event happened on September 11, 2001 in the United States?",
     a:["Terrorists attacked the United States","Terrorists took over two planes and crashed them into the World Trade Center in New York City","Terrorists took over a plane and crashed into the Pentagon in Arlington, Virginia","Terrorists took over a plane originally aimed at Washington, D.C., and crashed in a field in Pennsylvania","9/11","September 11 attacks"],
     distractors:["The Pearl Harbor attack","The Boston Marathon bombing","The fall of the Berlin Wall"], vi: "Biến cố lớn lao nào xảy ra vào ngày 11 tháng 9 năm 2001 tại Hoa Kỳ?", vi_a: ["Bọn khủng bố tấn công Hoa Kỳ."], es: "¿Qué suceso de gran magnitud ocurrió el 11 de septiembre de 2001 en los Estados Unidos?", es_a: ["Terroristas atacaron los Estados Unidos."] },
   { id:116, q:"Name one U.S. military conflict after the September 11, 2001 attacks.",
     a:["Global War on Terror","War on Terror","War in Afghanistan","Afghanistan","War in Iraq","Iraq War"],
-    distractors:["World War II","Vietnam War","Korean War"] },
+    distractors:["World War II","Vietnam War","Korean War"], vi: "Hãy nêu một cuộc xung đột quân sự Hoa Kỳ sau các vụ tấn công ngày 11 tháng 9 năm 2001.", vi_a: ["Cuộc Chiến Toàn Cầu Chống Khủng Bố", "Chiến tranh chống khủng bố", "Chiến Tranh Afghanistan", "Afghanistan", "Chiến Tranh Iraq", "Iraq"], vi_suggested: true, es: "Mencione un conflicto militar de los Estados Unidos después de los ataques del 11 de septiembre de 2001.", es_a: ["Guerra Global contra el Terrorismo", "Guerra contra el Terrorismo", "Guerra en Afganistán", "Afganistán", "Guerra en Iraq", "Guerra de Iraq"], es_suggested: true },
   { id:117, q:"Name one American Indian tribe in the United States.",
     a:["Apache","Blackfeet","Cayuga","Cherokee","Cheyenne","Chippewa","Choctaw","Creek","Crow","Hopi","Huron","Inupiat","Lakota","Mohawk","Mohegan","Navajo","Oneida","Onondaga","Pueblo","Seminole","Seneca","Shawnee","Sioux","Teton","Tuscarora"],
     distractors:["Aztec","Inca","Maya"], vi: "Kể tên một bộ lạc da đỏ tại Mỹ. [Phỏng vấn viên USCIS sẽ được cung cấp một danh sách các bộ lạc da đỏ được liên bang công nhận.]", vi_a: ["Cherokee", "Navajo", "Sioux", "Chippewa", "Choctaw", "Pueblo", "Apache", "Iroquois", "Creek", "Blackfeet", "Seminole", "Cheyenne", "Arawak", "Shawnee", "Mohegan", "Huron", "Oneida", "Lakota", "Crow", "Teton", "Hopi", "Inuit"], es: "Mencione una tribu de indios americanos en los Estados Unidos.", es_a: ["Cherokee", "Navajo", "Sioux", "Chippewa", "Choctaw", "Pueblo", "Apache", "Iroquois", "Creek", "Blackfeet", "Seminole", "Cheyenne", "Arawak", "Shawnee", "Mohegan", "Huron", "Oneida", "Lakota", "Crow", "Teton", "Hopi", "Inuit"] },
   { id:118, q:"Name one example of an American innovation.",
     a:["Light bulb","Automobile","Cars","Internal combustion engine","Skyscrapers","Skyscraper","Airplane","Assembly line","Landing on the moon","Integrated circuit"],
-    distractors:["The compass","Gunpowder","The wheel"] },
+    distractors:["The compass","Gunpowder","The wheel"], vi: "Hãy nêu một ví dụ về sự đổi mới của Hoa Kỳ.", vi_a: ["Bóng đèn", "Xe hơi", "Xe ô tô", "Động cơ đốt trong", "Tòa nhà chọc trời", "Tòa nhà cao tầng", "Máy bay", "Dây chuyền lắp ráp", "Đáp xuống mặt trăng", "Mạch tích hợp"], vi_suggested: true, es: "Mencione un ejemplo de una innovación estadounidense.", es_a: ["La bombilla", "El automóvil", "Los autos", "El motor de combustión interna", "Los rascacielos", "El rascacielos", "El avión", "La línea de ensamblaje", "El alunizaje", "El circuito integrado"], es_suggested: true },
 
   // SYMBOLS AND HOLIDAYS — A: Symbols
   { id:119, q:"What is the capital of the United States?",
@@ -1685,7 +1793,7 @@ const QUESTIONS_2025 = [
   { id:120, q:"Where is the Statue of Liberty?",
     a:["New York Harbor","New York","Liberty Island","New Jersey","Near New York City","On the Hudson River"],
     distractors:["Washington, D.C.","San Francisco Bay","Boston Harbor"], vi: "Tượng Nữ Thần Tự Do ở đâu?", vi_a: ["(Hải Cảng) Nữu Ước", "Đảo Liberty"], es: "¿Dónde está la Estatua de la Libertad?", es_a: ["(el puerto de) Nueva York", "Liberty Island."] },
-  { id:121, starred:true, q:"Why does the flag have 13 stripes?",
+  { id:121, starred_6520:true, q:"Why does the flag have 13 stripes?",
     a:["Because there were 13 original colonies","13 original colonies","Because the stripes represent the original colonies","Represent the original colonies"],
     distractors:["One stripe for each branch of government","One for each amendment","Each stripe represents a state"], vi: "Tại sao lá cờ Hoa Kỳ có 13 lằn gạch?", vi_a: ["bởi vì đã có 13 thuộc địa nguyên thủy", "bởi vì các lằn này tượng trưng cho 13 thuộc địa nguyên thủy"], es: "¿Por qué hay 13 franjas en la bandera?", es_a: ["porque representan las 13 colonias originales", "porque las franjas representan las colonias originales"] },
   { id:122, q:"Why does the flag have 50 stars?",
@@ -1696,21 +1804,21 @@ const QUESTIONS_2025 = [
     distractors:["America the Beautiful","God Bless America","My Country, Tis of Thee"], vi: "Tựa của bài quốc ca Hoa Kỳ là gì?", vi_a: ["The Star-Spangled Banner"], es: "¿Cómo se llama el himno nacional?", es_a: ["The Star-Spangled Banner"] },
   { id:124, q:"The Nation's first motto was E Pluribus Unum. What does that mean?",
     a:["Out of many, one","Out of many one","We all become one"],
-    distractors:["In God we trust","Liberty and justice for all","Land of the free"] },
+    distractors:["In God we trust","Liberty and justice for all","Land of the free"], vi: "Khẩu hiệu đầu tiên của Quốc Gia là E Pluribus Unum. Câu này có nghĩa là gì?", vi_a: ["Từ nhiều thành một", "Từ nhiều, một", "Tất cả chúng ta hợp thành một"], vi_suggested: true, es: "El primer lema de la Nación fue E Pluribus Unum. ¿Qué significa eso?", es_a: ["De muchos, uno", "De muchos uno", "Todos nos convertimos en uno"], es_suggested: true },
 
   // SYMBOLS AND HOLIDAYS — B: Holidays
   { id:125, q:"What is Independence Day?",
     a:["A holiday to celebrate U.S. independence from Britain","Holiday to celebrate U.S. independence","The country's birthday"],
-    distractors:["The day the Constitution was signed","Memorial Day","The President's birthday"] },
-  { id:126, starred:true, q:"Name three national U.S. holidays.",
+    distractors:["The day the Constitution was signed","Memorial Day","The President's birthday"], vi: "Lễ Độc Lập là ngày gì?", vi_a: ["Ngày lễ kỷ niệm độc lập của Hoa Kỳ khỏi Anh Quốc", "Ngày lễ kỷ niệm độc lập của Hoa Kỳ", "Sinh nhật của đất nước"], vi_suggested: true, es: "¿Qué es el Día de la Independencia?", es_a: ["Un día feriado para celebrar la independencia de los Estados Unidos de Gran Bretaña", "Día feriado para celebrar la independencia de los Estados Unidos", "El cumpleaños del país"], es_suggested: true },
+  { id:126, starred_6520:true, q:"Name three national U.S. holidays.",
     a:["New Year's Day","Martin Luther King, Jr. Day","MLK Day","Presidents Day","Washington's Birthday","Memorial Day","Juneteenth","Independence Day","Labor Day","Columbus Day","Veterans Day","Thanksgiving Day","Thanksgiving","Christmas Day","Christmas"],
     distractors:["Black Friday","Valentine's Day","Halloween"], vi: "Cho biết ba ngày lễ quốc gia của Hoa Kỳ.", vi_a: ["Tết Tây", "Ngày Sinh của Martin Luther King, Jr.", "Ngày Các Tổng Thống", "Lễ Chiến Sĩ Trận Vong (Memorial Day)", "Lễ Độc Lập (Independence Day)", "Lễ Lao Động (Labor Day)", "Ngày Tưởng Niệm Columbus", "Ngày Cựu Chiến Binh (Veterans Day)", "Lễ Tạ Ơn (Thanksgiving)", "Lễ Giáng Sinh", "Ngày Juneteenth"], es: "Mencione tres días feriados nacionales de los Estados Unidos.", es_a: ["el Día de Año Nuevo", "el Día de Martin Luther King, Jr.", "el Día de los Presidentes", "el Día de la Recordación", "el Día de la Independencia", "el Día del Trabajo", "el Día de la Raza (Cristóbal Colón)", "el Día de los Veteranos", "el Día de Acción de Gracias", "el Día de Navidad"] },
   { id:127, q:"What is Memorial Day?",
     a:["A holiday to honor soldiers who died in military service","Honor soldiers who died in military service","Holiday to honor fallen soldiers"],
-    distractors:["A holiday to celebrate the end of World War II","A holiday for federal workers","A holiday to celebrate veterans currently serving"] },
+    distractors:["A holiday to celebrate the end of World War II","A holiday for federal workers","A holiday to celebrate veterans currently serving"], vi: "Ngày Lễ Chiến Sĩ Trận Vong là gì?", vi_a: ["Ngày lễ để tôn vinh các chiến sĩ đã hy sinh trong quân ngũ", "Tôn vinh các chiến sĩ đã hy sinh trong quân ngũ", "Ngày lễ để tôn vinh các chiến sĩ đã ngã xuống"], vi_suggested: true, es: "¿Qué es el Día de la Recordación (Memorial Day)?", es_a: ["Un día feriado para honrar a los soldados que murieron en servicio militar", "Honrar a los soldados que murieron en servicio militar", "Día feriado para honrar a los soldados caídos"], es_suggested: true },
   { id:128, q:"What is Veterans Day?",
     a:["A holiday to honor people in the U.S. military","Honor people in the military","A holiday to honor people who have served","Honor people who have served"],
-    distractors:["A holiday for soldiers killed in action","Independence Day","The President's birthday"] },
+    distractors:["A holiday for soldiers killed in action","Independence Day","The President's birthday"], vi: "Ngày Cựu Chiến Binh là gì?", vi_a: ["Ngày lễ để tôn vinh những người phục vụ trong quân đội Hoa Kỳ", "Tôn vinh những người phục vụ trong quân đội", "Ngày lễ để tôn vinh những người đã từng phục vụ", "Tôn vinh những người đã từng phục vụ"], vi_suggested: true, es: "¿Qué es el Día de los Veteranos?", es_a: ["Un día feriado para honrar a las personas en el ejército de los Estados Unidos", "Honrar a las personas en el ejército", "Un día feriado para honrar a las personas que han servido", "Honrar a las personas que han servido"], es_suggested: true },
 ];
 
 const QUESTIONS_2008 = [
@@ -1719,29 +1827,29 @@ const QUESTIONS_2008 = [
   { id:3, q:"The idea of self-government is in the first three words of the Constitution. What are these words?", a:["We the People"], distractors:["liberty","petition the government","religion"], vi:"Ý tưởng tự quản trị nằm trong ba chữ đầu tiên của Hiến Pháp. Các chữ này là những chữ nào?", vi_a:["Chúng tôi người dân (We the People)"], es:"Las primeras tres palabras de la Constitución contienen la idea del autogobierno (de que el pueblo se gobierna a sí mismo). ¿Cuáles son estas palabras?", es_a:["Nosotros, el pueblo"] },
   { id:4, q:"What is an amendment?", a:["a change (to the Constitution)","an addition (to the Constitution)"], distractors:["defines the government","petition the government","press"], vi:"Tu chính án là gì?", vi_a:["một sự thay đổi (trong Hiến Pháp)","một sự thêm (vào Hiến Pháp)"], es:"¿Qué es una enmienda?", es_a:["un cambio (a la Constitución)","una adición (a la Constitución)"] },
   { id:5, q:"What do we call the first ten amendments to the Constitution?", a:["the Bill of Rights"], distractors:["Leaders must obey the law.","the Constitution","speech"], vi:"Ta gọi mười tu chính đầu tiên vào Hiến Pháp là gì?", vi_a:["Luật Dân Quyền"], es:"¿Con qué nombre se conocen las primeras diez enmiendas a la Constitución?", es_a:["la Carta de Derechos"] },
-  { id:6, starred:true, q:"What is one right or freedom from the First Amendment?", a:["speech","religion","assembly","press","petition the government"], distractors:["twenty-seven (27)","capitalist economy","said that the United States is free (from Great Britain)"], vi:"Kể ra Một quyền hoặc một tự do trong Tu Chính Án Đầu Tiên (First Amendment)?", vi_a:["tự do ngôn luận","tự do tôn giáo","tự do hội họp","tự do báo chí","tự do thỉnh nguyện chánh phủ"], es:"¿Cuál es un derecho o libertad que la Primera Enmienda garantiza?", es_a:["expresión","religión","reunión","prensa","peticionar al gobierno"] },
+  { id:6, starred_6520:true, q:"What is one right or freedom from the First Amendment?", a:["speech","religion","assembly","press","petition the government"], distractors:["twenty-seven (27)","capitalist economy","said that the United States is free (from Great Britain)"], vi:"Kể ra Một quyền hoặc một tự do trong Tu Chính Án Đầu Tiên (First Amendment)?", vi_a:["tự do ngôn luận","tự do tôn giáo","tự do hội họp","tự do báo chí","tự do thỉnh nguyện chánh phủ"], es:"¿Cuál es un derecho o libertad que la Primera Enmienda garantiza?", es_a:["expresión","religión","reunión","prensa","peticionar al gobierno"] },
   { id:7, q:"How many amendments does the Constitution have?", a:["twenty-seven (27)"], distractors:["Ten (10)","Twenty-five (25)","Thirty (30)"], vi:"Hiến Pháp có bao nhiêu tu chính án?", vi_a:["hai mươi bảy (27)"], es:"¿Cuántas enmiendas tiene la Constitución?", es_a:["veintisiete (27)"] },
   { id:8, q:"What did the Declaration of Independence do?", a:["announced our independence (from Great Britain)","declared our independence (from Great Britain)","said that the United States is free (from Great Britain)"], distractors:["religion","the Bill of Rights","the Constitution"], vi:"Bản Tuyên Ngôn Độc Lập có ý nghĩa gì?", vi_a:["thông báo nền độc lập của chúng ta (khỏi Anh Quốc)","tuyên cáo nền độc lập của chúng ta (khỏi Anh Quốc)","cho biết Hoa Kỳ đã tự do (khỏi Anh Quốc)"], es:"¿Qué hizo la Declaración de Independencia?", es_a:["anunció nuestra independencia (de Gran Bretaña)","declaró nuestra independencia (de Gran Bretaña)","dijo que los Estados Unidos se independizó (de Gran Bretaña)"] },
   { id:9, q:"What are two rights in the Declaration of Independence?", a:["life","liberty","pursuit of happiness"], distractors:["No one is above the law.","the Bill of Rights","religion"], vi:"Kể ra Hai quyền trong bản Bản Tuyên Ngôn Độc Lập?", vi_a:["quyền sống","quyền tự do","quyền theo đuổi hạnh phúc"], es:"¿Cuáles son dos derechos en la Declaración de la Independencia?", es_a:["la vida","la libertad","la búsqueda de la felicidad"] },
   { id:10, q:"What is freedom of religion?", a:["You can practice any religion, or not practice a religion."], distractors:["life","We the People","sets up the government"], vi:"Tự do tôn giáo là gì?", vi_a:["Bạn có thể theo bất cứ tôn giáo nào, hoặc không theo tôn giáo nào."], es:"¿En qué consiste la libertad de religión?", es_a:["Se puede practicar cualquier religión o no practicar ninguna."] },
-  { id:11, starred:true, q:"What is the economic system in the United States?", a:["capitalist economy","market economy"], distractors:["Socialism","Communism","Centrally planned economy"], vi:"Hệ thống kinh tế của Hoa Kỳ gọi là gì?", vi_a:["kinh tế tư bản","kinh tế thị trường"], es:"¿Cuál es el sistema económico de los Estados Unidos?", es_a:["economía capitalista","economía de mercado"] },
+  { id:11, starred_6520:true, q:"What is the economic system in the United States?", a:["capitalist economy","market economy"], distractors:["Socialism","Communism","Centrally planned economy"], vi:"Hệ thống kinh tế của Hoa Kỳ gọi là gì?", vi_a:["kinh tế tư bản","kinh tế thị trường"], es:"¿Cuál es el sistema económico de los Estados Unidos?", es_a:["economía capitalista","economía de mercado"] },
   { id:12, q:"What is the \"rule of law\"?", a:["Everyone must follow the law.","Leaders must obey the law.","Government must obey the law.","No one is above the law."], distractors:["Only citizens must follow the law","The President writes all laws","Laws only apply in courts"], vi:"\"Thượng tôn luật pháp\" là gì?", vi_a:["Mọi người đều phải tuân theo luật pháp.","Cả các người lãnh đạo đều phải tuân theo luật pháp.","Nhà cầm quyền phải tuân theo luật pháp.","Không ai được ở trên pháp luật cả."], es:"¿En qué consiste el \"estado de derecho\" (ley y orden)?", es_a:["Todos deben obedecer la ley","Los líderes deben obedecer la ley","El gobierno debe obedecer la ley","Nadie está por encima de la ley"] },
-  { id:13, starred:true, q:"Name one branch or part of the government.", a:["Congress","legislative","President","executive","the courts","judicial"], distractors:["approve zoning and land use","Secretary of Veterans Affairs","Senate and House (of Representatives)"], vi:"Cho biết một ngành hay phần của công quyền.", vi_a:["Quốc Hội","lập pháp","Tổng Thống","hành pháp","các tòa án","tư pháp"], es:"Nombre una rama o parte del gobierno.", es_a:["Congreso","Poder legislativo","Presidente","Poder ejecutivo","Los tribunales","Poder judicial"] },
+  { id:13, starred_6520:true, q:"Name one branch or part of the government.", a:["Congress","legislative","President","executive","the courts","judicial"], distractors:["approve zoning and land use","Secretary of Veterans Affairs","Senate and House (of Representatives)"], vi:"Cho biết một ngành hay phần của công quyền.", vi_a:["Quốc Hội","lập pháp","Tổng Thống","hành pháp","các tòa án","tư pháp"], es:"Nombre una rama o parte del gobierno.", es_a:["Congreso","Poder legislativo","Presidente","Poder ejecutivo","Los tribunales","Poder judicial"] },
   { id:14, q:"What stops one branch of government from becoming too powerful?", a:["checks and balances","separation of powers"], distractors:["Secretary of the Interior","Visit uscis.gov/citizenship/testupdates for the name of the Vice President of the United States.","the courts"], vi:"Cách nào ngăn cản một ngành công quyền trở thành quá mạnh?", vi_a:["kiểm soát lẫn nhau","phân quyền"], es:"¿Qué es lo que evita que una rama del gobierno se vuelva demasiado poderosa?", es_a:["pesos y contrapesos","separación de poderes"] },
   { id:15, q:"Who is in charge of the executive branch?", a:["the President"], distractors:["reviews laws","resolves disputes (disagreements)","Secretary of Veterans Affairs"], vi:"Ai phụ trách hành pháp?", vi_a:["Tổng Thống"], es:"¿Quién está a cargo de la rama ejecutiva?", es_a:["el Presidente"] },
   { id:16, q:"Who makes federal laws?", a:["Congress","Senate and House (of Representatives)","(U.S. or national) legislature"], distractors:["The President","The Supreme Court","The Cabinet"], vi:"Ai làm luật liên bang?", vi_a:["Quốc Hội","Thượng và Hạ Nghị Viện","Ngành Lập Pháp (của Liên Bang hay Quốc Gia)"], es:"¿Quién crea las leyes federales?", es_a:["el Congreso","el Senado y la Cámara (de Representantes)","la legislatura (nacional o de los Estados Unidos)"] },
-  { id:17, starred:true, q:"What are the two parts of the U.S. Congress?", a:["the Senate and House (of Representatives)"], distractors:["The House and Supreme Court","The Senate and President","Democrats and Republicans"], vi:"Hai phần của Quốc Hội Hoa Kỳ là gì?", vi_a:["Thượng và Hạ Nghị Viện"], es:"¿Cuáles son las dos partes que integran el Congreso de los Estados Unidos?", es_a:["el Senado y la Cámara (de Representantes)"] },
+  { id:17, starred_6520:true, q:"What are the two parts of the U.S. Congress?", a:["the Senate and House (of Representatives)"], distractors:["The House and Supreme Court","The Senate and President","Democrats and Republicans"], vi:"Hai phần của Quốc Hội Hoa Kỳ là gì?", vi_a:["Thượng và Hạ Nghị Viện"], es:"¿Cuáles son las dos partes que integran el Congreso de los Estados Unidos?", es_a:["el Senado y la Cámara (de Representantes)"] },
   { id:18, q:"How many U.S. Senators are there?", a:["one hundred (100)"], distractors:["Fifty (50)","Four hundred thirty-five (435)","Two hundred (200)"], vi:"Có bao nhiêu Thượng Nghị Sĩ Liên Bang?", vi_a:["một trăm (100)"], es:"¿Cuántos senadores de los Estados Unidos hay?", es_a:["cien (100)"] },
   { id:19, q:"We elect a U.S. Senator for how many years?", a:["six (6)"], distractors:["Two (2) years","Four (4) years","Eight (8) years"], vi:"Chúng ta bầu Thượng Nghị Sĩ cho bao nhiêu năm?", vi_a:["sáu (6)"], es:"¿De cuántos años es el término de elección de un senador de los Estados Unidos?", es_a:["seis (6)"] },
-  { id:20, starred:true, stateField:"senators", q:"Who is one of your state's U.S. Senators now?", helpNote:"Answer depends on your state. Verify current senators at senate.gov.", vi:"Ai là một trong những Thượng Nghị Sĩ Liên Bang của bạn?", vi_a:["Câu trả lời thay đổi tùy tiểu bang."], es:"Nombre a uno de los senadores actuales del estado donde usted vive.", es_a:["Las respuestas variarán."] },
+  { id:20, starred_6520:true, stateField:"senators", q:"Who is one of your state's U.S. Senators now?", helpNote:"Answer depends on your state. Verify current senators at senate.gov.", vi:"Ai là một trong những Thượng Nghị Sĩ Liên Bang của bạn?", vi_a:["Câu trả lời thay đổi tùy tiểu bang."], es:"Nombre a uno de los senadores actuales del estado donde usted vive.", es_a:["Las respuestas variarán."] },
   { id:21, q:"The House of Representatives has how many voting members?", a:["four hundred thirty-five (435)"], distractors:["One hundred (100)","Two hundred (200)","Five hundred (500)"], vi:"Hạ-Nghị-Viện có bao nhiêu dân biểu?", vi_a:["bốn trăm ba mươi lăm (435)"], es:"¿Cuántos miembros votantes tiene la Cámara de Representantes?", es_a:["cuatrocientos treinta y cinco (435)"] },
   { id:22, q:"We elect a U.S. Representative for how many years?", a:["two (2)"], distractors:["Four (4) years","Six (6) years","One (1) year"], vi:"Chúng ta bầu dân biểu cho mấy năm?", vi_a:["hai năm (2)"], es:"¿De cuántos años es el término de elección de un representante de los Estados Unidos?", es_a:["dos (2)"] },
   { id:23, excluded:true, q:"Name your U.S. Representative.", a:["Answers will vary."], distractors:[], vi:"Cho biết tên dân biểu của bạn.", vi_a:["Câu trả lời sẽ thay đổi tùy nơi."], es:"Dé el nombre de su representante a nivel nacional.", es_a:["Las respuestas variarán."] },
   { id:24, q:"Who does a U.S. Senator represent?", a:["all people of the state"], distractors:["Only their political party","All Americans","Their congressional district"], vi:"Thượng-nghị-sĩ đại diện ai?", vi_a:["Tất cả người dân trong tiểu bang"], es:"¿A quiénes representa un senador de los Estados Unidos?", es_a:["a todas las personas del estado"] },
   { id:25, q:"Why do some states have more Representatives than other states?", a:["(because of) the state's population","(because) they have more people","(because) some states have more people"], distractors:["Because of the state's size in square miles","Because of how long the state has been in the Union","Because of state tax revenue"], vi:"Tại sao có những tiểu bang có nhiều đại biểu hơn các tiểu bang khác?", vi_a:["(Vì) dân số tiểu bang đó","(Vì) tiểu bang đó đông dân hơn","(Vì) một số tiểu bang đông dân hơn tiểu bang khác"], es:"¿Por qué tienen algunos estados más representantes que otros?", es_a:["(debido a) la población del estado","(debido a que) tienen más gente","(debido a que) algunos estados tienen más gente"] },
   { id:26, q:"We elect a President for how many years?", a:["four (4)"], distractors:["Two (2) years","Six (6) years","Eight (8) years"], vi:"Nhiệm kỳ Tổng Thống là mấy năm?", vi_a:["Bốn (4) năm"], es:"¿De cuántos años es el término de elección de un presidente?", es_a:["cuatro (4)"] },
-  { id:27, starred:true, q:"In what month do we vote for President?", a:["November"], distractors:["to create an army","executive","four hundred thirty-five (435)"], vi:"Bầu Tổng Thống vào tháng nào?", vi_a:["Tháng Mười Một"], es:"¿En qué mes votamos por un nuevo presidente?", es_a:["noviembre"] },
-  { id:28, starred:true, dynamic:true, officialField:"president", q:"What is the name of the President of the United States now?", dynamic_note:"⚡ Answer must reflect the President serving at time of your interview. Check uscis.gov/citizenship/testupdates.", vi:"Hiện nay tên Tổng Thống Hoa Kỳ là gì?", vi_a:["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Tổng Thống Hoa Kỳ."], es:"¿Cómo se llama el actual Presidente de los Estados Unidos?", es_a:["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Presidente de Estados Unidos."] },
+  { id:27, starred_6520:true, q:"In what month do we vote for President?", a:["November"], distractors:["to create an army","executive","four hundred thirty-five (435)"], vi:"Bầu Tổng Thống vào tháng nào?", vi_a:["Tháng Mười Một"], es:"¿En qué mes votamos por un nuevo presidente?", es_a:["noviembre"] },
+  { id:28, starred_6520:true, dynamic:true, officialField:"president", q:"What is the name of the President of the United States now?", dynamic_note:"⚡ Answer must reflect the President serving at time of your interview. Check uscis.gov/citizenship/testupdates.", vi:"Hiện nay tên Tổng Thống Hoa Kỳ là gì?", vi_a:["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Tổng Thống Hoa Kỳ."], es:"¿Cómo se llama el actual Presidente de los Estados Unidos?", es_a:["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Presidente de Estados Unidos."] },
   { id:29, dynamic:true, officialField:"vp", q:"What is the name of the Vice President of the United States now?", dynamic_note:"⚡ Answer must reflect the Vice President serving at time of your interview. Check uscis.gov/citizenship/testupdates.", vi:"Hiện nay tên Phó Tổng Thống Hoa Kỳ là gì?", vi_a:["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Phó Tổng Thống Hoa Kỳ."], es:"¿Cómo se llama el actual Vicepresidente de los Estados Unidos?", es_a:["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Vice Presidente de Estados Unidos."] },
   { id:30, q:"If the President can no longer serve, who becomes President?", a:["the Vice President"], distractors:["The Speaker of the House","The Secretary of State","The Chief Justice"], vi:"Nếu Tổng Thống không còn làm việc được nữa, ai sẽ thay thế làm Tổng Thống?", vi_a:["Phó Tổng Thống"], es:"Si el Presidente ya no puede cumplir sus funciones, ¿quién se convierte en Presidente?", es_a:["el Vicepresidente"] },
   { id:31, q:"If both the President and the Vice President can no longer serve, who becomes President?", a:["the Speaker of the House"], distractors:["Secretary of Commerce","provide schooling and education","to declare war"], vi:"Nếu cả Tổng Thống và Phó Tổng Thống không còn làm việc được nữa, ai sẽ thay thế?", vi_a:["Chủ Tịch Hạ Nghị Viện"], es:"Si tanto el Presidente como el Vicepresidente ya no pueden cumplir sus funciones, ¿quién se convierte en Presidente?", es_a:["el Presidente de la Cámara de Representantes"] },
@@ -1757,19 +1865,19 @@ const QUESTIONS_2008 = [
   { id:41, q:"Under our Constitution, some powers belong to the federal government. What is one power of the federal government?", a:["to print money","to declare war","to create an army","to make treaties"], distractors:["Issue driver's licenses","Run public schools","Set local zoning rules"], vi:"Theo Hiến Pháp, chánh phủ liên bang có một số quyền. Một trong các quyền của chánh phủ liên bang là?", vi_a:["in tiền","tuyên chiến","lập quân đội","ký các hòa ước"], es:"De acuerdo a nuestra Constitución, algunos poderes pertenecen al gobierno federal. ¿Cuál es un poder del gobierno federal?", es_a:["imprimir dinero","declarar la guerra","crear un ejército","suscribir tratados"] },
   { id:42, q:"Under our Constitution, some powers belong to the states. What is one power of the states?", a:["provide schooling and education","provide protection (police)","provide safety (fire departments)","give a driver's license","approve zoning and land use"], distractors:["Print money","Declare war on another country","Sign treaties with foreign nations"], vi:"Theo Hiến Pháp, các tiểu bang có một số quyền. Một trong những quyền này là gì?", vi_a:["cung cấp trường học và giáo dục","bảo vệ dân chúng (cảnh sát)","bảo vệ an toàn (các sở cứu hỏa)","cấp bằng lái xe","chia vùng và chấp thuận cách xử dụng đất đai"], es:"De acuerdo a nuestra Constitución, algunos poderes pertenecen a los estados. ¿Cuál es un poder de los estados?", es_a:["proveer escuelas y educación","proveer protección (policía)","proveer seguridad (cuerpos de bomberos)","conceder licencias de conducir","aprobar la zonificación y uso de la tierra"] },
   { id:43, stateField:"governor", q:"Who is the Governor of your state now?", helpNote:"Answer depends on your state. Verify current governor at usa.gov/state-governments.", vi:"Thống Đốc tiểu bang của bạn tên gì?", vi_a:["Câu trả lời tùy tiểu bang."], es:"¿Quién es el gobernador actual de su estado?", es_a:["Las respuestas variarán."] },
-  { id:44, starred:true, stateField:"capital", q:"What is the capital of your state?", helpNote:"Answer depends on your state.", vi:"Thủ phủ của tiểu bang bạn tên gì?", vi_a:["Câu trả lời tùy theo tiểu bang."], es:"¿Cuál es la capital de su estado?", es_a:["Las respuestas variarán."] },
-  { id:45, starred:true, q:"What are the two major political parties in the United States?", a:["Democratic and Republican"], distractors:["four hundred thirty-five (435)","give a driver's license","judicial"], vi:"Hai đảng chính của Hoa Kỳ là gì?", vi_a:["Dân Chủ và Cộng Hòa"], es:"¿Cuáles son los dos principales partidos políticos de los Estados Unidos?", es_a:["Demócrata y Republicano"] },
+  { id:44, starred_6520:true, stateField:"capital", q:"What is the capital of your state?", helpNote:"Answer depends on your state.", vi:"Thủ phủ của tiểu bang bạn tên gì?", vi_a:["Câu trả lời tùy theo tiểu bang."], es:"¿Cuál es la capital de su estado?", es_a:["Las respuestas variarán."] },
+  { id:45, starred_6520:true, q:"What are the two major political parties in the United States?", a:["Democratic and Republican"], distractors:["four hundred thirty-five (435)","give a driver's license","judicial"], vi:"Hai đảng chính của Hoa Kỳ là gì?", vi_a:["Dân Chủ và Cộng Hòa"], es:"¿Cuáles son los dos principales partidos políticos de los Estados Unidos?", es_a:["Demócrata y Republicano"] },
   { id:46, q:"What is the political party of the President now?", a:["Visit uscis.gov/citizenship/testupdates for the political party of the President."], distractors:["Secretary of Housing and Urban Development","approve zoning and land use","Visit uscis.gov/citizenship/testupdates for the number of justices on the Supreme Court."], vi:"Đảng của Tổng Thống hiện tại là đảng nào?", vi_a:["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết thông tin về chính đảng của Tổng Thống Hoa Kỳ."], es:"¿Cuál es el partido político del Presidente actual?", es_a:["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el partido político al que pertenece el Presidente de Estados Unidos."] },
   { id:47, dynamic:true, officialField:"speaker", q:"What is the name of the Speaker of the House of Representatives now?", dynamic_note:"⚡ Answer must reflect the Speaker serving at time of your interview. Check uscis.gov/citizenship/testupdates.", vi:"Chủ Tịch Hạ Viện hiện thời tên gì?", vi_a:["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết tên của Chủ Tịch Hạ viện Dân Biểu Hoa Kỳ."], es:"¿Cómo se llama el Presidente actual de la Cámara de Representantes?", es_a:["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el nombre del Portavoz de la Cámara de Representantes."] },
   { id:48, q:"There are four amendments to the Constitution about who can vote. Describe one of them.", a:["Citizens eighteen (18) and older (can vote).","You don't have to pay (a poll tax) to vote.","Any citizen can vote. (Women and men can vote.)","A male citizen of any race (can vote)."], distractors:["Only landowners can vote.","Only people who served in the military can vote.","You must pass a literacy test to vote."], vi:"Có bốn tu chính án Hiến Pháp về việc ai có quyền bầu cử. Kể ra Một trong các thứ đó.", vi_a:["Công dân mười tám (18) tuổi và hơn (được đi bầu).","Không phải trả (thuế bầu cử) để được bầu.","Bất cứ công dân nào cũng được bầu (phụ nữ và nam giới đều được bầu).","Nam giới của bất cứ chủng tộc nào (cũng đều được bầu)."], es:"Existen cuatro enmiendas a la Constitución sobre quién puede votar. Describa una de ellas.", es_a:["Ciudadanos de dieciocho (18) años en adelante (pueden votar).","No se exige pagar un impuesto para votar (el impuesto para acudir a las urnas o \"poll tax\" en inglés).","Cualquier ciudadano puede votar. (Tanto mujeres como hombres pueden votar).","Un hombre ciudadano de cualquier raza (puede votar)."] },
-  { id:49, starred:true, q:"What is one responsibility that is only for United States citizens?", a:["serve on a jury","vote in a federal election"], distractors:["freedom of assembly","run for federal office","between eighteen (18) and twenty-six (26)"], vi:"Một trong các bổn phận chỉ dành riêng cho công dân Hoa Kỳ là gì?", vi_a:["phục vụ trong bồi thẩm đoàn","đi bầu trong bầu cử liên bang"], es:"¿Cuál es una responsabilidad que corresponde sólo a los ciudadanos de los Estados Unidos?", es_a:["prestar servicio en un jurado","votar en una elección federal"] },
+  { id:49, starred_6520:true, q:"What is one responsibility that is only for United States citizens?", a:["serve on a jury","vote in a federal election"], distractors:["freedom of assembly","run for federal office","between eighteen (18) and twenty-six (26)"], vi:"Một trong các bổn phận chỉ dành riêng cho công dân Hoa Kỳ là gì?", vi_a:["phục vụ trong bồi thẩm đoàn","đi bầu trong bầu cử liên bang"], es:"¿Cuál es una responsabilidad que corresponde sólo a los ciudadanos de los Estados Unidos?", es_a:["prestar servicio en un jurado","votar en una elección federal"] },
   { id:50, q:"Name one right only for United States citizens.", a:["vote in a federal election","run for federal office"], distractors:["defend the Constitution and laws of the United States","join a community group","call Senators and Representatives"], vi:"Cho biết một quyền của riêng công dân Hoa Kỳ.", vi_a:["tham gia bầu cử cấp liên bang","ứng cử chức vụ liên bang"], es:"¿Cuál es un derecho que pueden ejercer sólo los ciudadanos de los Estados Unidos?", es_a:["votar en una elección federal","postularse a un cargo político federal"] },
   { id:51, q:"What are two rights of everyone living in the United States?", a:["freedom of expression","freedom of speech","freedom of assembly","freedom to petition the government","freedom of religion","the right to bear arms"], distractors:["The right to vote in federal elections","The right to run for federal office","The right to a government job"], vi:"Cho biết hai quyền của mỗi người sống ở Hoa Kỳ?", vi_a:["tự do phát biểu ý kiến","tự do ngôn luận","tự do hội họp","tự do thỉnh nguyện chính quyền","tự do tín ngưỡng","quyền mang vũ khí tự vệ"], es:"¿Cuáles son dos derechos que pueden ejercer todas las personas que viven en los Estados Unidos?", es_a:["libertad de expresión","libertad de la palabra","libertad de reunión","libertad para peticionar al gobierno","libertad de religión","derecho a portar armas"] },
   { id:52, q:"What do we show loyalty to when we say the Pledge of Allegiance?", a:["the United States","the flag"], distractors:["The Constitution alone","The President","Our state government"], vi:"Khi nói Lời Tuyên Thệ Trung Thành (Pledge of Allegiance), chúng ta chứng tỏ sự trung thành với cái gì?", vi_a:["Hoa Kỳ","Lá cờ"], es:"¿A qué demostramos nuestra lealtad cuando decimos el Juramento de Lealtad (Pledge of Allegiance)?", es_a:["a los Estados Unidos","a la bandera"] },
   { id:53, q:"What is one promise you make when you become a United States citizen?", a:["give up loyalty to other countries","defend the Constitution and laws of the United States","obey the laws of the United States","serve in the U.S. military (if needed)","serve (do important work for) the nation (if needed)","be loyal to the United States"], distractors:["vote","freedom of assembly","give an elected official your opinion on an issue"], vi:"Khi trở thành công dân Hoa Kỳ, một trong những lời hứa của bạn là gì?", vi_a:["từ bỏ sự trung thành với các quốc gia khác","bảo vệ Hiến Pháp và luật lệ Hoa Kỳ","tuân hành luật lệ của Hoa Kỳ","phục vụ trong quân đội Hoa Kỳ (nếu cần)","phục vụ (công việc quan trọng cho) Hoa Kỳ (nếu cần)","trung thành với quốc gia Hoa Kỳ"], es:"¿Cuál es una promesa que usted hace cuando se convierte en ciudadano de los Estados Unidos?", es_a:["renunciar a la lealtad a otros países","defender la Constitución y las leyes de los Estados Unidos","obedecer las leyes de los Estados Unidos","prestar servicio en las Fuerzas Armadas de los Estados Unidos (de ser necesario)","prestar servicio a (realizar trabajo importante para) la nación (de ser necesario)","ser leal a los Estados Unidos"] },
-  { id:54, starred:true, q:"How old do citizens have to be to vote for President?", a:["eighteen (18) and older"], distractors:["the flag","freedom of speech","freedom of religion"], vi:"Công dân phải bao nhiêu tuổi mới được bầu Tổng Thống?", vi_a:["Mười Tám (18) và hơn"], es:"¿Cuántos años tienen que tener los ciudadanos para votar por el Presidente?", es_a:["dieciocho (18) años en adelante"] },
+  { id:54, starred_6520:true, q:"How old do citizens have to be to vote for President?", a:["eighteen (18) and older"], distractors:["the flag","freedom of speech","freedom of religion"], vi:"Công dân phải bao nhiêu tuổi mới được bầu Tổng Thống?", vi_a:["Mười Tám (18) và hơn"], es:"¿Cuántos años tienen que tener los ciudadanos para votar por el Presidente?", es_a:["dieciocho (18) años en adelante"] },
   { id:55, q:"What are two ways that Americans can participate in their democracy?", a:["vote","join a political party","help with a campaign","join a civic group","join a community group","give an elected official your opinion on an issue","call Senators and Representatives","publicly support or oppose an issue or policy","run for office","write to a newspaper"], distractors:["serve on a jury","the right to bear arms","eighteen (18) and older"], vi:"Có hai cách công dân Hoa Kỳ có thể tham dự vào nền dân chủ là các cách nào?", vi_a:["bầu cử","tham gia một đảng phái chính trị","tham dự vào một cuộc vận động tranh cử","tham dự vào một nhóm hoạt động công dân","tham dự vào một nhóm hoạt động cộng đồng","phát biểu ý kiến về một vấn đề với một vị dân cử","gọi điện thoại cho nghị sĩ và dân biểu","công khai ủng hộ hoặc phản đối một vấn đề hay chính sách nào đó","tranh cử","góp ý kiến trên một tờ báo"], es:"¿Cuáles son dos maneras mediante las cuales los ciudadanos americanos pueden participar en su democracia?", es_a:["votar","afiliarse a un partido político","ayudar en una campaña","unirse a un grupo cívico","unirse a un grupo comunitario","compartir su opinión acerca de un asunto con un oficial electo","llamar a los senadores y representantes","apoyar u oponerse públicamente a un asunto o política","postularse a un cargo político","enviar una carta o mensaje a un periódico"] },
-  { id:56, starred:true, q:"When is the last day you can send in federal income tax forms?", a:["April 15"], distractors:["call Senators and Representatives","serve on a jury","at age eighteen (18)"], vi:"Ngày cuối cùng có thể nạp mẫu khai thuế cho liên bang là?", vi_a:["15 Tháng Tư"], es:"¿Cuál es la fecha límite para enviar la declaración federal de impuestos sobre ingresos?", es_a:["el 15 de abril"] },
+  { id:56, starred_6520:true, q:"When is the last day you can send in federal income tax forms?", a:["April 15"], distractors:["call Senators and Representatives","serve on a jury","at age eighteen (18)"], vi:"Ngày cuối cùng có thể nạp mẫu khai thuế cho liên bang là?", vi_a:["15 Tháng Tư"], es:"¿Cuál es la fecha límite para enviar la declaración federal de impuestos sobre ingresos?", es_a:["el 15 de abril"] },
   { id:57, q:"When must all men register for the Selective Service?", a:["at age eighteen (18)","between eighteen (18) and twenty-six (26)"], distractors:["So they can vote","To get a job","To get a driver's license"], vi:"Khi nào tất cả nam giới phải ghi tên cho Sở Quân Vụ (Selective Service)?", vi_a:["ở tuổi mười tám (18)","ở giữa tuổi mười tám (18) và hai mươi sáu (26)"], es:"¿Cuándo deben inscribirse todos los hombres en el Servicio Selectivo?", es_a:["a la edad de dieciocho (18) años","entre los dieciocho (18) y veintiséis (26) años de edad"] },
   { id:58, q:"What is one reason colonists came to America?", a:["freedom","political liberty","religious freedom","economic opportunity","practice their religion","escape persecution"], distractors:["To join the British military","To collect taxes","To found a monarchy"], vi:"Một trong những lý do khiến người di dân thời thuộc địa tới Mỹ Châu là gì?", vi_a:["tự do","tự do chính trị","tự do tôn giáo","cơ hội kinh tế","hành xử tôn giáo của mình","tránh sự áp bức"], es:"¿Cuál es una razón por la que los colonos vinieron a América?", es_a:["libertad","libertad política","libertad religiosa","oportunidad económica","para practicar su religión","para huir de la persecución"] },
   { id:59, q:"Who lived in America before the Europeans arrived?", a:["American Indians","Native Americans"], distractors:["The British","The French","The Vikings only"], vi:"Những ai sống tại Mỹ trước khi người Âu Châu tới?", vi_a:["người da đỏ Mỹ Châu","thổ dân Mỹ Châu"], es:"¿Quiénes vivían en lo que hoy conocemos como los Estados Unidos antes de la llegada de los europeos?", es_a:["Indios americanos","Nativos americanos"] },
@@ -1783,22 +1891,22 @@ const QUESTIONS_2008 = [
   { id:67, q:"The Federalist Papers supported the passage of the U.S. Constitution. Name one of the writers.", a:["(James) Madison","(Alexander) Hamilton","(John) Jay","Publius"], distractors:["Thomas Jefferson","George Washington","Benjamin Franklin"], vi:"Các bài tham luận gọi là Federalist Papers có mục đích hỗ trợ việc thông qua Hiến Pháp Hoa Kỳ. Kể tên một trong những người viết tham luận.", vi_a:["(James) Madison","(Alexander) Hamilton","(John) Jay","Publius"], es:"Los escritos conocidos como \"Los Documentos Federalistas\" respaldaron la aprobación de la Constitución de los Estados Unidos. Nombre uno de sus autores.", es_a:["(James) Madison","(Alexander) Hamilton","(John) Jay","Publius"] },
   { id:68, q:"What is one thing Benjamin Franklin is famous for?", a:["U.S. diplomat","oldest member of the Constitutional Convention","first Postmaster General of the United States","writer of \"Poor Richard's Almanac\"","started the first free libraries"], distractors:["Wrote the Constitution by himself","Led the Continental Army","Was the first President"], vi:"Một việc gì làm Benjamin Franklin nổi tiếng?", vi_a:["nhà ngoại giao Hoa Kỳ","thành viên già nhất của Đại Hội Lập Hiến","Tổng Giám Đốc Bưu Điện đầu tiên của Hoa Kỳ","người viết cuốn lịch \"Poor Richard's Almanac\"","khởi công xây các thư viện miễn phí đầu tiên của Hoa Kỳ"], es:"Mencione una razón por la que es famoso Benjamin Franklin.", es_a:["diplomático americano","el miembro de mayor edad de la Convención Constitucional","primer Director General de Correos de Estados Unidos","autor de \"Poor Richard's Almanac\" (Almanaque del Pobre Richard)","fundó las primeras bibliotecas gratuitas"] },
   { id:69, q:"Who is the \"Father of Our Country\"?", a:["(George) Washington"], distractors:["Virginia","(Alexander) Hamilton","The Founding Fathers wrote the Constitution."], vi:"Ai được gọi là cha đẻ của nước Mỹ?", vi_a:["(George) Washington"], es:"¿Quién se conoce como el \"Padre de Nuestra Nación\"?", es_a:["(George) Washington"] },
-  { id:70, starred:true, q:"Who was the first President?", a:["(George) Washington"], distractors:["escape persecution","Delaware","first Postmaster General of the United States"], vi:"Ai là Tổng Thống đầu tiên?", vi_a:["(George) Washington"], es:"¿Quién fue el primer Presidente?", es_a:["(George) Washington"] },
+  { id:70, starred_6520:true, q:"Who was the first President?", a:["(George) Washington"], distractors:["escape persecution","Delaware","first Postmaster General of the United States"], vi:"Ai là Tổng Thống đầu tiên?", vi_a:["(George) Washington"], es:"¿Quién fue el primer Presidente?", es_a:["(George) Washington"] },
   { id:71, q:"What territory did the United States buy from France in 1803?", a:["the Louisiana Territory","Louisiana"], distractors:["Alaska","Florida","Texas"], vi:"Hoa Kỳ mua lãnh thổ nào của Pháp vào năm 1803?", vi_a:["Lãnh Thổ Louisiana","Louisiana"], es:"¿Qué territorio compró Estados Unidos a Francia en 1803?", es_a:["el territorio de Louisiana","Louisiana"] },
   { id:72, q:"Name one war fought by the United States in the 1800s.", a:["War of 1812","Mexican-American War","Civil War","Spanish-American War"], distractors:["World War I","American Revolution","slavery"], vi:"Nói tên một trong những cuộc chiến Hoa Kỳ tham dự thời 1800.", vi_a:["Chiến tranh 1812","Chiến tranh Hoa Kỳ-Mễ-Tây-Cơ (Mexico)","Nội chiến","Chiến tranh Hoa Kỳ-Tây-Ban-Nha"], es:"Mencione una guerra en la que peleó los Estados Unidos durante los años 1800.", es_a:["la Guerra de 1812","la Guerra entre México y los Estados Unidos","la Guerra Civil","la Guerra Hispano-Estadounidense (Hispano-americana)"] },
   { id:73, q:"Name the U.S. war between the North and the South.", a:["the Civil War","the War between the States"], distractors:["The Revolutionary War","World War II","The War of 1812"], vi:"Tên gọi của cuộc chiến trên đất Hoa Kỳ giữa miền Bắc và miền Nam là gì.", vi_a:["Nội chiến","Chiến tranh giữa các Tiểu Bang"], es:"Dé el nombre de la guerra entre el Norte y el Sur de los Estados Unidos.", es_a:["la Guerra Civil","la Guerra entre los Estados"] },
   { id:74, q:"Name one problem that led to the Civil War.", a:["slavery","economic reasons","states' rights"], distractors:["freed the slaves (Emancipation Proclamation)","Spanish-American War","freed slaves in the Confederate states"], vi:"Cho biết một vấn đề đưa tới cuộc nội chiến.", vi_a:["vấn đề nô lệ","các vấn đề kinh tế","quyền của các tiểu bang"], es:"Mencione un problema que condujo a la Guerra Civil.", es_a:["esclavitud","razones económicas","derechos de los estados"] },
-  { id:75, starred:true, q:"What was one important thing that Abraham Lincoln did?", a:["freed the slaves (Emancipation Proclamation)","saved (or preserved) the Union","led the United States during the Civil War"], distractors:["First president of the United States","Wrote the Constitution","Founded the Federalist Party"], vi:"Một điều quan trọng mà Abraham Lincoln làm là gì?", vi_a:["giải phóng nô lệ (Tuyên Ngôn Giải Phóng)","giữ gìn (hoặc bảo tồn) đoàn kết Quốc Gia","lãnh đạo Hoa Kỳ trong Cuộc Nội Chiến"], es:"¿Cuál fue una cosa importante que hizo Abraham Lincoln?", es_a:["liberó a los esclavos (Proclamación de la Emancipación)","salvó (o preservó) la Unión","presidió los Estados Unidos durante la Guerra Civil"] },
+  { id:75, starred_6520:true, q:"What was one important thing that Abraham Lincoln did?", a:["freed the slaves (Emancipation Proclamation)","saved (or preserved) the Union","led the United States during the Civil War"], distractors:["First president of the United States","Wrote the Constitution","Founded the Federalist Party"], vi:"Một điều quan trọng mà Abraham Lincoln làm là gì?", vi_a:["giải phóng nô lệ (Tuyên Ngôn Giải Phóng)","giữ gìn (hoặc bảo tồn) đoàn kết Quốc Gia","lãnh đạo Hoa Kỳ trong Cuộc Nội Chiến"], es:"¿Cuál fue una cosa importante que hizo Abraham Lincoln?", es_a:["liberó a los esclavos (Proclamación de la Emancipación)","salvó (o preservó) la Unión","presidió los Estados Unidos durante la Guerra Civil"] },
   { id:76, q:"What did the Emancipation Proclamation do?", a:["freed the slaves","freed slaves in the Confederacy","freed slaves in the Confederate states","freed slaves in most Southern states"], distractors:["Ended World War I","Established the right to vote","Founded the Republican Party"], vi:"Tuyên Ngôn Giải Phóng làm gì?", vi_a:["giải phóng nô lệ","giải phóng nô lệ thuộc tập hợp (nhóm) các tiểu bang ly khai miền Nam","giải phóng nô lệ ở các tiểu bang miền Nam","giải phóng nô lệ ở đa số các tiểu bang miền Nam"], es:"¿Qué hizo la Proclamación de la Emancipación?", es_a:["liberó a los esclavos","liberó a los esclavos de la Confederación","liberó a los esclavos en los estados de la Confederación","liberó a los esclavos en la mayoría de los estados del sur"] },
   { id:77, q:"What did Susan B. Anthony do?", a:["fought for women's rights","fought for civil rights"], distractors:["led the United States during the Civil War","Spanish-American War","freed slaves in most Southern states"], vi:"Bà Susan B. Anthony làm gì?", vi_a:["tranh đấu cho quyền phụ nữ","tranh đấu cho dân quyền"], es:"¿Qué hizo Susan B. Anthony?", es_a:["luchó por los derechos de la mujer","luchó por los derechos civiles"] },
-  { id:78, starred:true, q:"Name one war fought by the United States in the 1900s.", a:["World War I","World War II","Korean War","Vietnam War","(Persian) Gulf War"], distractors:["The Civil War","The American Revolution","The Mexican-American War"], vi:"Cho biết một cuộc chiến mà Hoa Kỳ tham dự vào thập niên 1900.", vi_a:["Thế Chiến Thứ Nhất","Thế Chiến Thứ Hai","Chiến Tranh Cao Ly (Triều Tiên)","Chiến Tranh Việt Nam","Chiến tranh Vùng Vịnh (Ba Tư)"], es:"Mencione una guerra durante los años 1900 en la que peleó los Estados Unidos.", es_a:["la Primera Guerra Mundial","la Segunda Guerra Mundial","la Guerra de Corea","la Guerra de Vietnam","la Guerra del Golfo (Pérsico)"] },
+  { id:78, starred_6520:true, q:"Name one war fought by the United States in the 1900s.", a:["World War I","World War II","Korean War","Vietnam War","(Persian) Gulf War"], distractors:["The Civil War","The American Revolution","The Mexican-American War"], vi:"Cho biết một cuộc chiến mà Hoa Kỳ tham dự vào thập niên 1900.", vi_a:["Thế Chiến Thứ Nhất","Thế Chiến Thứ Hai","Chiến Tranh Cao Ly (Triều Tiên)","Chiến Tranh Việt Nam","Chiến tranh Vùng Vịnh (Ba Tư)"], es:"Mencione una guerra durante los años 1900 en la que peleó los Estados Unidos.", es_a:["la Primera Guerra Mundial","la Segunda Guerra Mundial","la Guerra de Corea","la Guerra de Vietnam","la Guerra del Golfo (Pérsico)"] },
   { id:79, q:"Who was President during World War I?", a:["(Woodrow) Wilson"], distractors:["Vietnam War","Seminole","World War I"], vi:"Ai là Tổng Thống trong Thế Chiến Thứ Nhất?", vi_a:["(Woodrow) Wilson"], es:"¿Quién era el presidente durante la Primera Guerra Mundial?", es_a:["(Woodrow) Wilson"] },
   { id:80, q:"Who was President during the Great Depression and World War II?", a:["(Franklin) Roosevelt"], distractors:["Herbert Hoover","Harry Truman","Woodrow Wilson"], vi:"Ai là Tổng Thống trong thời kỳ Khủng Hoảng Kinh Tế và Thế Chiến Thứ Hai?", vi_a:["(Franklin) Roosevelt"], es:"¿Quién era presidente durante la Gran Depresión y la Segunda Guerra Mundial?", es_a:["(Franklin) Roosevelt"] },
   { id:81, q:"Who did the United States fight in World War II?", a:["Japan, Germany, and Italy"], distractors:["Vietnam War","Sioux","Communism"], vi:"Trong Thế Chiến Thứ Hai, Hoa Kỳ chiến đấu chống các nước nào?", vi_a:["Nhật Bản, Đức và Ý"], es:"¿Contra qué países peleó Estados Unidos en la Segunda Guerra Mundial?", es_a:["Japón, Alemania e Italia"] },
   { id:82, q:"Before he was President, Eisenhower was a general. What war was he in?", a:["World War II"], distractors:["First President of the United States","Led the Continental Army","Wrote the Declaration of Independence"], vi:"Trước khi trở thành Tổng Thống, Eisenhower là tướng lãnh. Ông ta đánh trận nào?", vi_a:["Thế Chiến Thứ Hai"], es:"Antes de ser presidente, Eisenhower era general. ¿En qué guerra participó?", es_a:["Segunda Guerra Mundial"] },
   { id:83, q:"During the Cold War, what was the main concern of the United States?", a:["Communism"], distractors:["Fascism","Climate change","Inflation"], vi:"Trong thời kỳ Chiến Tranh Lạnh, quan tâm chính của Hoa Kỳ là gì?", vi_a:["Chủ Nghĩa Cộng Sản"], es:"Durante la Guerra Fría, ¿cuál era la principal preocupación de los Estados Unidos?", es_a:["Comunismo"] },
   { id:84, q:"What movement tried to end racial discrimination?", a:["civil rights (movement)"], distractors:["Huron","Arawak","Navajo"], vi:"Phong trào nào tìm cách chấm dứt sự phân biệt chủng tộc?", vi_a:["(phong trào) dân quyền"], es:"¿Qué movimiento trató de poner fin a la discriminación racial?", es_a:["(el movimiento de) derechos civiles"] },
-  { id:85, starred:true, q:"What did Martin Luther King, Jr. do?", a:["fought for civil rights","worked for equality for all Americans"], distractors:["Was the first African American President","Wrote the Constitution","Invented the telephone"], vi:"Martin Luther King, Jr. đã làm gì?", vi_a:["tranh đấu cho dân quyền","hoạt động nhằm mang lại bình đẳng cho mọi người Mỹ"], es:"¿Qué hizo Martin Luther King, Jr.?", es_a:["luchó por los derechos civiles","trabajó por la igualdad de todos los ciudadanos americanos"] },
+  { id:85, starred_6520:true, q:"What did Martin Luther King, Jr. do?", a:["fought for civil rights","worked for equality for all Americans"], distractors:["Was the first African American President","Wrote the Constitution","Invented the telephone"], vi:"Martin Luther King, Jr. đã làm gì?", vi_a:["tranh đấu cho dân quyền","hoạt động nhằm mang lại bình đẳng cho mọi người Mỹ"], es:"¿Qué hizo Martin Luther King, Jr.?", es_a:["luchó por los derechos civiles","trabajó por la igualdad de todos los ciudadanos americanos"] },
   { id:86, q:"What major event happened on September 11, 2001, in the United States?", a:["Terrorists attacked the United States."], distractors:["The Pearl Harbor attack","The Boston Marathon bombing","The fall of the Berlin Wall"], vi:"Biến cố lớn lao nào xảy ra vào ngày 11 tháng 9 năm 2001 tại Hoa Kỳ?", vi_a:["Bọn khủng bố tấn công Hoa Kỳ."], es:"¿Qué suceso de gran magnitud ocurrió el 11 de septiembre de 2001 en los Estados Unidos?", es_a:["Terroristas atacaron los Estados Unidos."] },
   { id:87, q:"Name one American Indian tribe in the United States.", a:["Cherokee","Navajo","Sioux","Chippewa","Choctaw","Pueblo","Apache","Iroquois","Creek","Blackfeet","Seminole","Cheyenne","Arawak","Shawnee","Mohegan","Huron","Oneida","Lakota","Crow","Teton","Hopi","Inuit"], distractors:["Aztec","Inca","Maya"], vi:"Kể tên một bộ lạc da đỏ tại Mỹ.", vi_a:["Cherokee","Navajo","Sioux","Chippewa","Choctaw","Pueblo","Apache","Iroquois","Creek","Blackfeet","Seminole","Cheyenne","Arawak","Shawnee","Mohegan","Huron","Oneida","Lakota","Crow","Teton","Hopi","Inuit"], es:"Mencione una tribu de indios americanos en los Estados Unidos.", es_a:["Cherokee","Navajo","Sioux","Chippewa","Choctaw","Pueblo","Apache","Iroquois","Creek","Blackfeet","Seminole","Cheyenne","Arawak","Shawnee","Mohegan","Huron","Oneida","Lakota","Crow","Teton","Hopi","Inuit"] },
   { id:88, q:"Name one of the two longest rivers in the United States.", a:["Missouri (River)","Mississippi (River)"], distractors:["Liberty Island","Puerto Rico","Northern Mariana Islands"], vi:"Cho biết một trong hai con sông dài nhất ở Hoa Kỳ.", vi_a:["(Sông) Missouri","(Sông) Mississippi"], es:"Mencione uno de los dos ríos más largos en los Estados Unidos.", es_a:["(el Río) Missouri","(el Río) Mississippi"] },
@@ -1807,19 +1915,20 @@ const QUESTIONS_2008 = [
   { id:91, q:"Name one U.S. territory.", a:["Puerto Rico","U.S. Virgin Islands","American Samoa","Northern Mariana Islands","Guam"], distractors:["Washington, D.C.","New York (Harbor)","Missouri (River)"], vi:"Cho biết một lãnh thổ hải ngoại của Hoa Kỳ.", vi_a:["Puerto Rico","Quần Đảo Virgin","Đảo Samoa","Quần Đảo Bắc Mariana","Đảo Guam"], es:"Dé el nombre de un territorio de los Estados Unidos.", es_a:["Puerto Rico","Islas Vírgenes de Estados Unidos","Samoa Estadounidense","Islas Marianas del Norte","Guam"] },
   { id:92, q:"Name one state that borders Canada.", a:["Maine","New Hampshire","Vermont","New York","Pennsylvania","Ohio","Michigan","Minnesota","North Dakota","Montana","Idaho","Washington","Alaska"], distractors:["Atlantic (Ocean)","American Samoa","U.S. Virgin Islands"], vi:"Cho biết một trong những tiểu bang ráp ranh Gia-Nã-Đại.", vi_a:["Maine","New Hampshire","Vermont","New York","Pennsylvania","Ohio","Michigan","Minnesota","North Dakota","Montana","Idaho","Washington","Alaska"], es:"Mencione un estado que tiene frontera con Canadá.", es_a:["Maine","Nueva Hampshire","Vermont","Nueva York","Pensilvania","Ohio","Michigan","Minnesota","Dakota del Norte","Montana","Idaho","Washington","Alaska"] },
   { id:93, q:"Name one state that borders Mexico.", a:["California","Arizona","New Mexico","Texas"], distractors:["Vermont","Missouri (River)","U.S. Virgin Islands"], vi:"Cho biết một trong những tiểu bang ráp ranh Mễ-Tây-Cơ.", vi_a:["California","Arizona","New Mexico","Texas"], es:"Mencione un estado que tiene frontera con México.", es_a:["California","Arizona","Nuevo México","Texas"] },
-  { id:94, starred:true, q:"What is the capital of the United States?", a:["Washington, D.C."], distractors:["New York City","Philadelphia","Boston"], vi:"Thủ đô của Hoa Kỳ tên gì?", vi_a:["Washington, D.C."], es:"¿Cuál es la capital de los Estados Unidos?", es_a:["Washington, D.C."] },
-  { id:95, starred:true, q:"Where is the Statue of Liberty?", a:["New York (Harbor)","Liberty Island"], distractors:["Washington, D.C.","San Francisco Bay","Boston Harbor"], vi:"Tượng Nữ Thần Tự Do ở đâu?", vi_a:["(Hải Cảng) Nữu Ước","Đảo Liberty"], es:"¿Dónde está la Estatua de la Libertad?", es_a:["(el puerto de) Nueva York","Liberty Island."] },
+  { id:94, starred_6520:true, q:"What is the capital of the United States?", a:["Washington, D.C."], distractors:["New York City","Philadelphia","Boston"], vi:"Thủ đô của Hoa Kỳ tên gì?", vi_a:["Washington, D.C."], es:"¿Cuál es la capital de los Estados Unidos?", es_a:["Washington, D.C."] },
+  { id:95, starred_6520:true, q:"Where is the Statue of Liberty?", a:["New York (Harbor)","Liberty Island"], distractors:["Washington, D.C.","San Francisco Bay","Boston Harbor"], vi:"Tượng Nữ Thần Tự Do ở đâu?", vi_a:["(Hải Cảng) Nữu Ước","Đảo Liberty"], es:"¿Dónde está la Estatua de la Libertad?", es_a:["(el puerto de) Nueva York","Liberty Island."] },
   { id:96, q:"Why does the flag have 13 stripes?", a:["because there were 13 original colonies","because the stripes represent the original colonies"], distractors:["One stripe for each branch of government","One for each amendment","Each stripe represents a state"], vi:"Tại sao lá cờ Hoa Kỳ có 13 lằn gạch?", vi_a:["bởi vì đã có 13 thuộc địa nguyên thủy","bởi vì các lằn này tượng trưng cho 13 thuộc địa nguyên thủy"], es:"¿Por qué hay 13 franjas en la bandera?", es_a:["porque representan las 13 colonias originales","porque las franjas representan las colonias originales"] },
-  { id:97, starred:true, q:"Why does the flag have 50 stars?", a:["because there is one star for each state","because each star represents a state","because there are 50 states"], distractors:["One for each original colony","One for each amendment to the Bill of Rights","One for each President"], vi:"Tại sao lá cờ Hoa Kỳ có 50 ngôi sao?", vi_a:["bởi vì mỗi tiểu bang có một ngôi sao","bởi vì mỗi ngôi sao tượng trưng cho một tiểu bang","bởi vì có 50 tiểu bang"], es:"¿Por qué hay 50 estrellas en la bandera?", es_a:["porque hay una estrella por cada estado","porque cada estrella representa un estado","porque hay 50 estados"] },
+  { id:97, starred_6520:true, q:"Why does the flag have 50 stars?", a:["because there is one star for each state","because each star represents a state","because there are 50 states"], distractors:["One for each original colony","One for each amendment to the Bill of Rights","One for each President"], vi:"Tại sao lá cờ Hoa Kỳ có 50 ngôi sao?", vi_a:["bởi vì mỗi tiểu bang có một ngôi sao","bởi vì mỗi ngôi sao tượng trưng cho một tiểu bang","bởi vì có 50 tiểu bang"], es:"¿Por qué hay 50 estrellas en la bandera?", es_a:["porque hay una estrella por cada estado","porque cada estrella representa un estado","porque hay 50 estados"] },
   { id:98, q:"What is the name of the national anthem?", a:["The Star-Spangled Banner"], distractors:["America the Beautiful","God Bless America","My Country, Tis of Thee"], vi:"Tựa của bài quốc ca Hoa Kỳ là gì?", vi_a:["The Star-Spangled Banner"], es:"¿Cómo se llama el himno nacional?", es_a:["The Star-Spangled Banner"] },
-  { id:99, starred:true, q:"When do we celebrate Independence Day?", a:["July 4"], distractors:["Labor Day","Thanksgiving","Christmas"], vi:"Ngày nào là ngày Lễ Độc Lập?", vi_a:["4 Tháng Bẩy"], es:"¿Cuándo celebramos el Día de la Independencia?", es_a:["el 4 de julio"] },
+  { id:99, starred_6520:true, q:"When do we celebrate Independence Day?", a:["July 4"], distractors:["Labor Day","Thanksgiving","Christmas"], vi:"Ngày nào là ngày Lễ Độc Lập?", vi_a:["4 Tháng Bẩy"], es:"¿Cuándo celebramos el Día de la Independencia?", es_a:["el 4 de julio"] },
   { id:100, q:"Name two national U.S. holidays.", a:["New Year's Day","Martin Luther King, Jr. Day","Presidents' Day","Memorial Day","Independence Day","Labor Day","Columbus Day","Veterans Day","Thanksgiving","Christmas"], distractors:["Black Friday","Valentine's Day","Halloween"], vi:"Cho biết hai ngày lễ quốc gia của Hoa Kỳ.", vi_a:["Tết Tây","Ngày Sinh của Martin Luther King, Jr.","Ngày Các Tổng Thống","Lễ Chiến Sĩ Trận Vong (Memorial Day)","Lễ Độc Lập (Independence Day)","Lễ Lao Động (Labor Day)","Ngày Tưởng Niệm Columbus","Ngày Cựu Chiến Binh (Veterans Day)","Lễ Tạ Ơn (Thanksgiving)","Lễ Giáng Sinh","Ngày Juneteenth"], es:"Mencione dos días feriados nacionales de los Estados Unidos.", es_a:["el Día de Año Nuevo","el Día de Martin Luther King, Jr.","el Día de los Presidentes","el Día de la Recordación","el Día de la Independencia","el Día del Trabajo","el Día de la Raza (Cristóbal Colón)","el Día de los Veteranos","el Día de Acción de Gracias","el Día de Navidad"] }
 ];
 
 const QUESTIONS = {
   "2025": QUESTIONS_2025.filter(q => !q.excluded),
   "2008": QUESTIONS_2008.filter(q => !q.excluded),
-  "6520": QUESTIONS_2025.filter(q => q.starred && !q.excluded),
+  "6520_2025": QUESTIONS_2025.filter(q => q.starred_6520 && !q.excluded),
+  "6520_2008": QUESTIONS_2008.filter(q => q.starred_6520 && !q.excluded),
   "5020": QUESTIONS_2025.filter(q => !q.excluded), // same bank as 2025; English exemption only
   "5515": QUESTIONS_2025.filter(q => !q.excluded), // same bank as 2025; English exemption only
 };
@@ -1894,15 +2003,16 @@ const DATA_AS_OF = "2026-01";
 let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null };
 
 const ROUTE_CONFIG = {
-  "2025": { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
-  "2008": { passThreshold:6,  failThreshold:5,  askCount:10, label:"2008 Test · 100 Questions" },
-  "6520": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 Exemption · 20 Questions" },
-  "5020": { passThreshold:12, failThreshold:9,  askCount:20, label:"50/20 Practice · Native Language" },
-  "5515": { passThreshold:12, failThreshold:9,  askCount:20, label:"55/15 Practice · Native Language" },
+  "2025":      { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
+  "2008":      { passThreshold:6,  failThreshold:5,  askCount:10, label:"2008 Test · 100 Questions" },
+  "6520_2025": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 · 2025 Starred Subset" },
+  "6520_2008": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 · 2008 Starred Subset" },
+  "5020":      { passThreshold:12, failThreshold:9,  askCount:20, label:"50/20 Practice · Native Language" },
+  "5515":      { passThreshold:12, failThreshold:9,  askCount:20, label:"55/15 Practice · Native Language" },
 };
 
 // Routes where the civics test is taken in the applicant's native language.
-const EXEMPTION_ROUTES = new Set(["5020","5515","6520"]);
+const EXEMPTION_ROUTES = new Set(["5020","5515","6520_2025","6520_2008"]);
 
 // Display name + BCP-47 language tag for Web Speech TTS.
 const LANG_META = {
@@ -1921,9 +2031,50 @@ function showScreen(id) {
 }
 
 function selectRoute(el) {
-  document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  state.route = el.dataset.route;
+  const route = el.dataset.route;
+  // Meta-route: 65/20 parent card just toggles the filing-date sub-selector.
+  // The actual route gets set when the user picks one of the sub-options.
+  if (route === '6520_meta') {
+    const sub = document.getElementById('subselect-65');
+    const wasExpanded = sub.classList.contains('expanded');
+    document.querySelectorAll('.route-card').forEach(c => {
+      c.classList.remove('selected');
+      c.classList.remove('meta-active');
+    });
+    document.querySelectorAll('.route-suboption').forEach(c => c.classList.remove('selected'));
+    if (wasExpanded) {
+      sub.classList.remove('expanded');
+      sub.setAttribute('aria-hidden', 'true');
+      state.route = null;
+    } else {
+      sub.classList.add('expanded');
+      sub.setAttribute('aria-hidden', 'false');
+      el.classList.add('meta-active');
+      state.route = null;  // not chosen yet — wait for sub-option click
+    }
+    applyLangSectionMode();
+    checkStartEnabled();
+    return;
+  }
+  // Normal selection: clear all selection markers and apply this one.
+  document.querySelectorAll('.route-card').forEach(c => {
+    c.classList.remove('selected');
+    c.classList.remove('meta-active');
+  });
+  document.querySelectorAll('.route-suboption').forEach(c => c.classList.remove('selected'));
+  if (el.classList.contains('route-suboption')) {
+    // Keep the parent 65/20 card visually engaged and the sub-selector open.
+    el.classList.add('selected');
+    const parent = document.querySelector('.route-card[data-route="6520_meta"]');
+    if (parent) parent.classList.add('meta-active');
+    document.getElementById('subselect-65').classList.add('expanded');
+  } else {
+    el.classList.add('selected');
+    // Any other route was picked → collapse the 65/20 sub-selector.
+    const sub = document.getElementById('subselect-65');
+    if (sub) { sub.classList.remove('expanded'); sub.setAttribute('aria-hidden','true'); }
+  }
+  state.route = route;
   applyLangSectionMode();
   checkStartEnabled();
 }
@@ -2073,18 +2224,27 @@ function renderQuestion() {
   const tq = getT(q,'q');
 
   // On exemption routes with a non-English language, show the native-language
-  // question prominently with English as a secondary line. When the translation
-  // for this question is missing, flag it so the user knows it's English-only.
+  // question prominently with English as a secondary line. Suggested (non-
+  // official) translations get a small "(Dịch gợi ý)" / "(Traducción sugerida)"
+  // pill next to the text so the user knows it's a hint, not from USCIS.
   const isExempt = EXEMPTION_ROUTES.has(state.route);
   const nativeMode = isExempt && state.lang !== 'en';
   const langName = (LANG_META[state.lang] || { name: state.lang }).name;
+  const suggested = (state.lang === 'vi' && q.vi_suggested)
+                 || (state.lang === 'es' && q.es_suggested);
+  const hintLabel = state.lang === 'vi' ? 'Dịch gợi ý'
+                  : state.lang === 'es' ? 'Traducción sugerida' : '';
+  const hintPill = suggested && hintLabel
+    ? `<span class="trans-hint">${escapeHtml(hintLabel)}</span>` : '';
   let questionTextBlock;
   if (nativeMode) {
     if (tq) {
       questionTextBlock = `
-        <div class="q-text-native">${escapeHtml(tq)}</div>
+        <div class="q-text-native">${escapeHtml(tq)}${hintPill}</div>
         <div class="q-text-en-secondary"><span class="en-label">EN</span>${escapeHtml(q.q)}</div>`;
     } else {
+      // No translation available at all — we should not hit this often now that
+      // all 128 2025 questions have at least a suggested translation.
       questionTextBlock = `
         <div class="translation-pending-banner">Translation to ${escapeHtml(langName)} coming soon — showing English for now.</div>
         <div class="q-text-en-fallback"><span class="en-tag">EN</span>${escapeHtml(q.q)}</div>`;
@@ -2092,7 +2252,7 @@ function renderQuestion() {
   } else {
     questionTextBlock = `
       <div class="q-text">${escapeHtml(q.q)}</div>
-      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}</div>` : ''}`;
+      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}${hintPill}</div>` : ''}`;
   }
 
   document.getElementById('question-area').innerHTML = `
@@ -2151,8 +2311,14 @@ function selectAnswer(el, chosen) {
   const taText = Array.isArray(ta) ? ta.join(' / ') : ta;
   const nativeMode = EXEMPTION_ROUTES.has(state.route) && state.lang !== 'en';
   const langName = (LANG_META[state.lang] || { name: state.lang }).name;
+  const suggested = (state.lang === 'vi' && q.vi_suggested)
+                 || (state.lang === 'es' && q.es_suggested);
+  const hintLabel = state.lang === 'vi' ? 'Dịch gợi ý'
+                  : state.lang === 'es' ? 'Traducción sugerida' : '';
+  const hintPill = suggested && hintLabel
+    ? `<span class="trans-hint">${escapeHtml(hintLabel)}</span>` : '';
   let translationLine = '';
-  if (taText) translationLine = `<br><em>${escapeHtml(taText)}</em>`;
+  if (taText) translationLine = `<br><em>${escapeHtml(taText)}</em>${hintPill}`;
   else if (nativeMode && !isCorrect) translationLine = `<br><span class="translation-pending">Translation to ${escapeHtml(langName)} coming soon</span>`;
 
   document.getElementById('feedback-area').innerHTML = `

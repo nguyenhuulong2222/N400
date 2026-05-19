@@ -31,15 +31,18 @@ Three screens, swapped via the `.active` class:
 
 State lives in a single `state` object. `ROUTE_CONFIG` holds per-route thresholds:
 
-| Route | Pool (claimed) | Asked | Pass | Fail | Notes |
-|-------|----------------|-------|------|------|-------|
-| 2025  | 128            | 20    | 12   | 9    | Standard 2025 civics test |
-| 2008  | 100            | 10    | 6    | 5    | Pre-Oct-2025 applicants — real 2008 bank from USCIS PDF |
-| 65/20 | 20             | 10    | 6    | 5    | Age 65+, 20yr LPR — starred subset |
-| 50/20 | 128            | 20    | 12   | 9    | Age 50+, 20yr LPR — English exempt only |
-| 55/15 | 128            | 20    | 12   | 9    | Age 55+, 15yr LPR — English exempt only |
+| Route        | Pool | Asked | Pass | Fail | Notes |
+|--------------|------|-------|------|------|-------|
+| `2025`       | 128  | 20    | 12   | 9    | Standard 2025 civics test |
+| `2008`       | 100  | 10    | 6    | 5    | Pre-Oct-2025 applicants — real 2008 bank from USCIS PDF |
+| `6520_2025`  | 20   | 10    | 6    | 5    | Age 65+, 20yr LPR — 2025 starred subset (filed on/after Oct 20, 2025) |
+| `6520_2008`  | 20   | 10    | 6    | 5    | Age 65+, 20yr LPR — 2008 starred subset (filed before Oct 20, 2025) |
+| `5020`       | 128  | 20    | 12   | 9    | Age 50+, 20yr LPR — English exempt only |
+| `5515`       | 128  | 20    | 12   | 9    | Age 55+, 15yr LPR — English exempt only |
 
-`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). `QUESTIONS["6520"]` is the 20 questions with `starred:true` (the USCIS ★ subset for 65/20). `QUESTIONS["5020"]` and `QUESTIONS["5515"]` reuse the full 2025 bank — the 50/20 and 55/15 exemptions waive only the English requirement, not the civics test itself (the user simply answers in their native language with their own interpreter). `QUESTIONS_2008` is the real 100-question 2008 USCIS civics bank with its own starred subset, dynamic-official questions, state-dependent questions, and vi/es translations (full coverage from the matching 2008 USCIS multilingual PDFs).
+`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). The two 65/20 routes filter their respective banks by the `starred_6520:true` marker that USCIS uses to designate the starred subset for each test version. `QUESTIONS["5020"]` and `QUESTIONS["5515"]` reuse the full 2025 bank — the 50/20 and 55/15 exemptions waive only the English requirement, not the civics test itself (the user simply answers in their native language with their own interpreter). `QUESTIONS_2008` is the real 100-question 2008 USCIS civics bank with its own starred subset, dynamic-official questions, state-dependent questions, and vi/es translations.
+
+The 2008 USCIS multilingual PDFs cover only 100 questions, so the 2025 bank picks up vi/es translations for ~61 questions where the 2008 and 2025 wording line up. The remaining ~67 questions in the 2025 bank carry suggested (unofficial) translations marked with `vi_suggested:true` / `es_suggested:true` — the UI shows a small "Dịch gợi ý" / "Traducción sugerida" pill next to those so the user knows they aren't from USCIS.
 
 ## Question record shape
 
@@ -50,8 +53,8 @@ State lives in a single `state` object. `ROUTE_CONFIG` holds per-route threshold
   a: ["accepted answer 1", "accepted answer 2", ...],   // any one accepts; omitted for stateField/dynamic
   distractors: ["wrong 1", "wrong 2", "wrong 3"],       // 3 used per render; omitted for stateField (generated)
 
-  // 65/20 subset marker:
-  starred: true,
+  // 65/20 subset marker — USCIS's "★" set per test version:
+  starred_6520: true,
 
   // Time-sensitive federal officials. resolveQuestion() looks up CURRENT_OFFICIALS[officialField]:
   dynamic: true, officialField: "president" | "vp" | "speaker" | "chiefJustice",
