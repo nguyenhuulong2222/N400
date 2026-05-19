@@ -407,6 +407,30 @@
 
   .lang-btn .flag { font-size: 20px; display: block; margin-bottom: 4px; }
 
+  /* Required-language indicator on exemption routes */
+  .lang-section .section-label .req-marker {
+    color: var(--red);
+    font-weight: 700;
+    margin-left: 4px;
+    display: none;
+  }
+
+  .lang-section.required .section-label .req-marker { display: inline; }
+
+  .lang-required-note {
+    display: none;
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: #fff3f3;
+    border-left: 3px solid var(--red);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--red);
+    line-height: 1.5;
+  }
+
+  .lang-section.required .lang-required-note { display: block; }
+
   /* ── STATE SELECTOR ── */
   .state-section { margin-top: 24px; }
 
@@ -622,6 +646,78 @@
     font-style: italic;
     line-height: 1.5;
   }
+
+  /* Native-language-primary rendering (exemption routes + non-en lang) */
+  .q-text-native {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(19px, 3.2vw, 24px);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .q-text-en-secondary {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .q-text-en-secondary .en-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-right: 6px;
+  }
+
+  .translation-pending {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    background: #fff8e6;
+    border: 1px solid #f5d76e;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8a6a00;
+    letter-spacing: 0.02em;
+  }
+
+  /* Exemption banner shown at the top of the quiz */
+  .exemption-banner {
+    display: none;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--navy);
+    color: white;
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1.55;
+    box-shadow: var(--shadow);
+  }
+
+  .exemption-banner.visible { display: block; }
+
+  .exemption-banner .eb-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    color: var(--navy);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    margin-right: 8px;
+    vertical-align: -3px;
+  }
+
+  .exemption-banner strong { color: white; }
 
   .q-note {
     font-size: 13px;
@@ -1053,8 +1149,8 @@
       </button>
     </div>
 
-    <div class="lang-section">
-      <div class="section-label">Display language</div>
+    <div class="lang-section" id="lang-section" data-role="lang">
+      <div class="section-label">Display language<span class="req-marker" aria-hidden="true">*</span></div>
       <div class="lang-grid">
         <button class="lang-btn selected" data-lang="en" onclick="selectLang(this)">
           <span class="flag">🇺🇸</span>English
@@ -1075,6 +1171,7 @@
           <span class="flag">🇰🇷</span>한국어
         </button>
       </div>
+      <div class="lang-required-note"><strong>Required:</strong> select your native language for this exemption.</div>
     </div>
 
     <div class="lang-section state-section">
@@ -1094,6 +1191,7 @@
 
   <!-- ══ SCREEN 2: QUIZ ══ -->
   <div id="screen-quiz" class="screen">
+    <div id="exemption-banner" class="exemption-banner"></div>
     <div class="quiz-header">
       <span class="quiz-mode-label" id="quiz-mode-label">2025 Test</span>
       <div class="score-display">
@@ -1637,7 +1735,7 @@ const STATE_DATA = {
 const DATA_AS_OF = "2026-01";
 
 // ══ STATE ══
-let state = { route:null, lang:'en', userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null };
+let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null };
 
 const ROUTE_CONFIG = {
   "2025": { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
@@ -1645,6 +1743,19 @@ const ROUTE_CONFIG = {
   "6520": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 Exemption · 20 Questions" },
   "5020": { passThreshold:12, failThreshold:9,  askCount:20, label:"50/20 Practice · Native Language" },
   "5515": { passThreshold:12, failThreshold:9,  askCount:20, label:"55/15 Practice · Native Language" },
+};
+
+// Routes where the civics test is taken in the applicant's native language.
+const EXEMPTION_ROUTES = new Set(["5020","5515","6520"]);
+
+// Display name + BCP-47 language tag for Web Speech TTS.
+const LANG_META = {
+  en: { name:"English",     tts:"en-US" },
+  vi: { name:"Tiếng Việt",  tts:"vi-VN" },
+  es: { name:"Español",     tts:"es-ES" },
+  zh: { name:"中文",         tts:"zh-CN" },
+  tl: { name:"Filipino",    tts:"fil-PH" },
+  ko: { name:"한국어",       tts:"ko-KR" },
 };
 
 // ══ UI ══
@@ -1657,6 +1768,7 @@ function selectRoute(el) {
   document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   state.route = el.dataset.route;
+  applyLangSectionMode();
   checkStartEnabled();
 }
 
@@ -1664,6 +1776,8 @@ function selectLang(el) {
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   state.lang = el.dataset.lang;
+  state.langExplicit = true;
+  checkStartEnabled();
 }
 
 function selectState(sel) {
@@ -1671,8 +1785,29 @@ function selectState(sel) {
   checkStartEnabled();
 }
 
+// Toggle the language section's required state based on the chosen route.
+// Exemption routes (5020/5515/6520) require an active language choice and clear
+// the default English selection so the user must pick.
+function applyLangSectionMode() {
+  const sec = document.getElementById('lang-section');
+  if (!sec) return;
+  const isExempt = EXEMPTION_ROUTES.has(state.route);
+  sec.classList.toggle('required', isExempt);
+  if (isExempt && !state.langExplicit) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+  } else if (!isExempt && !state.langExplicit) {
+    // Restore the English default on non-exemption routes when the user hasn't picked.
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.lang === 'en');
+    });
+    state.lang = 'en';
+  }
+}
+
 function checkStartEnabled() {
-  document.getElementById('btn-start').disabled = !(state.route && state.userState);
+  const isExempt = EXEMPTION_ROUTES.has(state.route);
+  const langOK = isExempt ? state.langExplicit : true;
+  document.getElementById('btn-start').disabled = !(state.route && state.userState && langOK);
 }
 
 // Populate the state dropdown alphabetically on load.
@@ -1702,9 +1837,27 @@ function startQuiz() {
   const cfg = ROUTE_CONFIG[state.route];
   Object.assign(state, { ...cfg, questions: shuffle([...QUESTIONS[state.route]]).slice(0, cfg.askCount), qIndex:0, correct:0, wrong:0, answered:false });
   document.getElementById('quiz-mode-label').textContent = cfg.label;
+  renderExemptionBanner();
   updateScore();
   showScreen('quiz');
   renderQuestion();
+}
+
+// Show the interpreter reminder at the top of the quiz when the user is taking
+// the test in a non-English language under an age/residency exemption.
+function renderExemptionBanner() {
+  const banner = document.getElementById('exemption-banner');
+  if (!banner) return;
+  const isExempt = EXEMPTION_ROUTES.has(state.route);
+  const showBanner = isExempt && state.lang !== 'en';
+  if (showBanner) {
+    const meta = LANG_META[state.lang] || { name: state.lang };
+    banner.innerHTML = `<span class="eb-icon">i</span>You are practicing in <strong>${escapeHtml(meta.name)}</strong> — bring a qualified interpreter to your USCIS interview.`;
+    banner.classList.add('visible');
+  } else {
+    banner.innerHTML = '';
+    banner.classList.remove('visible');
+  }
 }
 
 function updateScore() {
@@ -1763,11 +1916,33 @@ function renderQuestion() {
   const letters = ['A','B','C','D'];
   const tq = getT(q,'q');
 
+  // On exemption routes with a non-English language, show the native-language
+  // question prominently with English as a secondary line. When the translation
+  // for this question is missing, flag it so the user knows it's English-only.
+  const isExempt = EXEMPTION_ROUTES.has(state.route);
+  const nativeMode = isExempt && state.lang !== 'en';
+  const langName = (LANG_META[state.lang] || { name: state.lang }).name;
+  let questionTextBlock;
+  if (nativeMode) {
+    if (tq) {
+      questionTextBlock = `
+        <div class="q-text-native">${escapeHtml(tq)}</div>
+        <div class="q-text-en-secondary"><span class="en-label">EN</span>${escapeHtml(q.q)}</div>`;
+    } else {
+      questionTextBlock = `
+        <div class="q-text-native">${escapeHtml(q.q)}</div>
+        <div class="translation-pending">Translation to ${escapeHtml(langName)} coming soon</div>`;
+    }
+  } else {
+    questionTextBlock = `
+      <div class="q-text">${escapeHtml(q.q)}</div>
+      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}</div>` : ''}`;
+  }
+
   document.getElementById('question-area').innerHTML = `
     <div class="question-card">
       <div class="q-number">Question ${state.qIndex+1} of ${state.askCount}</div>
-      <div class="q-text">${escapeHtml(q.q)}</div>
-      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}</div>` : ''}
+      ${questionTextBlock}
       ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
       ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
       <button class="audio-btn" id="audio-btn" type="button">🔊 Listen</button>
@@ -1783,7 +1958,11 @@ function renderQuestion() {
       </div>
     </div>`;
 
-  document.getElementById('audio-btn').addEventListener('click', () => speakText(q.q));
+  // Speak the native-language version when available; otherwise fall back to
+  // English so the audio button still works while translations are incomplete.
+  const audioText = nativeMode && tq ? tq : q.q;
+  const audioLangCode = (LANG_META[nativeMode && tq ? state.lang : 'en'] || LANG_META.en).tts;
+  document.getElementById('audio-btn').addEventListener('click', () => speakText(audioText, audioLangCode));
   document.querySelectorAll('#opts .answer-opt').forEach(btn => {
     btn.addEventListener('click', () => selectAnswer(btn, btn.dataset.opt));
   });
@@ -1813,13 +1992,18 @@ function selectAnswer(el, chosen) {
 
   const ended = state.correct >= state.passThreshold || state.wrong >= state.failThreshold;
   const ta = getT(q,'a');
+  const nativeMode = EXEMPTION_ROUTES.has(state.route) && state.lang !== 'en';
+  const langName = (LANG_META[state.lang] || { name: state.lang }).name;
+  let translationLine = '';
+  if (ta) translationLine = `<br><em>${escapeHtml(ta)}</em>`;
+  else if (nativeMode && !isCorrect) translationLine = `<br><span class="translation-pending">Translation to ${escapeHtml(langName)} coming soon</span>`;
 
   document.getElementById('feedback-area').innerHTML = `
     <div class="feedback-box ${isCorrect?'correct':'wrong'}">
       <div class="fb-title">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>
       <div class="fb-answer">
         ${isCorrect ? 'Well done.' : `Accepted: <strong>${escapeHtml(q.a.join(' / '))}</strong>`}
-        ${ta ? `<br><em>${escapeHtml(ta)}</em>` : ''}
+        ${translationLine}
       </div>
     </div>`;
 
@@ -1859,11 +2043,12 @@ function showResult() {
 function restartQuiz() { startQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
 function goHome() { showScreen('onboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 
-function speakText(text) {
+function speakText(text, langCode) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang='en-US'; u.rate=0.88;
+  u.lang = langCode || (LANG_META[state.lang] || LANG_META.en).tts;
+  u.rate = 0.88;
   window.speechSynthesis.speak(u);
 }
 </script>
