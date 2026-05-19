@@ -34,12 +34,12 @@ State lives in a single `state` object. `ROUTE_CONFIG` holds per-route threshold
 | Route | Pool (claimed) | Asked | Pass | Fail | Notes |
 |-------|----------------|-------|------|------|-------|
 | 2025  | 128            | 20    | 12   | 9    | Standard 2025 civics test |
-| 2008  | 100            | 10    | 6    | 5    | Pre-Oct-2025 applicants (placeholder bank) |
+| 2008  | 100            | 10    | 6    | 5    | Pre-Oct-2025 applicants — real 2008 bank from USCIS PDF |
 | 65/20 | 20             | 10    | 6    | 5    | Age 65+, 20yr LPR — starred subset |
 | 50/20 | 128            | 20    | 12   | 9    | Age 50+, 20yr LPR — English exempt only |
 | 55/15 | 128            | 20    | 12   | 9    | Age 55+, 15yr LPR — English exempt only |
 
-`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). `QUESTIONS["6520"]` is the 20 questions with `starred:true` (the USCIS ★ subset for 65/20). `QUESTIONS["5020"]` and `QUESTIONS["5515"]` reuse the full 2025 bank — the 50/20 and 55/15 exemptions waive only the English requirement, not the civics test itself (the user simply answers in their native language with their own interpreter). `QUESTIONS["2008"]` is still a slice-view placeholder of the 2025 bank — see Known gaps.
+`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). `QUESTIONS["6520"]` is the 20 questions with `starred:true` (the USCIS ★ subset for 65/20). `QUESTIONS["5020"]` and `QUESTIONS["5515"]` reuse the full 2025 bank — the 50/20 and 55/15 exemptions waive only the English requirement, not the civics test itself (the user simply answers in their native language with their own interpreter). `QUESTIONS_2008` is the real 100-question 2008 USCIS civics bank with its own starred subset, dynamic-official questions, state-dependent questions, and vi/es translations (full coverage from the matching 2008 USCIS multilingual PDFs).
 
 ## Question record shape
 
@@ -80,8 +80,8 @@ This is fragile. When adding a new question, ensure no distractor's normalized f
 
 ## Known gaps and bugs
 
-- **2008 bank is a placeholder.** `QUESTIONS["2008"]` is currently `slice(0, 15)` of the 2025 bank. The real 2008 USCIS bank is its own 100-question set with different officials; not yet shipped.
-- **Q29 (your U.S. representative) is excluded.** It needs district-level data (435 reps, frequent turnover); we don't ship that table. Question is marked `excluded:true` and filtered from the asked pool.
+- **Q29 (your U.S. representative) is excluded** in both banks (2025 Q29 / 2008 Q23). It needs district-level data (435 reps, frequent turnover); we don't ship that table. Question is marked `excluded:true` and filtered from the asked pool.
+- **2008 bank distractors are auto-generated.** USCIS publishes accepted answers but not wrong-answer choices, so 2008 distractors are sourced from (a) the matched 2025 question's distractors when a counterpart exists (~63 questions) and (b) other correct answers within the same topical chapter for the rest. Distractor quality is variable; the answer-matching gotcha is enforced.
 - **Officials data goes stale.** `CURRENT_OFFICIALS` and `STATE_DATA` were sourced ~2026-01 (`DATA_AS_OF` constant). They drift after every election — needs periodic refresh. The dynamic-Q `q-note` and the state-Q `q-note-help` link out to uscis.gov/testupdates so users can verify before their interview.
 - **Translations are English-only.** UI still offers en/vi/es/zh/tl/ko buttons; the underlying question data has no per-language `vi`/`es`/etc. strings. Toggles are dead until translations are added back.
 - **Speech is English-only.** `speakText` hardcodes `u.lang='en-US'` regardless of selected display language.
