@@ -133,6 +133,149 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ── EXEMPTION INFO CARD ── */
+  .exemption-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--navy);
+    border-radius: var(--radius);
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .exemption-card[open] { box-shadow: var(--shadow-hover); }
+
+  .exemption-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    user-select: none;
+    transition: background 0.18s;
+  }
+
+  .exemption-summary::-webkit-details-marker { display: none; }
+  .exemption-summary:hover { background: #f0f4ff; }
+
+  .exemption-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: white;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    font-weight: 700;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+
+  .exemption-title { flex: 1; }
+
+  .exemption-chevron {
+    color: var(--navy);
+    font-size: 18px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .exemption-card[open] .exemption-chevron { transform: rotate(90deg); }
+
+  .exemption-body {
+    padding: 4px 20px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+  }
+
+  .exemption-intro {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin: 14px 0 18px;
+  }
+
+  .exemption-tiers {
+    display: grid;
+    gap: 12px;
+  }
+
+  .exemption-tier {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    background: #f7f9ff;
+    border-radius: 10px;
+    border: 1px solid #e4ebfa;
+  }
+
+  .et-badge {
+    flex-shrink: 0;
+    min-width: 58px;
+    padding: 8px 10px;
+    background: var(--navy);
+    color: white;
+    border-radius: 8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  .et-content { flex: 1; min-width: 0; }
+
+  .et-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .et-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.55;
+  }
+
+  .et-desc strong { color: var(--navy); font-weight: 700; }
+
+  .exemption-links {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    display: grid;
+    gap: 8px;
+  }
+
+  .exemption-links a {
+    font-size: 13px;
+    color: var(--navy-light);
+    text-decoration: none;
+    line-height: 1.5;
+  }
+
+  .exemption-links a:hover {
+    color: var(--navy);
+    text-decoration: underline;
+  }
+
+  .exemption-links .el-label {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
   /* ── ONBOARDING ── */
   .section-title {
     font-family: 'Playfair Display', serif;
@@ -807,6 +950,49 @@
   <!-- ══ SCREEN 1: ONBOARDING ══ -->
   <div id="screen-onboard" class="screen active">
 
+    <details class="exemption-card">
+      <summary class="exemption-summary">
+        <span class="exemption-icon">i</span>
+        <span class="exemption-title">Do you qualify for an exemption?</span>
+        <span class="exemption-chevron">→</span>
+      </summary>
+      <div class="exemption-body">
+        <p class="exemption-intro">USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.</p>
+
+        <div class="exemption-tiers">
+          <div class="exemption-tier">
+            <div class="et-badge">50/20</div>
+            <div class="et-content">
+              <div class="et-title">Age 50+ · 20 years permanent residency</div>
+              <div class="et-desc"><strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.</div>
+            </div>
+          </div>
+
+          <div class="exemption-tier">
+            <div class="et-badge">55/15</div>
+            <div class="et-content">
+              <div class="et-title">Age 55+ · 15 years permanent residency</div>
+              <div class="et-desc"><strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.</div>
+            </div>
+          </div>
+
+          <div class="exemption-tier">
+            <div class="et-badge">65/20</div>
+            <div class="et-content">
+              <div class="et-title">Age 65+ · 20 years permanent residency</div>
+              <div class="et-desc"><strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="exemption-links">
+          <a href="https://www.uscis.gov/citizenship/exceptions-and-accommodations" target="_blank" rel="noopener"><span class="el-label">USCIS</span> · Exceptions &amp; Accommodations →</a>
+          <a href="https://www.uscis.gov/sites/default/files/document/fact-sheets/Fact-Sheet-Promoting-Citizenship-for-50-and-Older.pdf" target="_blank" rel="noopener"><span class="el-label">Fact Sheet (PDF)</span> · Citizenship for Applicants 50 and Older →</a>
+          <a href="https://www.uscis.gov/sites/default/files/document/crc/Civics%20Questions%20and%20Answers.pdf" target="_blank" rel="noopener"><span class="el-label">65/20 Questions (PDF)</span> · The 20 starred civics questions →</a>
+        </div>
+      </div>
+    </details>
+
     <h2 class="section-title">Which version do you need?</h2>
     <p class="section-sub">Your version depends on when you filed Form N-400. Choose below.</p>
 
@@ -841,6 +1027,28 @@
           <span class="rc-stat">20 Questions</span>
           <span class="rc-stat">10 Asked</span>
           <span class="rc-stat">6 to Pass</span>
+        </div>
+      </button>
+
+      <button class="route-card" data-route="5020" onclick="selectRoute(this)">
+        <div class="rc-badge">Age 50+ · Resident 20+ years</div>
+        <div class="rc-title">50/20 Practice</div>
+        <div class="rc-desc">Full civics question bank — at your interview you may answer in your native language with your own interpreter.</div>
+        <div class="rc-stats">
+          <span class="rc-stat">128 Questions</span>
+          <span class="rc-stat">20 Asked</span>
+          <span class="rc-stat">12 to Pass</span>
+        </div>
+      </button>
+
+      <button class="route-card" data-route="5515" onclick="selectRoute(this)">
+        <div class="rc-badge">Age 55+ · Resident 15+ years</div>
+        <div class="rc-title">55/15 Practice</div>
+        <div class="rc-desc">Full civics question bank — at your interview you may answer in your native language with your own interpreter.</div>
+        <div class="rc-stats">
+          <span class="rc-stat">128 Questions</span>
+          <span class="rc-stat">20 Asked</span>
+          <span class="rc-stat">12 to Pass</span>
         </div>
       </button>
     </div>
@@ -1358,6 +1566,8 @@ const QUESTIONS = {
   "2025": QUESTIONS_2025.filter(q => !q.excluded),
   "2008": QUESTIONS_2025.filter(q => !q.excluded).slice(0, 15), // TODO: not the real 2008 bank
   "6520": QUESTIONS_2025.filter(q => q.starred && !q.excluded),
+  "5020": QUESTIONS_2025.filter(q => !q.excluded), // same bank as 2025; English exemption only
+  "5515": QUESTIONS_2025.filter(q => !q.excluded), // same bank as 2025; English exemption only
 };
 
 // Federal officials — verify at uscis.gov/citizenship/testupdates
@@ -1433,6 +1643,8 @@ const ROUTE_CONFIG = {
   "2025": { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
   "2008": { passThreshold:6,  failThreshold:5,  askCount:10, label:"2008 Test · 100 Questions" },
   "6520": { passThreshold:6,  failThreshold:5,  askCount:10, label:"65/20 Exemption · 20 Questions" },
+  "5020": { passThreshold:12, failThreshold:9,  askCount:20, label:"50/20 Practice · Native Language" },
+  "5515": { passThreshold:12, failThreshold:9,  askCount:20, label:"55/15 Practice · Native Language" },
 };
 
 // ══ UI ══

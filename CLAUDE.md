@@ -31,13 +31,15 @@ Three screens, swapped via the `.active` class:
 
 State lives in a single `state` object. `ROUTE_CONFIG` holds per-route thresholds:
 
-| Route | Pool (claimed) | Asked | Pass | Fail |
-|-------|----------------|-------|------|------|
-| 2025  | 128            | 20    | 12   | 9    |
-| 2008  | 100            | 10    | 6    | 5    |
-| 65/20 | 20             | 10    | 6    | 5    |
+| Route | Pool (claimed) | Asked | Pass | Fail | Notes |
+|-------|----------------|-------|------|------|-------|
+| 2025  | 128            | 20    | 12   | 9    | Standard 2025 civics test |
+| 2008  | 100            | 10    | 6    | 5    | Pre-Oct-2025 applicants (placeholder bank) |
+| 65/20 | 20             | 10    | 6    | 5    | Age 65+, 20yr LPR — starred subset |
+| 50/20 | 128            | 20    | 12   | 9    | Age 50+, 20yr LPR — English exempt only |
+| 55/15 | 128            | 20    | 12   | 9    | Age 55+, 15yr LPR — English exempt only |
 
-`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). `QUESTIONS["6520"]` is the 20 questions with `starred:true` (the USCIS ★ subset for 65/20). `QUESTIONS["2008"]` is still a slice-view placeholder of the 2025 bank — see Known gaps.
+`QUESTIONS_2025` is the canonical 128-question array. `QUESTIONS["2025"]` is the same array minus any `excluded:true` entries (currently just Q29). `QUESTIONS["6520"]` is the 20 questions with `starred:true` (the USCIS ★ subset for 65/20). `QUESTIONS["5020"]` and `QUESTIONS["5515"]` reuse the full 2025 bank — the 50/20 and 55/15 exemptions waive only the English requirement, not the civics test itself (the user simply answers in their native language with their own interpreter). `QUESTIONS["2008"]` is still a slice-view placeholder of the 2025 bank — see Known gaps.
 
 ## Question record shape
 
