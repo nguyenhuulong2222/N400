@@ -67,7 +67,11 @@
     "audienceType": "Permanent residents applying for U.S. citizenship"
   },
   "hasCredential": "Non-commercial civic education",
-  "sameAs": "https://github.com/nguyenhuulong2222/N400",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "long@formn400.org",
+    "contactType": "customer support"
+  },
   "provider": {
     "@type": "Organization",
     "name": "formN400.org",
@@ -2509,7 +2513,7 @@
 
     <section class="page-section">
       <h2 data-i18n="about.contact.title">Contact</h2>
-      <p data-i18n-html="about.contact.body">Found a bug or want to contribute? Open an issue on GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a></p>
+      <p data-i18n-html="about.contact.body">Found an error or want to contribute? Contact: <a href="mailto:long@formn400.org">long@formn400.org</a></p>
     </section>
 
     <section class="page-section">
@@ -2580,7 +2584,7 @@
 
     <section class="page-section">
       <h2 data-i18n="privacy.contact.title">Contact</h2>
-      <p data-i18n-html="privacy.contact.body">Questions about this privacy policy? Contact us via GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a></p>
+      <p data-i18n-html="privacy.contact.body">Questions about this privacy policy? Email: <a href="mailto:long@formn400.org">long@formn400.org</a></p>
     </section>
 
     <!-- Always-Vietnamese summary box per spec — does not switch on lang. -->
@@ -2603,8 +2607,6 @@
       <a href="#" onclick="goAbout(); return false;" data-i18n="footer.about">About</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="#" onclick="goPrivacy(); return false;" data-i18n="footer.privacy">Privacy Policy</a>
-      <span class="footer-dot" aria-hidden="true">·</span>
-      <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer" data-i18n="footer.github">GitHub</a>
     </div>
     <div class="footer-uscis">
       Questions from official <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank">USCIS study materials</a> (public domain · 17 U.S.C. § 105)<br>
@@ -4063,7 +4065,6 @@ const UI_TEXT = {
   // ─── Footer + back nav ───────────────────────────────────────────────
   "footer.about":               { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" },
   "footer.privacy":             { en:"Privacy Policy",                       vi:"Chính sách bảo mật",                                  es:"Política de privacidad",                              zh:"隐私政策",                                       tl:"Patakaran sa Privacy",                                ko:"개인정보 보호정책" },
-  "footer.github":              { en:"GitHub",                               vi:"GitHub",                                              es:"GitHub",                                              zh:"GitHub",                                          tl:"GitHub",                                              ko:"GitHub" },
   "footer.copyright":           { en:"© 2026 formN400.org — Free civic education resource",
                                   vi:"© 2026 formN400.org — Tài nguyên giáo dục công dân miễn phí",
                                   es:"© 2026 formN400.org — Recurso educativo cívico gratuito",
@@ -4124,12 +4125,12 @@ const UI_TEXT = {
                                   ko:'무료 법률 서비스는 <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>에서 찾으세요.' },
 
   "about.contact.title":        { en:"Contact",                              vi:"Liên hệ",                                              es:"Contacto",                                             zh:"联系",                                            tl:"Makipag-ugnayan",                                     ko:"문의" },
-  "about.contact.body":         { en:'Found a bug or want to contribute? Open an issue on GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  vi:'Phát hiện lỗi hoặc muốn đóng góp? Mở issue trên GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  es:'¿Encontró un error o quiere contribuir? Abra un issue en GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  zh:'发现错误或想要贡献？请在 GitHub 上提交 issue：<a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  tl:'May nakitang bug o gustong mag-ambag? Magbukas ng issue sa GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  ko:'버그를 발견했거나 기여하고 싶으신가요? GitHub에서 이슈를 열어주세요: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>' },
+  "about.contact.body":         { en:'Found an error or want to contribute? Contact: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  vi:'Phát hiện lỗi hoặc muốn đóng góp? Liên hệ: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  es:'¿Encontró un error o quiere contribuir? Contacto: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  zh:'发现错误或想要贡献？请联系：<a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  tl:'May nakitang error o gustong mag-ambag? Makipag-ugnayan: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  ko:'오류를 발견했거나 기여하고 싶으신가요? 연락처: <a href="mailto:long@formn400.org">long@formn400.org</a>' },
 
   "about.sources.title":        { en:"Data sources",                         vi:"Nguồn dữ liệu",                                       es:"Fuentes de datos",                                     zh:"数据来源",                                       tl:"Mga pinagmulan ng datos",                             ko:"데이터 출처" },
   "about.sources.uscis_2025":   { en:"USCIS 2025 Civics Test (128 questions)",
@@ -4283,12 +4284,12 @@ const UI_TEXT = {
                                   ko:'본 정책은 업데이트될 수 있습니다. 변경 사항은 위의 "최종 수정" 날짜에 반영됩니다. 사이트를 계속 사용하시면 업데이트된 정책에 동의하는 것으로 간주됩니다.' },
 
   "privacy.contact.title":      { en:"Contact",                              vi:"Liên hệ",                                              es:"Contacto",                                             zh:"联系",                                            tl:"Makipag-ugnayan",                                     ko:"문의" },
-  "privacy.contact.body":       { en:'Questions about this privacy policy? Contact us via GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  vi:'Câu hỏi về chính sách bảo mật này? Liên hệ với chúng tôi qua GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  es:'¿Preguntas sobre esta política de privacidad? Contáctenos por GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  zh:'对本隐私政策有疑问？通过 GitHub 联系我们：<a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  tl:'May mga tanong tungkol sa patakarang ito sa privacy? Makipag-ugnayan sa amin sa GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
-                                  ko:'본 개인정보 보호정책에 대한 질문이 있으신가요? GitHub을 통해 문의해 주세요: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>' },
+  "privacy.contact.body":       { en:'Questions about this privacy policy? Email: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  vi:'Câu hỏi về chính sách bảo mật này? Email: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  es:'¿Preguntas sobre esta política de privacidad? Correo electrónico: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  zh:'对本隐私政策有疑问？请发邮件至：<a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  tl:'May mga tanong tungkol sa patakarang ito sa privacy? Email: <a href="mailto:long@formn400.org">long@formn400.org</a>',
+                                  ko:'본 개인정보 보호정책에 대한 질문이 있으신가요? 이메일: <a href="mailto:long@formn400.org">long@formn400.org</a>' },
 };
 
 // Resolve the active display language slug for UI lookups. Anything not in
