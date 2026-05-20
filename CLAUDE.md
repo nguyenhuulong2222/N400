@@ -169,6 +169,35 @@ form: those values live exclusively in `state.interview.personal` and
 disappear on page reload. Any future feature touching user input must
 verify it does not violate this invariant.
 
+## SEO / discoverability
+
+The site is built for organic search. The `<head>` block carries: a
+descriptive `<title>` (per-language, updated via `document.title` on
+`selectLang`), `<meta name="description">`, OG and Twitter card tags
+pointing at `/og-image.png`, `hreflang` links for all six languages, and
+a Schema.org `WebApplication` JSON-LD block.
+
+Sister files at the repo root:
+
+- `sitemap.xml` — single-URL sitemap with hreflang alternates.
+- `robots.txt` — allow-all + sitemap reference.
+- `manifest.json` — PWA manifest pointing at `/icon-192.png` and `/icon-512.png`.
+- `og-image.svg` — source for the social-share preview (1200×630).
+
+**Binary assets still need to be generated** and committed alongside the
+repo before they go live:
+
+- `og-image.png` — convert `og-image.svg` (1200×630). Use
+  `rsvg-convert -w 1200 -h 630 og-image.svg -o og-image.png` (or any
+  other rasterizer); the OG/Twitter meta tags both point at the PNG.
+- `icon-192.png` and `icon-512.png` — plain navy circle with "N400"
+  centered is sufficient. Used by `manifest.json` for PWA install.
+
+Language detection on page load reads `?lang=` from the URL and, if the
+value is one of `en/vi/es/zh/tl/ko`, applies it before first paint. When
+the user manually changes language, `history.replaceState` keeps the URL
+in sync (English strips the param so the canonical `/` URL stays clean).
+
 ## Known gaps and bugs
 
 - **Q29 (your U.S. representative) is excluded** in both banks (2025 Q29 / 2008 Q23). It needs district-level data (435 reps, frequent turnover); we don't ship that table. Question is marked `excluded:true` and filtered from the asked pool.

@@ -3,8 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Civics Practice — Free U.S. Naturalization Test Prep</title>
+
+<!-- ── Primary SEO ─────────────────────────────────────────────────── -->
+<title>Free U.S. Citizenship Civics Test Practice 2025 | formN400.org</title>
+<meta name="description" content="Free practice for the U.S. naturalization civics test. 128 official USCIS questions, 6 languages (English, Tiếng Việt, Español, 中文, Filipino, 한국어), state-specific answers, interview simulation. 100% free, no account required.">
+<meta name="keywords" content="US citizenship test, civics test 2025, naturalization test, USCIS civics, thi quoc tich my, luyện thi quốc tịch, citizenship practice, N-400, 128 questions, free citizenship test">
+<meta name="robots" content="index, follow">
+<meta name="language" content="en, vi, es, zh, tl, ko">
+<link rel="canonical" href="https://formn400.org">
+
+<!-- ── Performance + PWA ───────────────────────────────────────────── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="theme-color" content="#0d2052">
+<link rel="manifest" href="/manifest.json">
+
+<!-- ── Open Graph (Facebook, LinkedIn) ────────────────────────────── -->
+<meta property="og:title" content="Free U.S. Citizenship Civics Test 2025 — 6 Languages">
+<meta property="og:description" content="Practice the official USCIS naturalization civics test for free. 128 questions, Vietnamese, Spanish, Chinese, Filipino, Korean. State-specific answers. No account needed.">
+<meta property="og:url" content="https://formn400.org">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://formn400.org/og-image.png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="vi_VN">
+<meta property="og:locale:alternate" content="es_MX">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:locale:alternate" content="tl_PH">
+<meta property="og:locale:alternate" content="ko_KR">
+
+<!-- ── Twitter Card ────────────────────────────────────────────────── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free U.S. Citizenship Test Practice — 6 Languages">
+<meta name="twitter:description" content="128 official USCIS civics questions. Vietnamese, Spanish, Chinese, Filipino, Korean. Interview simulation. 100% free.">
+<meta name="twitter:image" content="https://formn400.org/og-image.png">
+
+<!-- ── hreflang (multilingual SEO) ─────────────────────────────────── -->
+<link rel="alternate" hreflang="en" href="https://formn400.org">
+<link rel="alternate" hreflang="vi" href="https://formn400.org/?lang=vi">
+<link rel="alternate" hreflang="es" href="https://formn400.org/?lang=es">
+<link rel="alternate" hreflang="zh" href="https://formn400.org/?lang=zh">
+<link rel="alternate" hreflang="tl" href="https://formn400.org/?lang=tl">
+<link rel="alternate" hreflang="ko" href="https://formn400.org/?lang=ko">
+<link rel="alternate" hreflang="x-default" href="https://formn400.org">
+
+<!-- ── Structured data (Schema.org) ────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "formN400 — Free U.S. Citizenship Civics Test",
+  "url": "https://formn400.org",
+  "description": "Free practice app for the U.S. naturalization civics test. Official USCIS questions in 6 languages.",
+  "applicationCategory": "EducationApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "inLanguage": ["en", "vi", "es", "zh", "tl", "ko"],
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "Permanent residents applying for U.S. citizenship"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "formN400.org",
+    "url": "https://formn400.org"
+  },
+  "featureList": [
+    "128 official USCIS 2025 civics questions",
+    "100 official USCIS 2008 civics questions",
+    "6 languages: English, Vietnamese, Spanish, Chinese, Filipino, Korean",
+    "State-specific answers for all 50 states",
+    "Interview simulation with 5 groups",
+    "Speak practice mode",
+    "50/20 and 55/15 native language exemption routes",
+    "65/20 exemption route with simplified question set",
+    "Zero data collection"
+  ]
+}
+</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1788,6 +1868,18 @@
   .site-footer a { color: var(--navy-light); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
 
+  /* SEO: visually-hide foreign-language keyword anchors so search engines
+     index them while screen readers + sighted users skip them. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .legal-box {
     background: white;
     border: 1.5px solid var(--border);
@@ -2296,6 +2388,15 @@
         </a>
       </li>
     </ul>
+  </div>
+
+  <!-- SEO: Vietnamese-language search keywords for organic Google indexing.
+       aria-hidden so screen readers skip; .sr-only hides from sighted users
+       (Google still indexes the text content). -->
+  <div class="sr-only" aria-hidden="true">
+    thi quốc tịch mỹ miễn phí, luyện thi nhập tịch mỹ, câu hỏi thi quốc tịch 2025,
+    luyện thi civics tiếng việt, thi quốc tịch cho người lớn tuổi,
+    50/20 55/15 65/20 thi tiếng việt, form n-400 luyện thi
   </div>
 
   <footer class="site-footer">
@@ -3279,6 +3380,24 @@ function selectLang(el) {
   state.langExplicit = true;
   updateUILanguage(state.lang);
   checkStartEnabled();
+  // Reflect the chosen language in the URL so the page can be shared with a
+  // pre-selected language and so hreflang links resolve to a real state.
+  syncLangToURL(state.lang);
+}
+
+// Update the URL's ?lang= param to match the active language without
+// triggering a navigation. English is the canonical/default so we strip the
+// param for ?lang=en to keep the bare `/` URL clean.
+function syncLangToURL(lang) {
+  try {
+    const url = new URL(window.location.href);
+    if (lang && lang !== 'en' && SUPPORTED_LANGS.has(lang)) {
+      url.searchParams.set('lang', lang);
+    } else {
+      url.searchParams.delete('lang');
+    }
+    history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + url.hash);
+  } catch (e) { /* older browsers w/o URL ctor — ignore */ }
 }
 
 // ══ UI INTERNATIONALIZATION ══
@@ -3465,6 +3584,14 @@ const UI_TEXT = {
   // ─── Suggested-translation pill (shown when *_suggested:true on a question) ─
   "pill.suggested":             { en:"Suggested translation",                vi:"Dịch gợi ý",                                          es:"Traducción sugerida",
                                   zh:"翻译建议",                              tl:"Mungkahing salin",                                   ko:"번역 제안" },
+
+  // ─── SEO: document.title per language ─────────────────────────────────
+  "meta.title":                 { en:"Free U.S. Citizenship Civics Test Practice 2025 | formN400.org",
+                                  vi:"Luyện Thi Quốc Tịch Mỹ Miễn Phí 2025 | formN400.org",
+                                  es:"Prueba de Ciudadanía EE.UU. Gratis 2025 | formN400.org",
+                                  zh:"免费美国入籍公民考试练习 2025 | formN400.org",
+                                  tl:"Libreng Pagsasanay sa Pagkamamamayan ng US 2025 | formN400.org",
+                                  ko:"무료 미국 시민권 시민학 시험 연습 2025 | formN400.org" },
 
   // ─── Interview tab ──────────────────────────────────────────────────────
   "iv.home.title":              { en:"USCIS Interview Practice",             vi:"Luyện tập phỏng vấn USCIS",                            es:"Práctica de entrevista USCIS" , zh:"USCIS 面试练习", tl:"Pagsasanay sa Panayam sa USCIS", ko:"USCIS 인터뷰 연습" },
@@ -3760,6 +3887,10 @@ function updateUILanguage(lang) {
   // tag uses "fil" per BCP-47.
   const htmlLang = useLang === 'tl' ? 'fil' : useLang;
   document.documentElement.setAttribute('lang', htmlLang);
+  // Update document.title so search engines, browser tabs, and history
+  // entries reflect the active language.
+  const titleEntry = UI_TEXT['meta.title'];
+  if (titleEntry && titleEntry[useLang]) document.title = titleEntry[useLang];
   // Re-render screens whose content is built in JS (not driven by data-i18n).
   if (typeof renderInterview === 'function' && state && state.tab === 'interview') {
     renderInterview();
@@ -3809,10 +3940,26 @@ function checkStartEnabled() {
   }
 })();
 
-// Apply the initial UI language. The English defaults already match the
-// markup, but running this once ensures lang=en is reflected on <html>
-// and prevents stale content if the bank ever ships pre-translated.
-updateUILanguage('en');
+// Apply the initial UI language. Honors a `?lang=` URL param when present
+// (used by hreflang links and direct sharing of language-specific URLs);
+// falls back to English otherwise.
+(function applyInitialLang() {
+  let initial = 'en';
+  try {
+    const param = new URL(window.location.href).searchParams.get('lang');
+    if (param && SUPPORTED_LANGS.has(param)) initial = param;
+  } catch (e) { /* older browser without URL ctor — ignore */ }
+  if (initial !== 'en') {
+    // Mark the matching language button selected (don't call selectLang here
+    // — that would trigger checkStartEnabled before route/state are set).
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.lang === initial);
+    });
+    state.lang = initial;
+    state.langExplicit = true;
+  }
+  updateUILanguage(initial);
+})();
 
 // Wire the top-level tab bar (Practice Test ↔ Interview Practice).
 document.querySelectorAll('.tab-btn').forEach(btn => {
