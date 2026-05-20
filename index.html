@@ -66,6 +66,8 @@
     "@type": "Audience",
     "audienceType": "Permanent residents applying for U.S. citizenship"
   },
+  "hasCredential": "Non-commercial civic education",
+  "sameAs": "https://github.com/nguyenhuulong2222/N400",
   "provider": {
     "@type": "Organization",
     "name": "formN400.org",
@@ -1867,6 +1869,97 @@
 
   .site-footer a { color: var(--navy-light); text-decoration: none; }
   .site-footer a:hover { text-decoration: underline; }
+  .site-footer .footer-links {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .site-footer .footer-links a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    margin: 0 4px;
+  }
+  .site-footer .footer-dot { margin: 0 2px; color: var(--border); }
+  .site-footer .footer-uscis { margin: 8px 0 12px; }
+  .site-footer .footer-copyright {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* About + Privacy screens — shared layout. */
+  .page-back-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    margin-bottom: 20px;
+  }
+  .page-back-btn:hover { background: var(--bg-soft); border-color: var(--navy-light); }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4.5vw, 36px);
+    font-weight: 900;
+    color: var(--navy);
+    margin: 0 0 8px;
+    line-height: 1.15;
+  }
+  .page-updated {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+    margin: 0 0 22px;
+  }
+  .page-section {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin: 0 0 16px;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .page-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 12px;
+  }
+  .page-section p { margin: 0 0 10px; }
+  .page-section p:last-child { margin-bottom: 0; }
+  .page-section a {
+    color: var(--navy-light);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .page-section a:hover { color: var(--navy); }
+  .page-section-emphasis {
+    background: #fff7e8;
+    border-color: #e9c870;
+  }
+  .page-section-emphasis h2 { color: #8a5a00; }
+  .page-section-summary {
+    background: #eaf4ff;
+    border-color: #b8d6f5;
+  }
+  .page-section-summary p { font-weight: 600; color: var(--navy); }
+  .page-list {
+    margin: 0;
+    padding-left: 22px;
+  }
+  .page-list li { margin: 6px 0; }
+  .page-section ul.page-bullets {
+    margin: 8px 0 12px;
+    padding-left: 22px;
+  }
+  .page-section ul.page-bullets li { margin: 6px 0; }
 
   /* SEO: visually-hide foreign-language keyword anchors so search engines
      index them while screen readers + sighted users skip them. */
@@ -2390,6 +2483,112 @@
     </ul>
   </div>
 
+  <!-- ══ SCREEN 6: ABOUT ════════════════════════════════════════════════ -->
+  <div id="screen-about" class="screen">
+    <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
+    <h1 class="page-title" data-i18n="about.title">About</h1>
+
+    <section class="page-section">
+      <h2 data-i18n="about.intro.title">About this project</h2>
+      <p data-i18n="about.intro.body1">formN400.org is a free non-profit community project to help immigrants prepare for the U.S. citizenship test — entirely free, no ads, no personal data collection.</p>
+      <p data-i18n="about.intro.body2">Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="about.free.title">Why is it free?</h2>
+      <p data-i18n="about.free.body1">All civics questions are public-domain materials published by USCIS under 17 U.S.C. § 105. We do not own this content — we just make it easier to access.</p>
+      <p data-i18n="about.free.body2">formN400.org has no sponsors, no advertising, and will never charge users.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="about.disclaimer.title">Disclaimer</h2>
+      <p data-i18n="about.disclaimer.body1">formN400.org is an independent educational resource. We are NOT affiliated with, authorized by, or endorsed by USCIS, DHS, or any U.S. government agency.</p>
+      <p data-i18n="about.disclaimer.body2">This is not legal advice. For immigration counsel, contact a licensed immigration attorney or an accredited representative.</p>
+      <p data-i18n-html="about.disclaimer.body3">Find free legal services at <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="about.contact.title">Contact</h2>
+      <p data-i18n-html="about.contact.body">Found a bug or want to contribute? Open an issue on GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a></p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="about.sources.title">Data sources</h2>
+      <ul class="page-list">
+        <li><a href="https://www.uscis.gov/citizenship" target="_blank" rel="noopener noreferrer" data-i18n="about.sources.uscis_2025">USCIS 2025 Civics Test (128 questions)</a></li>
+        <li><a href="https://www.uscis.gov/citizenship" target="_blank" rel="noopener noreferrer" data-i18n="about.sources.uscis_2008">USCIS 2008 Civics Test (100 questions)</a></li>
+        <li data-i18n-html="about.sources.translations">Official USCIS translations — Vietnamese, Spanish, Chinese, Filipino, Korean</li>
+        <li data-i18n-html="about.sources.officials">State officials data — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ══ SCREEN 7: PRIVACY POLICY ══════════════════════════════════════ -->
+  <div id="screen-privacy" class="screen">
+    <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
+    <h1 class="page-title" data-i18n="privacy.title">Privacy Policy</h1>
+    <p class="page-updated" data-i18n="privacy.updated">Last updated: May 20, 2026</p>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.overview.title">Overview</h2>
+      <p data-i18n="privacy.overview.body">formN400.org is a free, non-commercial civic education resource. We are committed to your privacy. This policy explains what data we do and do not collect.</p>
+    </section>
+
+    <section class="page-section page-section-emphasis">
+      <h2 data-i18n="privacy.donot.title">Data we DO NOT collect</h2>
+      <p data-i18n="privacy.donot.intro">We do not collect, store, transmit, or share:</p>
+      <ul class="page-bullets">
+        <li data-i18n="privacy.donot.li1">Your name, date of birth, or personal information</li>
+        <li data-i18n="privacy.donot.li2">Your quiz answers or test results</li>
+        <li data-i18n="privacy.donot.li3">Your location or IP address (beyond standard server logs)</li>
+        <li data-i18n="privacy.donot.li4">Browser cookies for tracking</li>
+        <li data-i18n="privacy.donot.li5">Any information you type into the interview practice form</li>
+      </ul>
+      <p data-i18n="privacy.donot.body">All information you enter stays in your browser's memory only and is permanently deleted when you close or refresh the page.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.speech.title">Web Speech API (microphone)</h2>
+      <p data-i18n="privacy.speech.intro">The "Speak Practice" feature uses your browser's built-in Web Speech API. When you use this feature:</p>
+      <ul class="page-bullets">
+        <li data-i18n="privacy.speech.li1">Your voice is processed by your browser (Chrome: Google servers)</li>
+        <li data-i18n="privacy.speech.li2">We never receive, store, or have access to your audio</li>
+        <li data-i18n="privacy.speech.li3">You can decline microphone permission at any time</li>
+        <li data-i18n="privacy.speech.li4">The app works fully without microphone access (multiple choice mode)</li>
+      </ul>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.thirdparty.title">Third-party services</h2>
+      <p data-i18n="privacy.thirdparty.intro">This site uses:</p>
+      <ul class="page-bullets">
+        <li data-i18n-html="privacy.thirdparty.li1">Google Fonts (fonts.googleapis.com) — for typography. Google's privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></li>
+        <li data-i18n-html="privacy.thirdparty.li2">Cloudflare (hosting/CDN) — standard server access logs. Cloudflare's privacy policy: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a></li>
+        <li data-i18n="privacy.thirdparty.li3">No analytics, no advertising networks, no tracking pixels</li>
+      </ul>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.ccpa.title">California residents (CCPA)</h2>
+      <p data-i18n="privacy.ccpa.body">Under the California Consumer Privacy Act (CCPA), California residents have the right to know what personal information is collected. formN400.org does not collect personal information as defined by CCPA.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.changes.title">Changes to this policy</h2>
+      <p data-i18n="privacy.changes.body">We may update this policy. Changes will be reflected in the "Last updated" date above. Continued use of the site constitutes acceptance of the updated policy.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="privacy.contact.title">Contact</h2>
+      <p data-i18n-html="privacy.contact.body">Questions about this privacy policy? Contact us via GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a></p>
+    </section>
+
+    <!-- Always-Vietnamese summary box per spec — does not switch on lang. -->
+    <section class="page-section page-section-summary" lang="vi">
+      <p><strong>Tóm tắt bằng tiếng Việt:</strong> formN400.org KHÔNG thu thập bất kỳ thông tin cá nhân nào của bạn. Mọi dữ liệu bạn nhập chỉ tồn tại trong trình duyệt và biến mất khi bạn đóng trang.</p>
+    </section>
+  </div>
+
   <!-- SEO: Vietnamese-language search keywords for organic Google indexing.
        aria-hidden so screen readers skip; .sr-only hides from sighted users
        (Google still indexes the text content). -->
@@ -2400,8 +2599,18 @@
   </div>
 
   <footer class="site-footer">
-    Questions from official <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank">USCIS study materials</a> (public domain · 17 U.S.C. § 105)<br>
-    Verify current answers at <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates" target="_blank">uscis.gov/citizenship/testupdates</a>
+    <div class="footer-links">
+      <a href="#" onclick="goAbout(); return false;" data-i18n="footer.about">About</a>
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a href="#" onclick="goPrivacy(); return false;" data-i18n="footer.privacy">Privacy Policy</a>
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer" data-i18n="footer.github">GitHub</a>
+    </div>
+    <div class="footer-uscis">
+      Questions from official <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank">USCIS study materials</a> (public domain · 17 U.S.C. § 105)<br>
+      Verify current answers at <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates" target="_blank">uscis.gov/citizenship/testupdates</a>
+    </div>
+    <div class="footer-copyright" data-i18n="footer.copyright">© 2026 formN400.org — Free civic education resource</div>
   </footer>
 
   <div class="legal-box">
@@ -3321,8 +3530,14 @@ function showScreen(id) {
   // is in progress or the result is being shown — switching tabs mid-quiz
   // would be confusing.
   const tabBar = document.getElementById('tab-bar');
-  if (tabBar) tabBar.classList.toggle('hidden', id === 'quiz' || id === 'result');
+  if (tabBar) tabBar.classList.toggle('hidden', id === 'quiz' || id === 'result' || id === 'about' || id === 'privacy');
 }
+
+// Footer page navigation. Both about and privacy return to the onboarding
+// screen via the back button (goBack alias of goHome).
+function goAbout()   { showScreen('about');   window.scrollTo({top:0,behavior:'smooth'}); }
+function goPrivacy() { showScreen('privacy'); window.scrollTo({top:0,behavior:'smooth'}); }
+function goBack()    { showScreen('onboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function selectRoute(el) {
   const route = el.dataset.route;
@@ -3844,6 +4059,236 @@ const UI_TEXT = {
   "rs.tag.zh": { en:"Chinese", vi:"Tiếng Trung", es:"Chino", zh:"中文", tl:"Tsino", ko:"중국어" },
   "rs.tag.tl": { en:"Tagalog", vi:"Tiếng Filipino", es:"Tagalo", zh:"菲律宾语", tl:"Tagalog", ko:"타갈로그" },
   "rs.tag.ko": { en:"Korean", vi:"Tiếng Hàn", es:"Coreano", zh:"韩语", tl:"Koreyano", ko:"한국어" },
+
+  // ─── Footer + back nav ───────────────────────────────────────────────
+  "footer.about":               { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" },
+  "footer.privacy":             { en:"Privacy Policy",                       vi:"Chính sách bảo mật",                                  es:"Política de privacidad",                              zh:"隐私政策",                                       tl:"Patakaran sa Privacy",                                ko:"개인정보 보호정책" },
+  "footer.github":              { en:"GitHub",                               vi:"GitHub",                                              es:"GitHub",                                              zh:"GitHub",                                          tl:"GitHub",                                              ko:"GitHub" },
+  "footer.copyright":           { en:"© 2026 formN400.org — Free civic education resource",
+                                  vi:"© 2026 formN400.org — Tài nguyên giáo dục công dân miễn phí",
+                                  es:"© 2026 formN400.org — Recurso educativo cívico gratuito",
+                                  zh:"© 2026 formN400.org — 免费公民教育资源",
+                                  tl:"© 2026 formN400.org — Libreng kagamitan sa edukasyong sibika",
+                                  ko:"© 2026 formN400.org — 무료 시민 교육 자료" },
+  "back.button":                { en:"← Back",                               vi:"← Quay lại",                                          es:"← Atrás",                                              zh:"← 返回",                                          tl:"← Bumalik",                                           ko:"← 뒤로" },
+
+  // ─── About page ──────────────────────────────────────────────────────
+  "about.title":                { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" },
+
+  "about.intro.title":          { en:"About this project",                   vi:"Về dự án",                                            es:"Acerca de este proyecto",                              zh:"关于本项目",                                      tl:"Tungkol sa proyektong ito",                           ko:"이 프로젝트에 대하여" },
+  "about.intro.body1":          { en:"formN400.org is a free, non-profit community project to help immigrants prepare for the U.S. citizenship test — entirely free, no ads, no personal data collection.",
+                                  vi:"formN400.org là một dự án cộng đồng phi lợi nhuận, được xây dựng để giúp người nhập cư chuẩn bị cho kỳ thi quốc tịch Hoa Kỳ — hoàn toàn miễn phí, không quảng cáo, không thu thập thông tin cá nhân.",
+                                  es:"formN400.org es un proyecto comunitario gratuito y sin fines de lucro creado para ayudar a los inmigrantes a prepararse para el examen de ciudadanía de EE.UU. — totalmente gratis, sin anuncios y sin recopilación de datos personales.",
+                                  zh:"formN400.org 是一个免费的非营利社区项目，旨在帮助移民准备美国公民入籍考试 — 完全免费，无广告，不收集个人信息。",
+                                  tl:"Ang formN400.org ay isang libre at non-profit na proyekto ng komunidad upang tulungan ang mga imigrante na maghanda para sa eksamen sa pagkamamamayan ng EE.UU. — ganap na libre, walang ads, walang nakokolektang personal na datos.",
+                                  ko:"formN400.org는 이민자가 미국 시민권 시험을 준비할 수 있도록 돕는 무료 비영리 커뮤니티 프로젝트입니다 — 완전 무료, 광고 없음, 개인정보 수집 없음." },
+  "about.intro.body2":          { en:"Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language.",
+                                  vi:"Dự án được tạo ra vì chúng tôi tin rằng mọi người đều xứng đáng có quyền tiếp cận tài liệu luyện thi chất lượng, bất kể hoàn cảnh tài chính hay ngôn ngữ.",
+                                  es:"Creado porque creemos que todos merecen acceso a materiales de preparación de calidad, sin importar su situación económica o idioma.",
+                                  zh:"创建本项目，因为我们相信每个人都应享有获取优质备考资料的权利，无论经济条件或语言如何。",
+                                  tl:"Ginawa dahil naniniwala kami na ang lahat ay karapat-dapat sa de-kalidad na materyales sa paghahanda, anuman ang kanilang katayuan sa pananalapi o wika.",
+                                  ko:"누구나 재정 상황이나 언어와 관계없이 양질의 시험 준비 자료에 접근할 자격이 있다는 믿음에서 만들어졌습니다." },
+
+  "about.free.title":           { en:"Why is it free?",                      vi:"Tại sao miễn phí?",                                   es:"¿Por qué es gratis?",                                  zh:"为什么免费？",                                    tl:"Bakit libre?",                                        ko:"왜 무료인가요?" },
+  "about.free.body1":           { en:"All civics questions are public-domain materials published by USCIS under 17 U.S.C. § 105. We do not own this content — we just make it easier to access.",
+                                  vi:"Tất cả câu hỏi civics đều là tài liệu công cộng (public domain) do USCIS phát hành theo 17 U.S.C. § 105. Chúng tôi không sở hữu nội dung này — chúng tôi chỉ làm cho nó dễ tiếp cận hơn.",
+                                  es:"Todas las preguntas de educación cívica son material de dominio público publicado por USCIS según 17 U.S.C. § 105. No somos los dueños de este contenido — solo lo hacemos más accesible.",
+                                  zh:"所有公民问题都是 USCIS 根据《美国法典》第 17 编第 105 条发布的公共领域材料。我们不拥有这些内容 — 我们只是让它更易于访问。",
+                                  tl:"Lahat ng katanungan sa sibika ay public-domain na materyal na inilathala ng USCIS sa ilalim ng 17 U.S.C. § 105. Hindi amin ang content na ito — ginagawa lang namin itong mas madaling ma-access.",
+                                  ko:"모든 시민권 문항은 17 U.S.C. § 105에 따라 USCIS가 발행한 공공 도메인 자료입니다. 저희는 이 콘텐츠를 소유하지 않으며 — 단지 접근하기 쉽게 만들 뿐입니다." },
+  "about.free.body2":           { en:"formN400.org has no sponsors, no advertising, and will never charge users.",
+                                  vi:"formN400.org không có nhà tài trợ, không có quảng cáo, và không bao giờ tính phí người dùng.",
+                                  es:"formN400.org no tiene patrocinadores, no tiene publicidad y nunca cobrará a los usuarios.",
+                                  zh:"formN400.org 没有赞助商，没有广告，永远不会向用户收费。",
+                                  tl:"Ang formN400.org ay walang mga sponsor, walang anunsyo, at hindi kailanman maniningil sa mga user.",
+                                  ko:"formN400.org은 후원사가 없고, 광고가 없으며, 사용자에게 절대 요금을 청구하지 않습니다." },
+
+  "about.disclaimer.title":     { en:"Disclaimer",                           vi:"Tuyên bố miễn trách",                                 es:"Aviso legal",                                          zh:"免责声明",                                       tl:"Disclaimer",                                          ko:"면책 조항" },
+  "about.disclaimer.body1":     { en:"formN400.org is an independent educational resource. We are NOT affiliated with, authorized by, or endorsed by USCIS, DHS, or any U.S. government agency.",
+                                  vi:"formN400.org là tài nguyên giáo dục độc lập. Chúng tôi KHÔNG liên kết với, được ủy quyền bởi, hoặc được chứng nhận bởi USCIS, DHS, hoặc bất kỳ cơ quan chính phủ Hoa Kỳ nào.",
+                                  es:"formN400.org es un recurso educativo independiente. NO estamos afiliados con USCIS, DHS, ni con ninguna agencia del gobierno de EE.UU., ni autorizados ni respaldados por ellos.",
+                                  zh:"formN400.org 是一个独立的教育资源。我们不附属于、不受授权于或不受 USCIS、DHS 或任何美国政府机构的认可。",
+                                  tl:"Ang formN400.org ay isang independyenteng kagamitang pang-edukasyon. HINDI kami kaakibat, awtorisado, o inendorso ng USCIS, DHS, o anumang ahensya ng pamahalaan ng EE.UU.",
+                                  ko:"formN400.org은 독립적인 교육 자료입니다. 저희는 USCIS, DHS 또는 미국 정부 기관과 제휴, 승인, 보증 관계가 없습니다." },
+  "about.disclaimer.body2":     { en:"This is not legal advice. For immigration counsel, contact a licensed immigration attorney or an accredited representative.",
+                                  vi:"Đây không phải tư vấn pháp lý. Để được tư vấn về nhập cư, hãy liên hệ luật sư nhập cư được cấp phép hoặc đại diện được công nhận (accredited representative).",
+                                  es:"Esto no es asesoría legal. Para consejo de inmigración, contacte a un abogado de inmigración con licencia o a un representante acreditado.",
+                                  zh:"这不是法律建议。如需移民咨询，请联系持牌移民律师或经认证的代表（accredited representative）。",
+                                  tl:"Hindi ito legal na payo. Para sa konsultasyon sa imigrasyon, makipag-ugnayan sa lisensyadong abogado ng imigrasyon o isang accredited representative.",
+                                  ko:"이것은 법률 자문이 아닙니다. 이민 상담은 면허가 있는 이민 변호사 또는 공인 대리인(accredited representative)에게 문의하세요." },
+  "about.disclaimer.body3":     { en:'Find free legal services at <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>.',
+                                  vi:'Tìm dịch vụ pháp lý miễn phí: <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>.',
+                                  es:'Encuentre servicios legales gratuitos en <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>.',
+                                  zh:'查找免费法律服务：<a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>。',
+                                  tl:'Maghanap ng libreng legal na serbisyo sa <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>.',
+                                  ko:'무료 법률 서비스는 <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">uscis.gov/avoid-scams/find-legal-services</a>에서 찾으세요.' },
+
+  "about.contact.title":        { en:"Contact",                              vi:"Liên hệ",                                              es:"Contacto",                                             zh:"联系",                                            tl:"Makipag-ugnayan",                                     ko:"문의" },
+  "about.contact.body":         { en:'Found a bug or want to contribute? Open an issue on GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  vi:'Phát hiện lỗi hoặc muốn đóng góp? Mở issue trên GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  es:'¿Encontró un error o quiere contribuir? Abra un issue en GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  zh:'发现错误或想要贡献？请在 GitHub 上提交 issue：<a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  tl:'May nakitang bug o gustong mag-ambag? Magbukas ng issue sa GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  ko:'버그를 발견했거나 기여하고 싶으신가요? GitHub에서 이슈를 열어주세요: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>' },
+
+  "about.sources.title":        { en:"Data sources",                         vi:"Nguồn dữ liệu",                                       es:"Fuentes de datos",                                     zh:"数据来源",                                       tl:"Mga pinagmulan ng datos",                             ko:"데이터 출처" },
+  "about.sources.uscis_2025":   { en:"USCIS 2025 Civics Test (128 questions)",
+                                  vi:"USCIS — Bài thi Công dân 2025 (128 câu)",
+                                  es:"USCIS — Examen Cívico 2025 (128 preguntas)",
+                                  zh:"USCIS 2025 公民测试（128 道题）",
+                                  tl:"USCIS 2025 Eksamen sa Sibika (128 tanong)",
+                                  ko:"USCIS 2025 시민권 시험 (128문항)" },
+  "about.sources.uscis_2008":   { en:"USCIS 2008 Civics Test (100 questions)",
+                                  vi:"USCIS — Bài thi Công dân 2008 (100 câu)",
+                                  es:"USCIS — Examen Cívico 2008 (100 preguntas)",
+                                  zh:"USCIS 2008 公民测试（100 道题）",
+                                  tl:"USCIS 2008 Eksamen sa Sibika (100 tanong)",
+                                  ko:"USCIS 2008 시민권 시험 (100문항)" },
+  "about.sources.translations": { en:"Official USCIS translations — Vietnamese, Spanish, Chinese, Filipino, Korean",
+                                  vi:"Bản dịch chính thức USCIS — tiếng Việt, Tây Ban Nha, Trung Quốc, Filipino, Hàn Quốc",
+                                  es:"Traducciones oficiales de USCIS — vietnamita, español, chino, filipino, coreano",
+                                  zh:"USCIS 官方翻译 — 越南语、西班牙语、中文、菲律宾语、韩语",
+                                  tl:"Opisyal na mga salin ng USCIS — Biyetnames, Espanyol, Tsino, Filipino, Koreyano",
+                                  ko:"USCIS 공식 번역 — 베트남어, 스페인어, 중국어, 필리핀어, 한국어" },
+  "about.sources.officials":    { en:'State officials data — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>',
+                                  vi:'Dữ liệu quan chức theo bang — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>',
+                                  es:'Datos de funcionarios estatales — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>',
+                                  zh:'各州官员数据 — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>、<a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>',
+                                  tl:'Datos ng mga opisyal ng estado — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>',
+                                  ko:'주별 공직자 데이터 — <a href="https://www.house.gov" target="_blank" rel="noopener noreferrer">house.gov</a>, <a href="https://www.senate.gov" target="_blank" rel="noopener noreferrer">senate.gov</a>' },
+
+  // ─── Privacy page ────────────────────────────────────────────────────
+  "privacy.title":              { en:"Privacy Policy — formN400.org",        vi:"Chính sách bảo mật — formN400.org",                   es:"Política de privacidad — formN400.org",                zh:"隐私政策 — formN400.org",                         tl:"Patakaran sa Privacy — formN400.org",                 ko:"개인정보 보호정책 — formN400.org" },
+  "privacy.updated":            { en:"Last updated: May 20, 2026",           vi:"Cập nhật gần nhất: 20 Tháng 5, 2026",                 es:"Última actualización: 20 de mayo de 2026",             zh:"最近更新：2026 年 5 月 20 日",                    tl:"Huling na-update: Mayo 20, 2026",                     ko:"최종 수정: 2026년 5월 20일" },
+
+  "privacy.overview.title":     { en:"Overview",                             vi:"Tổng quan",                                            es:"Resumen",                                              zh:"概述",                                            tl:"Pangkalahatang-ideya",                                ko:"개요" },
+  "privacy.overview.body":      { en:"formN400.org is a free, non-commercial civic education resource. We are committed to your privacy. This policy explains what data we do and do not collect.",
+                                  vi:"formN400.org là một tài nguyên giáo dục công dân miễn phí, phi thương mại. Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích chúng tôi thu thập và không thu thập dữ liệu gì.",
+                                  es:"formN400.org es un recurso de educación cívica gratuito y no comercial. Estamos comprometidos con su privacidad. Esta política explica qué datos recopilamos y cuáles no.",
+                                  zh:"formN400.org 是一个免费的非商业公民教育资源。我们致力于保护您的隐私。本政策说明我们收集和不收集哪些数据。",
+                                  tl:"Ang formN400.org ay isang libre at hindi pangkomersyal na kagamitan sa edukasyong sibika. Kami ay nakatuon sa iyong privacy. Ipinapaliwanag ng patakarang ito kung anong datos ang kinokolekta at hindi namin kinokolekta.",
+                                  ko:"formN400.org은 무료 비영리 시민 교육 자료입니다. 저희는 귀하의 개인정보 보호에 전념합니다. 이 정책은 저희가 수집하는 데이터와 수집하지 않는 데이터를 설명합니다." },
+
+  "privacy.donot.title":        { en:"Data we DO NOT collect",               vi:"Dữ liệu chúng tôi KHÔNG thu thập",                    es:"Datos que NO recopilamos",                             zh:"我们不收集的数据",                                tl:"Datos na HINDI namin kinokolekta",                    ko:"수집하지 않는 데이터" },
+  "privacy.donot.intro":        { en:"We do not collect, store, transmit, or share:",
+                                  vi:"Chúng tôi không thu thập, lưu trữ, gửi đi hoặc chia sẻ:",
+                                  es:"No recopilamos, almacenamos, transmitimos ni compartimos:",
+                                  zh:"我们不收集、不存储、不传输或不共享：",
+                                  tl:"Hindi namin kinokolekta, iniimbak, ipinapadala, o ibinabahagi:",
+                                  ko:"저희는 다음을 수집, 저장, 전송, 공유하지 않습니다:" },
+  "privacy.donot.li1":          { en:"Your name, date of birth, or personal information",
+                                  vi:"Tên, ngày sinh hoặc thông tin cá nhân của bạn",
+                                  es:"Su nombre, fecha de nacimiento o información personal",
+                                  zh:"您的姓名、出生日期或个人信息",
+                                  tl:"Ang iyong pangalan, petsa ng kapanganakan, o personal na impormasyon",
+                                  ko:"이름, 생년월일 또는 개인정보" },
+  "privacy.donot.li2":          { en:"Your quiz answers or test results",
+                                  vi:"Câu trả lời hoặc kết quả bài thi của bạn",
+                                  es:"Sus respuestas o resultados del examen",
+                                  zh:"您的测验答案或测试结果",
+                                  tl:"Ang iyong mga sagot sa quiz o resulta ng pagsusulit",
+                                  ko:"퀴즈 답변이나 시험 결과" },
+  "privacy.donot.li3":          { en:"Your location or IP address (beyond standard server logs)",
+                                  vi:"Vị trí hoặc địa chỉ IP của bạn (ngoài nhật ký máy chủ tiêu chuẩn)",
+                                  es:"Su ubicación o dirección IP (más allá de los registros estándar del servidor)",
+                                  zh:"您的位置或 IP 地址（超出标准服务器日志的范围）",
+                                  tl:"Ang iyong lokasyon o IP address (lampas sa karaniwang server logs)",
+                                  ko:"위치 또는 IP 주소 (표준 서버 로그 이외)" },
+  "privacy.donot.li4":          { en:"Browser cookies for tracking",
+                                  vi:"Cookie trình duyệt để theo dõi",
+                                  es:"Cookies del navegador para seguimiento",
+                                  zh:"用于跟踪的浏览器 Cookie",
+                                  tl:"Mga browser cookie para sa pag-track",
+                                  ko:"추적을 위한 브라우저 쿠키" },
+  "privacy.donot.li5":          { en:"Any information you type into the interview practice form",
+                                  vi:"Bất kỳ thông tin nào bạn nhập vào biểu mẫu luyện phỏng vấn",
+                                  es:"Cualquier información que escriba en el formulario de práctica de entrevista",
+                                  zh:"您在面试练习表单中输入的任何信息",
+                                  tl:"Anumang impormasyong i-type mo sa interview practice form",
+                                  ko:"인터뷰 연습 양식에 입력한 모든 정보" },
+  "privacy.donot.body":         { en:"All information you enter stays in your browser's memory only and is permanently deleted when you close or refresh the page.",
+                                  vi:"Mọi thông tin bạn nhập chỉ tồn tại trong bộ nhớ trình duyệt của bạn và sẽ bị xóa vĩnh viễn khi bạn đóng hoặc tải lại trang.",
+                                  es:"Toda la información que ingrese permanece solo en la memoria de su navegador y se elimina permanentemente al cerrar o actualizar la página.",
+                                  zh:"您输入的所有信息仅保存在您的浏览器内存中，并在您关闭或刷新页面时被永久删除。",
+                                  tl:"Lahat ng impormasyong iyong inilalagay ay nananatili lamang sa memorya ng iyong browser at permanenteng nabubura kapag isinara o nire-refresh mo ang pahina.",
+                                  ko:"입력한 모든 정보는 브라우저 메모리에만 보관되며 페이지를 닫거나 새로 고치면 영구적으로 삭제됩니다." },
+
+  "privacy.speech.title":       { en:"Web Speech API (microphone)",          vi:"Web Speech API (microphone)",                          es:"Web Speech API (micrófono)",                           zh:"Web Speech API（麦克风）",                       tl:"Web Speech API (mikropono)",                          ko:"Web Speech API (마이크)" },
+  "privacy.speech.intro":       { en:'The "Speak Practice" feature uses your browser\'s built-in Web Speech API. When you use this feature:',
+                                  vi:'Tính năng "Luyện nói" sử dụng Web Speech API tích hợp trong trình duyệt của bạn. Khi bạn sử dụng tính năng này:',
+                                  es:'La función "Práctica oral" usa la Web Speech API integrada en su navegador. Cuando usa esta función:',
+                                  zh:'"口语练习"功能使用您浏览器内置的 Web Speech API。当您使用此功能时：',
+                                  tl:'Ang feature na "Speak Practice" ay gumagamit ng built-in na Web Speech API ng iyong browser. Kapag ginamit mo ang feature na ito:',
+                                  ko:'"음성 연습" 기능은 브라우저에 내장된 Web Speech API를 사용합니다. 이 기능을 사용할 때:' },
+  "privacy.speech.li1":         { en:"Your voice is processed by your browser (Chrome: Google servers)",
+                                  vi:"Giọng nói của bạn được trình duyệt xử lý (Chrome: máy chủ của Google)",
+                                  es:"Su voz es procesada por su navegador (Chrome: servidores de Google)",
+                                  zh:"您的语音由您的浏览器处理（Chrome：Google 服务器）",
+                                  tl:"Ang iyong boses ay pinoproseso ng iyong browser (Chrome: mga server ng Google)",
+                                  ko:"음성은 브라우저에서 처리됩니다 (Chrome의 경우 Google 서버)" },
+  "privacy.speech.li2":         { en:"We never receive, store, or have access to your audio",
+                                  vi:"Chúng tôi không bao giờ nhận, lưu trữ hoặc có quyền truy cập vào âm thanh của bạn",
+                                  es:"Nunca recibimos, almacenamos ni tenemos acceso a su audio",
+                                  zh:"我们从未接收、存储或访问您的音频",
+                                  tl:"Hindi kami tumatanggap, nag-iimbak, o may access sa iyong audio",
+                                  ko:"저희는 귀하의 오디오를 받지 않으며, 저장하지 않고, 접근할 수도 없습니다" },
+  "privacy.speech.li3":         { en:"You can decline microphone permission at any time",
+                                  vi:"Bạn có thể từ chối quyền truy cập microphone bất cứ lúc nào",
+                                  es:"Puede rechazar el permiso del micrófono en cualquier momento",
+                                  zh:"您可以随时拒绝麦克风权限",
+                                  tl:"Maaari mong tanggihan ang pahintulot sa mikropono anumang oras",
+                                  ko:"언제든지 마이크 권한을 거부할 수 있습니다" },
+  "privacy.speech.li4":         { en:"The app works fully without microphone access (multiple choice mode)",
+                                  vi:"Ứng dụng hoạt động đầy đủ mà không cần quyền truy cập microphone (chế độ trắc nghiệm)",
+                                  es:"La aplicación funciona completamente sin acceso al micrófono (modo de opción múltiple)",
+                                  zh:"无需麦克风访问，应用程序也能完全工作（多项选择模式）",
+                                  tl:"Gumagana nang buo ang app kahit walang access sa mikropono (multiple choice mode)",
+                                  ko:"마이크 접근 없이도 앱이 완전히 작동합니다 (객관식 모드)" },
+
+  "privacy.thirdparty.title":   { en:"Third-party services",                 vi:"Dịch vụ bên thứ ba",                                   es:"Servicios de terceros",                                zh:"第三方服务",                                     tl:"Mga third-party na serbisyo",                         ko:"제3자 서비스" },
+  "privacy.thirdparty.intro":   { en:"This site uses:",                      vi:"Trang web này sử dụng:",                              es:"Este sitio usa:",                                      zh:"本站使用：",                                      tl:"Gumagamit ang site na ito ng:",                       ko:"이 사이트는 다음을 사용합니다:" },
+  "privacy.thirdparty.li1":     { en:'Google Fonts (fonts.googleapis.com) — for typography. Google\'s privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>',
+                                  vi:'Google Fonts (fonts.googleapis.com) — cho kiểu chữ. Chính sách bảo mật của Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>',
+                                  es:'Google Fonts (fonts.googleapis.com) — para tipografía. Política de privacidad de Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>',
+                                  zh:'Google Fonts (fonts.googleapis.com) — 用于字体。Google 隐私政策：<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>',
+                                  tl:'Google Fonts (fonts.googleapis.com) — para sa typography. Patakaran sa privacy ng Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>',
+                                  ko:'Google Fonts (fonts.googleapis.com) — 타이포그래피용. Google 개인정보 보호정책: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>' },
+  "privacy.thirdparty.li2":     { en:'Cloudflare (hosting/CDN) — standard server access logs. Cloudflare\'s privacy policy: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>',
+                                  vi:'Cloudflare (lưu trữ/CDN) — nhật ký truy cập máy chủ tiêu chuẩn. Chính sách bảo mật của Cloudflare: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>',
+                                  es:'Cloudflare (alojamiento/CDN) — registros estándar de acceso al servidor. Política de privacidad de Cloudflare: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>',
+                                  zh:'Cloudflare（托管/CDN）— 标准服务器访问日志。Cloudflare 隐私政策：<a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>',
+                                  tl:'Cloudflare (hosting/CDN) — karaniwang server access logs. Patakaran sa privacy ng Cloudflare: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>',
+                                  ko:'Cloudflare (호스팅/CDN) — 표준 서버 접근 로그. Cloudflare 개인정보 보호정책: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">cloudflare.com/privacypolicy</a>' },
+  "privacy.thirdparty.li3":     { en:"No analytics, no advertising networks, no tracking pixels",
+                                  vi:"Không phân tích, không mạng quảng cáo, không pixel theo dõi",
+                                  es:"Sin analítica, sin redes publicitarias, sin píxeles de seguimiento",
+                                  zh:"没有分析工具，没有广告网络，没有跟踪像素",
+                                  tl:"Walang analytics, walang advertising network, walang tracking pixel",
+                                  ko:"분석 도구 없음, 광고 네트워크 없음, 추적 픽셀 없음" },
+
+  "privacy.ccpa.title":         { en:"California residents (CCPA)",          vi:"Cư dân California (CCPA)",                            es:"Residentes de California (CCPA)",                      zh:"加利福尼亚州居民 (CCPA)",                        tl:"Mga residente ng California (CCPA)",                  ko:"캘리포니아 거주자 (CCPA)" },
+  "privacy.ccpa.body":          { en:"Under the California Consumer Privacy Act (CCPA), California residents have the right to know what personal information is collected. formN400.org does not collect personal information as defined by CCPA.",
+                                  vi:"Theo Đạo luật Quyền riêng tư của Người tiêu dùng California (CCPA), cư dân California có quyền biết những thông tin cá nhân nào được thu thập. formN400.org không thu thập thông tin cá nhân theo định nghĩa của CCPA.",
+                                  es:"Según la Ley de Privacidad del Consumidor de California (CCPA), los residentes de California tienen derecho a saber qué información personal se recopila. formN400.org no recopila información personal según la definición de la CCPA.",
+                                  zh:"根据《加利福尼亚消费者隐私法》(CCPA)，加州居民有权知道收集了哪些个人信息。formN400.org 不收集 CCPA 定义的个人信息。",
+                                  tl:"Sa ilalim ng California Consumer Privacy Act (CCPA), ang mga residente ng California ay may karapatang malaman kung anong personal na impormasyon ang kinokolekta. Ang formN400.org ay hindi nangangalap ng personal na impormasyon na tinukoy ng CCPA.",
+                                  ko:"캘리포니아 소비자 개인정보 보호법(CCPA)에 따라 캘리포니아 거주자는 어떤 개인정보가 수집되는지 알 권리가 있습니다. formN400.org은 CCPA가 정의한 개인정보를 수집하지 않습니다." },
+
+  "privacy.changes.title":      { en:"Changes to this policy",               vi:"Thay đổi đối với chính sách này",                     es:"Cambios a esta política",                              zh:"本政策的变更",                                   tl:"Mga pagbabago sa patakarang ito",                     ko:"본 정책의 변경" },
+  "privacy.changes.body":       { en:'We may update this policy. Changes will be reflected in the "Last updated" date above. Continued use of the site constitutes acceptance of the updated policy.',
+                                  vi:'Chúng tôi có thể cập nhật chính sách này. Các thay đổi sẽ được phản ánh trong ngày "Cập nhật gần nhất" ở trên. Việc tiếp tục sử dụng trang web cấu thành sự chấp nhận chính sách đã cập nhật.',
+                                  es:'Podemos actualizar esta política. Los cambios se reflejarán en la fecha de "Última actualización" arriba. El uso continuo del sitio constituye la aceptación de la política actualizada.',
+                                  zh:'我们可能会更新本政策。变更将反映在上面的"最近更新"日期中。继续使用本网站即表示接受更新后的政策。',
+                                  tl:'Maaari naming i-update ang patakarang ito. Ang mga pagbabago ay makikita sa petsa ng "Huling na-update" sa itaas. Ang patuloy na paggamit ng site ay nagpapatunay ng pagtanggap sa na-update na patakaran.',
+                                  ko:'본 정책은 업데이트될 수 있습니다. 변경 사항은 위의 "최종 수정" 날짜에 반영됩니다. 사이트를 계속 사용하시면 업데이트된 정책에 동의하는 것으로 간주됩니다.' },
+
+  "privacy.contact.title":      { en:"Contact",                              vi:"Liên hệ",                                              es:"Contacto",                                             zh:"联系",                                            tl:"Makipag-ugnayan",                                     ko:"문의" },
+  "privacy.contact.body":       { en:'Questions about this privacy policy? Contact us via GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  vi:'Câu hỏi về chính sách bảo mật này? Liên hệ với chúng tôi qua GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  es:'¿Preguntas sobre esta política de privacidad? Contáctenos por GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  zh:'对本隐私政策有疑问？通过 GitHub 联系我们：<a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  tl:'May mga tanong tungkol sa patakarang ito sa privacy? Makipag-ugnayan sa amin sa GitHub: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>',
+                                  ko:'본 개인정보 보호정책에 대한 질문이 있으신가요? GitHub을 통해 문의해 주세요: <a href="https://github.com/nguyenhuulong2222/N400" target="_blank" rel="noopener noreferrer">github.com/nguyenhuulong2222/N400</a>' },
 };
 
 // Resolve the active display language slug for UI lookups. Anything not in
