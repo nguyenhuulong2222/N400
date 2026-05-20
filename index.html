@@ -911,6 +911,156 @@
 
   .answer-options { display: grid; gap: 9px; }
 
+  /* ── SPEAK MODE (oral interview simulation, Vietnamese only) ── */
+  .mode-toggle {
+    display: none;
+    margin-bottom: 14px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    width: fit-content;
+    box-shadow: var(--shadow);
+  }
+  .mode-toggle.visible { display: inline-flex; }
+
+  .mode-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 7px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.18s ease;
+  }
+  .mode-toggle-btn.active {
+    background: var(--navy);
+    color: white;
+    box-shadow: 0 2px 8px rgba(13,32,82,0.2);
+  }
+  .mode-toggle-btn:not(.active):hover { color: var(--navy); }
+
+  .speak-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 28px 16px 18px;
+  }
+
+  .mic-button {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: none;
+    background: var(--navy);
+    color: white;
+    cursor: pointer;
+    font-size: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(13,32,82,0.25);
+    transition: background 0.2s ease, transform 0.15s ease;
+    position: relative;
+  }
+  .mic-button:hover { transform: scale(1.04); }
+  .mic-button:active { transform: scale(0.97); }
+  .mic-button.listening {
+    background: var(--red);
+    box-shadow: 0 8px 24px rgba(178,34,52,0.35);
+    animation: mic-pulse 1.4s ease-in-out infinite;
+  }
+  .mic-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  @keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(178,34,52,0.5), 0 8px 24px rgba(178,34,52,0.35); }
+    50%      { box-shadow: 0 0 0 18px rgba(178,34,52,0), 0 8px 24px rgba(178,34,52,0.35); }
+  }
+
+  .mic-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    text-align: center;
+    margin-top: -2px;
+  }
+  .mic-button.listening + .mic-label { color: var(--red); }
+
+  .transcript-box {
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.5;
+    text-align: left;
+  }
+  .transcript-box.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+  }
+  .transcript-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .transcript-wrap { width: 100%; }
+
+  .speak-verdict {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border-left: 4px solid;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .speak-verdict.correct { background: var(--correct-bg); border-color: var(--correct); }
+  .speak-verdict.partial { background: #fff8e6;          border-color: #d4a017; color: #6b4f00; }
+  .speak-verdict.wrong   { background: var(--wrong-bg);   border-color: var(--wrong); }
+
+  .speak-verdict .sv-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .speak-verdict.correct .sv-title { color: var(--correct); }
+  .speak-verdict.partial .sv-title { color: #8a6a00; }
+  .speak-verdict.wrong   .sv-title { color: var(--wrong); }
+
+  .speak-accepted-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    margin-top: 10px;
+  }
+  .speak-accepted-list { margin-top: 4px; color: var(--text); font-weight: 600; }
+
+  .speak-error {
+    width: 100%;
+    padding: 14px 18px;
+    background: #fff3f3;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--red);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
   /* Bilingual option text — used on exemption routes in non-English mode.
      Translated text is primary; English shows as a small gray subtitle. */
   .opt-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
@@ -1372,6 +1522,10 @@
         <span class="score-pill correct">✓ <span id="score-correct">0</span></span>
         <span class="score-pill wrong">✗ <span id="score-wrong">0</span></span>
       </div>
+    </div>
+    <div class="mode-toggle" id="mode-toggle" role="tablist" aria-label="Practice mode">
+      <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button">Chọn đáp án</button>
+      <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button">Trả lời miệng</button>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="progress-fill" style="width:0%"></div>
@@ -2015,7 +2169,13 @@ const STATE_DATA = {
 const DATA_AS_OF = "2026-01";
 
 // ══ STATE ══
-let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null };
+let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null,
+  // ── Speak-mode state ─────────────────────────────────────────────────
+  // mode is 'mcq' (multiple choice, default) or 'speak' (oral simulation,
+  // Vietnamese only). speakVerdict holds 'correct' / 'partial' / 'wrong' /
+  // null for the current question — set by the recognizer and consumed when
+  // the user advances to the next question.
+  mode:'mcq', recognition:null, listening:false, speakVerdict:null, speakTranscript:'' };
 
 const ROUTE_CONFIG = {
   "2025":      { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
@@ -2041,6 +2201,10 @@ const LANG_META = {
 
 // ══ UI ══
 function showScreen(id) {
+  // Cancel any in-flight speech recognition / synthesis on screen change so
+  // the mic doesn't keep listening after the user navigates away.
+  if (typeof stopListening === 'function') stopListening();
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
 }
@@ -2279,7 +2443,8 @@ function shuffle(arr) {
 
 function startQuiz() {
   const cfg = ROUTE_CONFIG[state.route];
-  Object.assign(state, { ...cfg, questions: shuffle([...QUESTIONS[state.route]]).slice(0, cfg.askCount), qIndex:0, correct:0, wrong:0, answered:false });
+  Object.assign(state, { ...cfg, questions: shuffle([...QUESTIONS[state.route]]).slice(0, cfg.askCount), qIndex:0, correct:0, wrong:0, answered:false,
+    mode:'mcq', recognition:null, listening:false, speakVerdict:null, speakTranscript:'' });
   document.getElementById('quiz-mode-label').textContent = cfg.label;
   renderExemptionBanner();
   updateScore();
@@ -2350,11 +2515,311 @@ function resolveQuestion(q, stateKey) {
   return q;
 }
 
+// ══ SPEAK MODE (oral interview simulation, Vietnamese only) ══════════════
+// USCIS officers ask the civics test orally. Speak mode mirrors that flow:
+// the question is spoken by TTS, the user records an answer with the device
+// mic, and we transcribe via the Web Speech API and grade against the
+// Vietnamese (and English) accepted-answer lists.
+//
+// Only available when (a) the route is one of the native-language exemption
+// routes AND (b) the chosen language is Vietnamese. For zh/es/tl/ko we fall
+// back to plain MCQ until those speech models are wired up.
+
+const SPEAK_T = {
+  modeMcq:        "Chọn đáp án",
+  modeSpeak:      "Trả lời miệng",
+  tapToAnswer:    "Nhấn để trả lời",
+  listening:      "Đang nghe...",
+  nextQuestion:   "Câu tiếp theo →",
+  seeResults:     "Xem kết quả →",
+  partial:        "Gần đúng — xem đáp án chính thức",
+  acceptedLabel:  "Đáp án chấp nhận được:",
+  correctTitle:   "✓ Chính xác",
+  wrongTitle:     "✗ Chưa đúng",
+  transcriptLabel:"Bạn đã nói:",
+  noTranscript:   "Chưa có câu trả lời",
+  unsupported:    "Trình duyệt của bạn chưa hỗ trợ nhận giọng nói. Vui lòng dùng Chrome.",
+  micDenied:      "Microphone bị từ chối. Vào Cài đặt → Quyền riêng tư → Microphone và cấp quyền cho trang này.",
+  retryHint:      "Nhấn lại micro để thử lại.",
+};
+
+function getSpeechRecognition() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function speakModeAvailable() {
+  // Only the four native-language routes can host speak mode, and only when
+  // the user has actively picked Vietnamese — the speech model is vi-VN.
+  return EXEMPTION_ROUTES.has(state.route) && state.lang === 'vi';
+}
+
+// Render the MCQ/Speak toggle in the quiz header. Hidden when speak mode
+// isn't available so the rest of the UI is unchanged.
+function renderModeToggle() {
+  const toggle = document.getElementById('mode-toggle');
+  if (!toggle) return;
+  if (!speakModeAvailable()) {
+    toggle.classList.remove('visible');
+    state.mode = 'mcq';   // force back to MCQ when leaving a vi route
+    return;
+  }
+  toggle.classList.add('visible');
+  for (const btn of toggle.querySelectorAll('.mode-toggle-btn')) {
+    btn.classList.toggle('active', btn.dataset.mode === state.mode);
+    btn.onclick = () => setMode(btn.dataset.mode);
+  }
+}
+
+function setMode(mode) {
+  if (mode === state.mode) return;
+  stopListening();
+  state.mode = mode;
+  state.speakVerdict = null;
+  state.speakTranscript = '';
+  state.answered = false;
+  renderModeToggle();
+  renderQuestion();
+}
+
+// Strip Vietnamese diacritics + punctuation + case for fuzzy matching.
+// "Hiến Pháp" → "hien phap"; "Tòa Án Tối Cao" → "toa an toi cao".
+function normalizeVi(s) {
+  if (!s) return '';
+  return s.toString()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')       // strip combining diacritics
+    .replace(/[đĐ]/g, 'd')                 // Vietnamese đ → d
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Grade a transcribed answer against the question's accepted answers.
+// Tries Vietnamese (vi_a + accepted answers from resolveQuestion when the
+// question is dynamic/state-specific) first, then English q.a as a fallback
+// for users who answer in English. Returns 'correct' | 'partial' | 'wrong'.
+function evaluateSpeakAnswer(transcript, q) {
+  const tn = normalizeVi(transcript);
+  if (!tn) return 'wrong';
+  // Build the list of accepted answers we'll check against.
+  const accepted = [];
+  for (const a of (q.a || [])) accepted.push(a);
+  for (const a of (q.vi_a || [])) accepted.push(a);
+  if (accepted.length === 0) return 'wrong';
+  const STOP = new Set(['la','va','o','cua','cho','cac','de','tu','khoi','tai','vao','voi',
+                        'mot','hai','ba','bon','nam','sau','bay','tam','chin','muoi',
+                        'the','a','an','of','in','on','to','is','are','was','were','for','and','or','by','at','as','it']);
+  const transcriptTokens = new Set(tn.split(' ').filter(t => t && !STOP.has(t)));
+  let bestVerdict = 'wrong';
+  for (const a of accepted) {
+    const an = normalizeVi(a);
+    if (!an) continue;
+    // Full containment either direction → correct.
+    if (an.length >= 2 && (tn.includes(an) || an.includes(tn))) return 'correct';
+    // Otherwise tally significant-token overlap for a partial verdict.
+    const aTokens = an.split(' ').filter(t => t && !STOP.has(t));
+    if (!aTokens.length) continue;
+    let shared = 0;
+    for (const t of aTokens) if (transcriptTokens.has(t)) shared++;
+    const ratio = shared / aTokens.length;
+    if (ratio >= 0.6) return 'correct';
+    if (ratio >= 0.3) bestVerdict = 'partial';
+  }
+  return bestVerdict;
+}
+
+// Begin a single utterance recognition. Browsers stop on silence; we add a
+// 20-second hard cap as a safety net for cases where end-of-speech detection
+// stalls.
+function startListening() {
+  const SR = getSpeechRecognition();
+  if (!SR) {
+    showSpeakError(SPEAK_T.unsupported);
+    return;
+  }
+  // Tear down any previous session so we always start fresh.
+  stopListening();
+  const rec = new SR();
+  rec.lang = 'vi-VN';
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  let finalTranscript = '';
+
+  rec.onstart = () => {
+    state.listening = true;
+    state.speakVerdict = null;
+    state.speakTranscript = '';
+    paintMicState();
+  };
+  rec.onresult = (ev) => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const t = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) finalTranscript += t;
+      else interim += t;
+    }
+    state.speakTranscript = (finalTranscript + ' ' + interim).trim();
+    const tEl = document.getElementById('transcript-text');
+    if (tEl) {
+      tEl.classList.toggle('empty', !state.speakTranscript);
+      tEl.textContent = state.speakTranscript || SPEAK_T.noTranscript;
+    }
+  };
+  rec.onerror = (ev) => {
+    state.listening = false;
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+      showSpeakError(SPEAK_T.micDenied);
+    }
+    paintMicState();
+  };
+  rec.onend = () => {
+    state.listening = false;
+    paintMicState();
+    // If anything was captured, evaluate it.
+    if (state.speakTranscript) {
+      const verdict = evaluateSpeakAnswer(state.speakTranscript, state.currentRenderedQ);
+      state.speakVerdict = verdict;
+      renderSpeakVerdict();
+    }
+  };
+  state.recognition = rec;
+  try {
+    rec.start();
+  } catch (e) {
+    // Some browsers throw if start() is called rapidly; surface the error.
+    showSpeakError(SPEAK_T.unsupported);
+    return;
+  }
+  // Safety cap.
+  state._speakTimer = setTimeout(stopListening, 20000);
+}
+
+function stopListening() {
+  if (state._speakTimer) { clearTimeout(state._speakTimer); state._speakTimer = null; }
+  if (state.recognition) {
+    try { state.recognition.stop(); } catch (e) { /* already stopped */ }
+    state.recognition = null;
+  }
+  state.listening = false;
+}
+
+function paintMicState() {
+  const btn = document.getElementById('mic-btn');
+  const label = document.getElementById('mic-label');
+  if (!btn || !label) return;
+  btn.classList.toggle('listening', state.listening);
+  label.textContent = state.listening ? SPEAK_T.listening : SPEAK_T.tapToAnswer;
+}
+
+function showSpeakError(message) {
+  const errEl = document.getElementById('speak-error');
+  if (!errEl) return;
+  errEl.textContent = message;
+  errEl.style.display = 'block';
+}
+
+function renderSpeakVerdict() {
+  const verdict = state.speakVerdict;
+  if (!verdict) return;
+  const q = state.currentRenderedQ;
+  const isCorrectish = verdict === 'correct' || verdict === 'partial';
+  const verdictEl = document.getElementById('speak-verdict');
+  if (!verdictEl) return;
+  // Collect Vietnamese accepted answers for display (fall back to English).
+  const acceptedList = (q.vi_a && q.vi_a.length) ? q.vi_a : (q.a || []);
+  const acceptedHtml = acceptedList.map(a => escapeHtml(a)).join(' / ');
+  const title = verdict === 'correct' ? SPEAK_T.correctTitle
+              : verdict === 'partial' ? SPEAK_T.partial
+              : SPEAK_T.wrongTitle;
+  verdictEl.className = 'speak-verdict ' + verdict;
+  verdictEl.innerHTML = `
+    <div class="sv-title">${escapeHtml(title)}</div>
+    <div class="speak-accepted-label">${escapeHtml(SPEAK_T.acceptedLabel)}</div>
+    <div class="speak-accepted-list">${acceptedHtml}</div>
+    <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">${escapeHtml(SPEAK_T.retryHint)}</div>`;
+  verdictEl.style.display = 'block';
+  // Reveal the Next button so the user can advance once they've heard it.
+  const ac = document.getElementById('action-area');
+  if (!ac) return;
+  const ended = (state.correct + (isCorrectish ? 1 : 0)) >= state.passThreshold
+             || (state.wrong + (isCorrectish ? 0 : 1)) >= state.failThreshold;
+  ac.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'btn-next';
+  btn.type = 'button';
+  btn.textContent = ended ? SPEAK_T.seeResults : SPEAK_T.nextQuestion;
+  btn.addEventListener('click', () => submitSpeakAnswer(ended));
+  ac.appendChild(btn);
+}
+
+function submitSpeakAnswer(ended) {
+  const v = state.speakVerdict;
+  if (!v) return;
+  if (v === 'correct' || v === 'partial') state.correct++;
+  else state.wrong++;
+  updateScore();
+  state.speakVerdict = null;
+  state.speakTranscript = '';
+  if (ended) { showResult(); return; }
+  state.qIndex++;
+  if (state.qIndex >= state.questions.length) { showResult(); return; }
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderSpeakInterface(q, questionTextBlock) {
+  const SR = getSpeechRecognition();
+  const supported = !!SR;
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-card">
+      <div class="q-number">Question ${state.qIndex+1} of ${state.askCount}</div>
+      ${questionTextBlock}
+      ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
+      ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
+      <button class="audio-btn" id="audio-btn" type="button">🔊 Listen</button>
+    </div>
+    <div class="speak-container">
+      ${supported ? `
+        <button class="mic-button" id="mic-btn" type="button" aria-label="${escapeHtml(SPEAK_T.tapToAnswer)}">🎙</button>
+        <div class="mic-label" id="mic-label">${escapeHtml(SPEAK_T.tapToAnswer)}</div>
+        <div class="transcript-wrap">
+          <div class="transcript-label">${escapeHtml(SPEAK_T.transcriptLabel)}</div>
+          <div class="transcript-box empty" id="transcript-text">${escapeHtml(SPEAK_T.noTranscript)}</div>
+        </div>
+        <div class="speak-error" id="speak-error" style="display:none;"></div>
+        <div class="speak-verdict" id="speak-verdict" style="display:none;"></div>
+      ` : `
+        <div class="speak-error" id="speak-error">${escapeHtml(SPEAK_T.unsupported)}</div>
+      `}
+    </div>`;
+  // Re-bind the audio button (the standard one above the speak section).
+  const tq = getT(q, 'q');
+  const audioText = tq || q.q;
+  const audioLangCode = (LANG_META[tq ? state.lang : 'en'] || LANG_META.en).tts;
+  document.getElementById('audio-btn').addEventListener('click', () => speakText(audioText, audioLangCode));
+  if (supported) {
+    document.getElementById('mic-btn').addEventListener('click', () => {
+      if (state.listening) stopListening();
+      else startListening();
+    });
+  }
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('action-area').innerHTML = '';
+  // Auto-play the question in Vietnamese a moment after render so the user
+  // hears it like a real interview. The audio button stays available for
+  // replay. Browsers that block auto-play (notably iOS Safari before any
+  // user gesture) will silently skip — the user can tap 🔊 manually.
+  setTimeout(() => speakText(audioText, audioLangCode), 400);
+}
+
 function renderQuestion() {
   const baseQ = state.questions[state.qIndex];
   const q = resolveQuestion(baseQ, state.userState);
   state.currentRenderedQ = q;
   state.answered = false;
+  renderModeToggle();
   // Build option objects carrying both the English text (for grading) and
   // the translated text (for display). We shuffle the objects so the
   // translations stay aligned with their English counterparts.
@@ -2402,6 +2867,13 @@ function renderQuestion() {
     questionTextBlock = `
       <div class="q-text">${escapeHtml(q.q)}</div>
       ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}${hintPill}</div>` : ''}`;
+  }
+
+  // Branch: speak mode runs through its own renderer (mic UI + transcript +
+  // verdict box). MCQ keeps the existing 4-option grid.
+  if (state.mode === 'speak' && speakModeAvailable()) {
+    renderSpeakInterface(q, questionTextBlock);
+    return;
   }
 
   document.getElementById('question-area').innerHTML = `

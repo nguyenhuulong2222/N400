@@ -87,6 +87,32 @@ q.a.some(a => norm(chosen).includes(norm(a)) || norm(a).includes(norm(chosen)))
 
 This is fragile. When adding a new question, ensure no distractor's normalized form contains (or is contained by) any accepted answer's normalized form, or correctness will be miscalled.
 
+## Speak mode (oral interview simulation)
+
+Vietnamese-only practice mode that mirrors the actual USCIS interview format:
+the question is spoken aloud via `speechSynthesis` (vi-VN voice), the user
+records an answer with the device microphone, and the Web Speech API's
+`SpeechRecognition` transcribes it. The transcript is normalized
+(diacritics stripped, lowercased, punctuation removed) and graded against
+both the Vietnamese `vi_a` list and the English `q.a` list — answering in
+either language counts. Three verdicts: `correct`, `partial` (significant
+keyword overlap but not a full match — yellow highlight), `wrong`.
+
+- Toggle lives in the quiz header. Only visible when the route is one of
+  the four native-language exemption routes (`5020`, `5515`, `6520_2025`,
+  `6520_2008`) AND the chosen language is `vi`. Switching to a non-vi
+  language or a non-exemption route forces back to MCQ.
+- Hard-cap: 20 seconds per attempt (in addition to the browser's
+  end-of-speech detection).
+- Browser support: `SpeechRecognition` is well-supported on Chrome
+  (desktop + Android) and Safari iOS 14.5+. Firefox and older Safari fall
+  back to a "browser not supported" message. The `vi-VN` voice quality
+  varies by OS — macOS bundles a usable one; Linux often has none, in
+  which case the TTS fallback is silent.
+
+Speak mode does not exist for Spanish yet; that's a planned follow-up
+once the matching heuristics have been validated for Vietnamese.
+
 ## Known gaps and bugs
 
 - **Q29 (your U.S. representative) is excluded** in both banks (2025 Q29 / 2008 Q23). It needs district-level data (435 reps, frequent turnover); we don't ship that table. Question is marked `excluded:true` and filtered from the asked pool.
