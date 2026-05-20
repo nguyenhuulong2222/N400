@@ -2014,8 +2014,8 @@
       </div>
     </div>
     <div class="mode-toggle" id="mode-toggle" role="tablist" aria-label="Practice mode">
-      <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button">Chọn đáp án</button>
-      <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button">Trả lời miệng</button>
+      <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button" data-i18n="quiz.modeMcq">Multiple choice</button>
+      <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button" data-i18n="quiz.modeSpeak">Speak answer</button>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="progress-fill" style="width:0%"></div>
@@ -2034,20 +2034,20 @@
       <div class="result-stats">
         <div class="result-stat">
           <span class="rs-num" id="res-correct">0</span>
-          <span class="rs-label">Correct</span>
+          <span class="rs-label" data-i18n="result.correct">Correct</span>
         </div>
         <div class="result-stat">
           <span class="rs-num" id="res-wrong">0</span>
-          <span class="rs-label">Wrong</span>
+          <span class="rs-label" data-i18n="result.wrong">Wrong</span>
         </div>
         <div class="result-stat">
           <span class="rs-num" id="res-total">0</span>
-          <span class="rs-label">Asked</span>
+          <span class="rs-label" data-i18n="result.asked">Asked</span>
         </div>
       </div>
       <div class="result-actions">
-        <button class="btn-primary" onclick="restartQuiz()">Practice Again</button>
-        <button class="btn-outline" onclick="goHome()">Change Version or Language</button>
+        <button class="btn-primary" onclick="restartQuiz()" data-i18n="result.practiceAgain">Practice Again</button>
+        <button class="btn-outline" onclick="goHome()" data-i18n="result.changeVersion">Change Version or Language</button>
       </div>
     </div>
   </div>
@@ -2064,202 +2064,202 @@
   <!-- All content here is static: every link points directly to uscis.gov.
        We don't host any of these PDFs — formn400.org is link-only. -->
   <div id="screen-resources" class="screen">
-    <h2 class="rs-section-title">Tài liệu học chính thức</h2>
-    <p class="rs-section-sub">Official USCIS study materials</p>
-    <div class="rs-note"><strong>Tất cả tài liệu bên dưới là tài liệu chính thức của USCIS</strong> — miễn phí và public domain. formn400.org không lưu trữ bất kỳ file nào — các nút bên dưới dẫn thẳng đến uscis.gov.</div>
+    <h2 class="rs-section-title" data-i18n="rs.sec.official">Official study materials</h2>
+    <p class="rs-section-sub" data-i18n="rs.sec.official.sub">Official USCIS study materials</p>
+    <div class="rs-note" data-i18n-html="rs.note"><strong>All materials below are official USCIS documents</strong> — free and public domain.</div>
 
-    <div class="rs-subsection">Bài thi 2025 (filed Oct 20, 2025 or later)</div>
+    <div class="rs-subsection" data-i18n="rs.sub.2025">2025 test (filed Oct 20, 2025 or later)</div>
     <div class="rs-doc-list">
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">128 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.128qa">128 questions &amp; answers</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">PDF</span>
-            <span class="rs-tag">Tiếng Anh</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.pdf">PDF</span>
+            <span class="rs-tag" data-i18n="rs.tag.en">English</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/2025-Civics-Test-128-Questions-and-Answers.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/2025-Civics-Test-128-Questions-and-Answers.pdf" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">Flashcard 128 câu</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.flash128">128-question flashcards</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">Web</span>
-            <span class="rs-tag">Tiếng Anh</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.web">Web</span>
+            <span class="rs-tag" data-i18n="rs.tag.en">English</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
     </div>
 
-    <div class="rs-subsection">Bài thi 2008 (filed before Oct 20, 2025)</div>
+    <div class="rs-subsection" data-i18n="rs.sub.2008">2008 test (filed before Oct 20, 2025)</div>
     <div class="rs-doc-list">
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.100qa">100 questions &amp; answers</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">PDF</span>
-            <span class="rs-tag">Tiếng Anh</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.pdf">PDF</span>
+            <span class="rs-tag" data-i18n="rs.tag.en">English</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/100q.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/100q.pdf" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.100qa">100 questions &amp; answers</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">PDF</span>
-            <span class="rs-tag">Tiếng Việt</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.pdf">PDF</span>
+            <span class="rs-tag" data-i18n="rs.tag.vi">Vietnamese</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.100qa">100 questions &amp; answers</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">PDF</span>
-            <span class="rs-tag">Tiếng Tây Ban Nha</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.pdf">PDF</span>
+            <span class="rs-tag" data-i18n="rs.tag.es">Spanish</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Spanish.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Spanish.pdf" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
     </div>
 
-    <div class="rs-subsection">65/20 Special Consideration</div>
+    <div class="rs-subsection" data-i18n="rs.sub.6520">65/20 Special Consideration</div>
     <div class="rs-doc-list">
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">20 câu hoa thị (đa ngôn ngữ)</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.20star.multi">20 starred questions (multilingual)</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">Web</span>
-            <span class="rs-tag">Đa ngôn ngữ</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.web">Web</span>
+            <span class="rs-tag" data-i18n="rs.tag.multi">Multilingual</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/citizenship-multilingual-resources" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/citizenship-multilingual-resources" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">20 câu hoa thị (Tiếng Việt)</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.20star.vi">20 starred questions (Vietnamese)</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">PDF</span>
-            <span class="rs-tag">Tiếng Việt</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.pdf">PDF</span>
+            <span class="rs-tag" data-i18n="rs.tag.vi">Vietnamese</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/65-20q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/65-20q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
     </div>
 
-    <div class="rs-subsection">Form N-400</div>
+    <div class="rs-subsection" data-i18n="rs.sub.n400">Form N-400</div>
     <div class="rs-doc-list">
       <div class="rs-doc-card">
         <div class="rs-doc-main">
-          <div class="rs-doc-title">Form N-400 — Application for Naturalization</div>
+          <div class="rs-doc-title" data-i18n="rs.doc.n400">Form N-400 — Application for Naturalization</div>
           <div class="rs-doc-tags">
-            <span class="rs-tag">Web</span>
-            <span class="rs-tag">Tiếng Anh</span>
-            <span class="rs-tag rs-tag-free">Miễn phí</span>
+            <span class="rs-tag" data-i18n="rs.tag.web">Web</span>
+            <span class="rs-tag" data-i18n="rs.tag.en">English</span>
+            <span class="rs-tag rs-tag-free" data-i18n="rs.tag.free">Free</span>
           </div>
-          <div class="rs-doc-desc">Đơn nộp để xin nhập tịch — điền online hoặc in ra.</div>
+          <div class="rs-doc-desc" data-i18n="rs.doc.n400.desc">Form to apply for naturalization — fill out online or print.</div>
         </div>
-        <a class="rs-doc-btn" href="https://www.uscis.gov/n-400" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/n-400" target="_blank" rel="noopener noreferrer" data-i18n="rs.btn.view">View →</a>
       </div>
     </div>
 
-    <h2 class="rs-section-title">Chuẩn bị trước buổi phỏng vấn</h2>
-    <p class="rs-section-sub">How to prepare for your USCIS interview</p>
+    <h2 class="rs-section-title" data-i18n="rs.sec.prep">Pre-interview preparation</h2>
+    <p class="rs-section-sub" data-i18n="rs.sec.prep.sub">How to prepare for your USCIS interview</p>
     <div class="rs-prep-grid">
       <div class="rs-prep-card">
         <div class="rs-prep-icon">📋</div>
-        <h3 class="rs-prep-title">Mang theo những gì?</h3>
+        <h3 class="rs-prep-title" data-i18n="rs.prep.bring.title">What to bring?</h3>
         <ul class="rs-prep-list">
-          <li>Giấy mời phỏng vấn <em>(appointment notice)</em></li>
-          <li>Thẻ xanh <em>(Green Card)</em></li>
-          <li>Hộ chiếu và giấy tờ du lịch</li>
-          <li>Giấy tờ thay đổi tên (nếu có)</li>
-          <li>Phiên dịch viên (nếu thuộc diện 50/20, 55/15, 65/20)</li>
-          <li>Giấy tờ thuế 5 năm gần nhất (nếu được yêu cầu)</li>
+          <li data-i18n-html="rs.prep.bring.li1">Appointment notice</li>
+          <li data-i18n-html="rs.prep.bring.li2">Green Card</li>
+          <li data-i18n="rs.prep.bring.li3">Passport and travel documents</li>
+          <li data-i18n="rs.prep.bring.li4">Name-change documents (if any)</li>
+          <li data-i18n="rs.prep.bring.li5">Interpreter (if you're 50/20, 55/15, or 65/20)</li>
+          <li data-i18n="rs.prep.bring.li6">Last 5 years of tax documents (if requested)</li>
         </ul>
       </div>
 
       <div class="rs-prep-card">
         <div class="rs-prep-icon">⏰</div>
-        <h3 class="rs-prep-title">Ngày phỏng vấn</h3>
+        <h3 class="rs-prep-title" data-i18n="rs.prep.day.title">Interview day</h3>
         <ul class="rs-prep-list">
-          <li>Đến sớm ít nhất 15 phút</li>
-          <li>Mặc trang phục lịch sự</li>
-          <li>Tắt điện thoại trước khi vào phòng</li>
-          <li>Officer sẽ yêu cầu bạn đọc lời tuyên thệ nói thật trước khi bắt đầu</li>
+          <li data-i18n="rs.prep.day.li1">Arrive at least 15 minutes early</li>
+          <li data-i18n="rs.prep.day.li2">Dress respectfully</li>
+          <li data-i18n="rs.prep.day.li3">Turn off your phone before entering</li>
+          <li data-i18n="rs.prep.day.li4">The officer will ask you to swear to tell the truth before starting</li>
         </ul>
       </div>
 
       <div class="rs-prep-card">
         <div class="rs-prep-icon">🗣️</div>
-        <h3 class="rs-prep-title">Trong phòng phỏng vấn</h3>
+        <h3 class="rs-prep-title" data-i18n="rs.prep.room.title">In the interview room</h3>
         <ul class="rs-prep-list">
-          <li>Trả lời rõ ràng, ngắn gọn — không nói quá nhiều</li>
-          <li>Nếu không nghe rõ: <em>"Could you please repeat the question?"</em></li>
-          <li>Nếu không hiểu: <em>"Could you please rephrase that?"</em></li>
-          <li>Không đoán — nếu không biết, nói <em>"I don't know"</em></li>
-          <li>Với diện 50+: phiên dịch viên ngồi cạnh, officer biết bạn sẽ trả lời tiếng Việt</li>
+          <li data-i18n="rs.prep.room.li1">Answer clearly and briefly — don't say too much</li>
+          <li data-i18n-html="rs.prep.room.li2">If you don't hear well: <em>"Could you please repeat the question?"</em></li>
+          <li data-i18n-html="rs.prep.room.li3">If you don't understand: <em>"Could you please rephrase that?"</em></li>
+          <li data-i18n-html="rs.prep.room.li4">Don't guess — if you don't know, say <em>"I don't know"</em></li>
+          <li data-i18n="rs.prep.room.li5">For 50+ applicants: your interpreter sits beside you and the officer knows you'll answer in your native language</li>
         </ul>
       </div>
 
       <div class="rs-prep-card">
         <div class="rs-prep-icon">✅</div>
-        <h3 class="rs-prep-title">Phần Civics</h3>
+        <h3 class="rs-prep-title" data-i18n="rs.prep.civics.title">Civics portion</h3>
         <ul class="rs-prep-list">
-          <li>Officer hỏi ngẫu nhiên từ danh sách</li>
-          <li>Trả lời bằng một câu ngắn là đủ — không cần giải thích dài</li>
-          <li>Nếu câu trả lời có nhiều đáp án đúng, chỉ cần nói một</li>
-          <li>Officer dừng khi bạn đã đủ điểm đậu hoặc rớt</li>
+          <li data-i18n="rs.prep.civics.li1">Officer asks at random from the list</li>
+          <li data-i18n="rs.prep.civics.li2">A short sentence is enough — no long explanations needed</li>
+          <li data-i18n="rs.prep.civics.li3">If a question has multiple correct answers, just say one</li>
+          <li data-i18n="rs.prep.civics.li4">The officer stops once you've reached pass or fail</li>
         </ul>
       </div>
 
       <div class="rs-prep-card">
         <div class="rs-prep-icon">🔄</div>
-        <h3 class="rs-prep-title">Nếu thi rớt</h3>
+        <h3 class="rs-prep-title" data-i18n="rs.prep.retest.title">If you fail</h3>
         <ul class="rs-prep-list">
-          <li>Được thi lại trong vòng 60–90 ngày</li>
-          <li>Chỉ thi lại phần bị rớt (civics hoặc tiếng Anh)</li>
-          <li>Vẫn dùng cùng bộ câu hỏi (2008 hoặc 2025 tùy ngày nộp đơn)</li>
+          <li data-i18n="rs.prep.retest.li1">You can retest within 60–90 days</li>
+          <li data-i18n="rs.prep.retest.li2">You retake only the failed portion (civics or English)</li>
+          <li data-i18n="rs.prep.retest.li3">Same question bank applies (2008 or 2025 based on filing date)</li>
         </ul>
       </div>
     </div>
 
-    <h2 class="rs-section-title">Link hữu ích</h2>
-    <p class="rs-section-sub">Useful links — all on uscis.gov</p>
+    <h2 class="rs-section-title" data-i18n="rs.sec.links">Useful links</h2>
+    <p class="rs-section-sub" data-i18n="rs.sec.links.sub">Useful links — all on uscis.gov</p>
     <ul class="rs-link-list">
       <li>
-        <a href="https://my.uscis.gov" target="_blank" rel="noopener noreferrer">Kiểm tra trạng thái hồ sơ
-          <span class="rs-link-desc">my.uscis.gov — đăng nhập để xem tình trạng đơn N-400 và đặt lịch hẹn</span>
+        <a href="https://my.uscis.gov" target="_blank" rel="noopener noreferrer"><span data-i18n="rs.link.status">Check your case status</span>
+          <span class="rs-link-desc" data-i18n="rs.link.status.desc">my.uscis.gov — log in to see N-400 status and schedule appointments</span>
         </a>
       </li>
       <li>
-        <a href="https://www.uscis.gov/citizenship/exceptions-and-accommodations" target="_blank" rel="noopener noreferrer">Ngoại lệ và điều chỉnh (50/20, 55/15, 65/20)
-          <span class="rs-link-desc">Quy định miễn trừ tiếng Anh và bài thi civics rút gọn cho người lớn tuổi</span>
+        <a href="https://www.uscis.gov/citizenship/exceptions-and-accommodations" target="_blank" rel="noopener noreferrer"><span data-i18n="rs.link.exceptions">Exceptions and accommodations (50/20, 55/15, 65/20)</span>
+          <span class="rs-link-desc" data-i18n="rs.link.exceptions.desc">Rules for English-language exemption and simplified civics test for older applicants</span>
         </a>
       </li>
       <li>
-        <a href="https://my.uscis.gov/find-a-field-office" target="_blank" rel="noopener noreferrer">Tìm văn phòng USCIS gần nhất
-          <span class="rs-link-desc">Tra cứu địa chỉ và giờ làm việc của văn phòng USCIS</span>
+        <a href="https://my.uscis.gov/find-a-field-office" target="_blank" rel="noopener noreferrer"><span data-i18n="rs.link.office">Find a USCIS field office near you</span>
+          <span class="rs-link-desc" data-i18n="rs.link.office.desc">Look up addresses and hours for USCIS field offices</span>
         </a>
       </li>
       <li>
-        <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">Tư vấn pháp lý miễn phí (legal aid)
-          <span class="rs-link-desc">Danh sách tổ chức cung cấp dịch vụ luật sư miễn phí hoặc giá thấp</span>
+        <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer"><span data-i18n="rs.link.legal">Free legal aid</span>
+          <span class="rs-link-desc" data-i18n="rs.link.legal.desc">List of organizations offering free or low-cost legal services</span>
         </a>
       </li>
       <li>
-        <a href="https://www.uscis.gov/sites/default/files/document/fact-sheets/Fact-Sheet-Promoting-Citizenship-for-50-and-Older.pdf" target="_blank" rel="noopener noreferrer">Fact Sheet cho người 50+
-          <span class="rs-link-desc">PDF — tóm tắt các diện ngoại lệ dành cho thường trú nhân từ 50 tuổi</span>
+        <a href="https://www.uscis.gov/sites/default/files/document/fact-sheets/Fact-Sheet-Promoting-Citizenship-for-50-and-Older.pdf" target="_blank" rel="noopener noreferrer"><span data-i18n="rs.link.50sheet">Fact Sheet for 50+ applicants</span>
+          <span class="rs-link-desc" data-i18n="rs.link.50sheet.desc">PDF — summary of exceptions for permanent residents 50 and older</span>
         </a>
       </li>
     </ul>
@@ -2452,6 +2452,11 @@ const QUESTIONS_2025 = [
     distractors:["Federal Court of Appeals","U.S. District Court","International Court of Justice"], vi: "Tòa án cao nhất ở Hoa Kỳ là gì?", vi_a: ["Tối Cao Pháp Viện"], es: "¿Cuál es el tribunal más alto de los Estados Unidos?", es_a: ["la Corte Suprema"], distractors_vi: ["Tòa Phúc Thẩm Liên Bang", "Tòa Án Liên Bang Khu Vực", "Tòa Án Công Lý Quốc Tế"], distractors_es: ["Tribunal Federal de Apelaciones", "Tribunal de Distrito de los EE.UU.", "Corte Internacional de Justicia"], distractors_vi_suggested: true, distractors_es_suggested: true },
   { id:53, q:"How many seats are on the Supreme Court?",
     a:["Nine (9)","Nine","9"],
+    // The USCIS-supplied vi/es accepted answers are a "check uscis.gov"
+    // boilerplate, not the numeric answer. display_a_override is shown in
+    // the feedback box so the user actually sees the correct number;
+    // grading still uses q.a (English).
+    display_a_override: { en:"Nine (9)", vi:"Chín (9)", es:"Nueve (9)" },
     distractors:["Seven (7)","Eleven (11)","Five (5)"], vi: "Có bao nhiêu thẩm phán ở Tối Cao Pháp Viện?", vi_a: ["Xin ghé thăm trang uscis.gov/citizenship/testupdates để biết số Thẩm Phán của Tòa Án Tối Cao Pháp Viện."], es: "¿Cuántos jueces hay en la Corte Suprema?", es_a: ["Visite uscis.gov/es/ciudadania/actualizacionesalexamen para saber el número de jueces en la Corte Suprema."], distractors_vi: ["Bảy (7)", "Mười Một (11)", "Năm (5)"], distractors_es: ["Siete (7)", "Once (11)", "Cinco (5)"], distractors_vi_suggested: true, distractors_es_suggested: true },
   { id:54, q:"How many Supreme Court justices are usually needed to decide a case?",
     a:["Five (5)","Five","5"],
@@ -2875,98 +2880,195 @@ const DATA_AS_OF = "2026-01";
 // Five-group simulation of the USCIS naturalization interview. All content
 // in Vietnamese (primary) + English (secondary). Anything the user enters
 // stays in JS memory only — see Invariant VIII in CLAUDE.md.
+// Oath of Allegiance — the officer reads `en`; vi/es are translations; the
+// gloss is a plain-language explanation per display language.
 const INTERVIEW_OATH = [
   { en:"I hereby declare, on oath, that I absolutely and entirely renounce and abjure all allegiance and fidelity to any foreign prince, potentate, state, or sovereignty, of whom or which I have heretofore been a subject or citizen;",
     vi:"Tôi xin tuyên thệ rằng tôi hoàn toàn và tuyệt đối từ bỏ mọi lòng trung thành với bất kỳ vị vua, lãnh chúa, nhà nước, hoặc chủ quyền nước ngoài nào mà trước đây tôi đã từng là thần dân hoặc công dân;",
-    gloss:"Bạn tuyên bố từ bỏ lòng trung thành với quốc gia mà bạn từng là công dân." },
+    es:"Declaro bajo juramento que renuncio absoluta y completamente a toda lealtad y fidelidad a cualquier príncipe, potentado, estado o soberanía extranjeros de los que haya sido súbdito o ciudadano hasta ahora;",
+    gloss: { en:"You declare you renounce loyalty to any country you were previously a citizen of.",
+             vi:"Bạn tuyên bố từ bỏ lòng trung thành với quốc gia mà bạn từng là công dân.",
+             es:"Usted declara que renuncia a la lealtad a cualquier país del que haya sido ciudadano." } },
   { en:"that I will support and defend the Constitution and laws of the United States of America against all enemies, foreign and domestic;",
     vi:"rằng tôi sẽ ủng hộ và bảo vệ Hiến Pháp và luật pháp của Hợp Chủng Quốc Hoa Kỳ chống lại mọi kẻ thù trong và ngoài nước;",
-    gloss:"Bạn cam kết ủng hộ và bảo vệ Hiến Pháp Hoa Kỳ chống lại mọi kẻ thù." },
+    es:"que apoyaré y defenderé la Constitución y las leyes de los Estados Unidos de América contra todos los enemigos, extranjeros y nacionales;",
+    gloss: { en:"You promise to support and defend the U.S. Constitution against all enemies.",
+             vi:"Bạn cam kết ủng hộ và bảo vệ Hiến Pháp Hoa Kỳ chống lại mọi kẻ thù.",
+             es:"Usted promete apoyar y defender la Constitución de EE.UU. contra todos los enemigos." } },
   { en:"that I will bear true faith and allegiance to the same;",
     vi:"rằng tôi sẽ thật sự trung thành;",
-    gloss:"Bạn sẽ thật sự trung thành với Hoa Kỳ." },
+    es:"que tendré verdadera fe y lealtad a la misma;",
+    gloss: { en:"You will be truly loyal to the United States.",
+             vi:"Bạn sẽ thật sự trung thành với Hoa Kỳ.",
+             es:"Usted será verdaderamente leal a los Estados Unidos." } },
   { en:"that I will bear arms on behalf of the United States when required by the law;",
     vi:"rằng tôi sẽ cầm vũ khí thay mặt Hoa Kỳ khi luật pháp yêu cầu;",
-    gloss:"Bạn sẵn sàng phục vụ trong quân đội nếu luật pháp yêu cầu." },
+    es:"que portaré armas en nombre de los Estados Unidos cuando la ley lo requiera;",
+    gloss: { en:"You will serve in the military if the law requires it.",
+             vi:"Bạn sẵn sàng phục vụ trong quân đội nếu luật pháp yêu cầu.",
+             es:"Servirá en el ejército si la ley lo exige." } },
   { en:"that I will perform noncombatant service in the Armed Forces of the United States when required by the law;",
     vi:"rằng tôi sẽ phục vụ phi chiến đấu trong Lực Lượng Vũ Trang Hoa Kỳ khi luật pháp yêu cầu;",
-    gloss:"Bạn sẵn sàng phục vụ phi chiến đấu trong quân đội nếu luật pháp yêu cầu." },
+    es:"que prestaré servicio no combatiente en las Fuerzas Armadas de los Estados Unidos cuando la ley lo requiera;",
+    gloss: { en:"You will perform noncombatant military service if the law requires it.",
+             vi:"Bạn sẵn sàng phục vụ phi chiến đấu trong quân đội nếu luật pháp yêu cầu.",
+             es:"Prestará servicio militar no combatiente si la ley lo exige." } },
   { en:"that I will perform work of national importance under civilian direction when required by the law;",
     vi:"rằng tôi sẽ làm công việc quan trọng của quốc gia dưới sự chỉ đạo dân sự khi luật pháp yêu cầu;",
-    gloss:"Bạn sẵn sàng làm công việc dân sự quan trọng cho quốc gia nếu luật pháp yêu cầu." },
+    es:"que realizaré trabajo de importancia nacional bajo dirección civil cuando la ley lo requiera;",
+    gloss: { en:"You will do civilian work of national importance if the law requires it.",
+             vi:"Bạn sẵn sàng làm công việc dân sự quan trọng cho quốc gia nếu luật pháp yêu cầu.",
+             es:"Realizará trabajo civil de importancia nacional si la ley lo exige." } },
   { en:"and that I take this obligation freely, without any mental reservation or purpose of evasion; so help me God.",
     vi:"và rằng tôi tự nguyện nhận trách nhiệm này, không có bất kỳ sự dè dặt nào về mặt tinh thần hoặc ý định trốn tránh; xin Chúa giúp con.",
-    gloss:"Bạn tự nguyện chấp nhận lời tuyên thệ này, không có ý định trốn tránh." },
+    es:"y que asumo esta obligación libremente, sin ninguna reserva mental ni propósito de evasión; que Dios me ayude.",
+    gloss: { en:"You take this oath freely, with no intention of evading it.",
+             vi:"Bạn tự nguyện chấp nhận lời tuyên thệ này, không có ý định trốn tránh.",
+             es:"Usted asume este juramento libremente, sin intención de evadirlo." } },
 ];
 
+// Interview groups. Every `title`, `intro`, `afterNote`, and question text is
+// an {en, vi, es} object — read via `pickLang(obj)` at render time. The
+// template for sample answers (group 1) is also per-language; the inserted
+// {v} value comes from the personal-info form and is rendered verbatim.
 const INTERVIEW_GROUPS = [
   {
     id: 1,
-    title: "Nhóm 1 · Thông tin cá nhân",
-    titleEn: "Personal Information",
-    intro: "Officer sẽ hỏi về thông tin cá nhân của bạn. Trang luyện tập sẽ dùng thông tin bạn vừa nhập để gợi ý cách trả lời.",
+    title: { en:"Group 1 · Personal information",  vi:"Nhóm 1 · Thông tin cá nhân",  es:"Grupo 1 · Información personal" },
+    intro: { en:"The officer will ask about your personal information. This practice page uses what you entered to suggest how to answer.",
+             vi:"Officer sẽ hỏi về thông tin cá nhân của bạn. Trang luyện tập sẽ dùng thông tin bạn vừa nhập để gợi ý cách trả lời.",
+             es:"El oficial le preguntará sobre su información personal. Esta página de práctica usa lo que ingresó para sugerir cómo responder." },
     mode: "listen-sample",
     requiresPersonalInput: true,
     questions: [
-      { en:"What is your full legal name?",      vi:"Họ và tên đầy đủ của bạn là gì?",      field:"fullName",     template:"Tên đầy đủ của tôi là {v}." },
-      { en:"What is your date of birth?",        vi:"Ngày sinh của bạn là ngày nào?",       field:"dob",          template:"Tôi sinh ngày {v}." },
-      { en:"What is your current address?",      vi:"Địa chỉ hiện tại của bạn là gì?",      field:"address",      template:"Tôi sống tại {v}." },
-      { en:"Have you ever used any other names?",vi:"Bạn có từng dùng tên khác không?",     field:"otherNames",   template:"{v}" },
-      { en:"What country were you born in?",     vi:"Bạn sinh ở quốc gia nào?",             field:"birthCountry", template:"Tôi sinh ra ở {v}." },
+      { en:"What is your full legal name?",
+        vi:"Họ và tên đầy đủ của bạn là gì?",
+        es:"¿Cuál es su nombre legal completo?",
+        field:"fullName",
+        template: { en:"My full legal name is {v}.", vi:"Tên đầy đủ của tôi là {v}.", es:"Mi nombre legal completo es {v}." } },
+      { en:"What is your date of birth?",
+        vi:"Ngày sinh của bạn là ngày nào?",
+        es:"¿Cuál es su fecha de nacimiento?",
+        field:"dob",
+        template: { en:"I was born on {v}.", vi:"Tôi sinh ngày {v}.", es:"Nací el {v}." } },
+      { en:"What is your current address?",
+        vi:"Địa chỉ hiện tại của bạn là gì?",
+        es:"¿Cuál es su dirección actual?",
+        field:"address",
+        template: { en:"I live at {v}.", vi:"Tôi sống tại {v}.", es:"Vivo en {v}." } },
+      { en:"Have you ever used any other names?",
+        vi:"Bạn có từng dùng tên khác không?",
+        es:"¿Ha usado alguna vez otros nombres?",
+        field:"otherNames",
+        template: { en:"{v}", vi:"{v}", es:"{v}" } },
+      { en:"What country were you born in?",
+        vi:"Bạn sinh ở quốc gia nào?",
+        es:"¿En qué país nació?",
+        field:"birthCountry",
+        template: { en:"I was born in {v}.", vi:"Tôi sinh ra ở {v}.", es:"Nací en {v}." } },
     ],
   },
   {
     id: 2,
-    title: "Nhóm 2 · Lịch sử cư trú",
-    titleEn: "Residency History",
-    intro: "Officer sẽ hỏi về thời gian bạn sống tại Hoa Kỳ. Hãy lắng nghe câu hỏi, trả lời theo tình hình thực tế, rồi tự đánh giá mức độ tự tin.",
+    title: { en:"Group 2 · Residency history", vi:"Nhóm 2 · Lịch sử cư trú", es:"Grupo 2 · Historial de residencia" },
+    intro: { en:"The officer will ask about your time in the U.S. Listen to each question, answer truthfully, then rate your confidence.",
+             vi:"Officer sẽ hỏi về thời gian bạn sống tại Hoa Kỳ. Hãy lắng nghe câu hỏi, trả lời theo tình hình thực tế, rồi tự đánh giá mức độ tự tin.",
+             es:"El oficial le preguntará sobre su tiempo en EE.UU. Escuche cada pregunta, responda con sinceridad y luego califique su confianza." },
     mode: "self-grade",
     questions: [
-      { en:"How long have you been a permanent resident?", vi:"Bạn đã là thường trú nhân được bao lâu?" },
-      { en:"Have you traveled outside the US in the last 5 years?", vi:"Trong 5 năm qua bạn có đi ra ngoài Hoa Kỳ không?" },
-      { en:"What was your longest trip outside the US? How long were you gone?", vi:"Chuyến đi dài nhất ra khỏi Hoa Kỳ của bạn là chuyến nào? Bạn đi bao lâu?" },
-      { en:"Have you lived at your current address for the last 3 months?", vi:"Bạn đã sống ở địa chỉ hiện tại trong 3 tháng qua chưa?" },
-      { en:"Have you been physically present in the US for at least 30 months in the last 5 years?", vi:"Bạn đã có mặt thực tế tại Hoa Kỳ ít nhất 30 tháng trong 5 năm qua chưa?" },
+      { en:"How long have you been a permanent resident?",
+        vi:"Bạn đã là thường trú nhân được bao lâu?",
+        es:"¿Cuánto tiempo lleva siendo residente permanente?" },
+      { en:"Have you traveled outside the US in the last 5 years?",
+        vi:"Trong 5 năm qua bạn có đi ra ngoài Hoa Kỳ không?",
+        es:"¿Ha viajado fuera de EE.UU. en los últimos 5 años?" },
+      { en:"What was your longest trip outside the US? How long were you gone?",
+        vi:"Chuyến đi dài nhất ra khỏi Hoa Kỳ của bạn là chuyến nào? Bạn đi bao lâu?",
+        es:"¿Cuál fue su viaje más largo fuera de EE.UU.? ¿Cuánto tiempo estuvo fuera?" },
+      { en:"Have you lived at your current address for the last 3 months?",
+        vi:"Bạn đã sống ở địa chỉ hiện tại trong 3 tháng qua chưa?",
+        es:"¿Ha vivido en su dirección actual durante los últimos 3 meses?" },
+      { en:"Have you been physically present in the US for at least 30 months in the last 5 years?",
+        vi:"Bạn đã có mặt thực tế tại Hoa Kỳ ít nhất 30 tháng trong 5 năm qua chưa?",
+        es:"¿Ha estado físicamente presente en EE.UU. al menos 30 meses en los últimos 5 años?" },
     ],
   },
   {
     id: 3,
-    title: "Nhóm 3 · Phẩm chất đạo đức tốt",
-    titleEn: "Good Moral Character",
-    intro: "Phần này gồm các câu hỏi Có/Không về hành vi trong quá khứ.",
+    title: { en:"Group 3 · Good moral character", vi:"Nhóm 3 · Phẩm chất đạo đức tốt", es:"Grupo 3 · Buen carácter moral" },
+    intro: { en:"This section is Yes/No questions about past conduct.",
+             vi:"Phần này gồm các câu hỏi Có/Không về hành vi trong quá khứ.",
+             es:"Esta sección son preguntas de Sí/No sobre conducta pasada." },
     requiresWarning: true,
     mode: "yes-no",
-    afterNote: "Trong buổi phỏng vấn thật, bạn cần trả lời thành thật. Nếu câu trả lời là \"Yes\", officer sẽ hỏi thêm chi tiết.",
+    afterNote: { en:"In the real interview you must answer truthfully. If you say \"Yes\", the officer will ask for details.",
+                 vi:"Trong buổi phỏng vấn thật, bạn cần trả lời thành thật. Nếu câu trả lời là \"Yes\", officer sẽ hỏi thêm chi tiết.",
+                 es:"En la entrevista real debe responder con sinceridad. Si dice \"Sí\", el oficial le pedirá detalles." },
     questions: [
-      { en:"Have you EVER been a member of or associated with any organization, association, fund, foundation, party, club, society, or similar group?", vi:"Bạn có TỪNG là thành viên hoặc có liên hệ với bất kỳ tổ chức, hội đoàn, quỹ, đảng phái, câu lạc bộ, hội, hay nhóm tương tự nào không?" },
-      { en:"Have you EVER been a habitual drunkard?", vi:"Bạn có TỪNG là người nghiện rượu mãn tính không?" },
-      { en:"Have you EVER advocated or practiced polygamy?", vi:"Bạn có TỪNG ủng hộ hoặc thực hành chế độ đa thê không?" },
-      { en:"Have you EVER been a prostitute or procured anyone for prostitution?", vi:"Bạn có TỪNG hành nghề mại dâm hoặc môi giới mại dâm không?" },
-      { en:"Have you EVER sold or smuggled controlled substances, illegal drugs, or narcotics?", vi:"Bạn có TỪNG bán hoặc buôn lậu chất kiểm soát, ma túy bất hợp pháp, hoặc thuốc gây nghiện không?" },
-      { en:"Have you EVER been arrested, cited, or detained by any law enforcement officer?", vi:"Bạn có TỪNG bị bắt, bị phạt, hoặc bị tạm giữ bởi bất kỳ nhân viên thi hành luật nào không?" },
-      { en:"Have you EVER been charged with committing, attempting to commit, or assisting in committing a crime or offense?", vi:"Bạn có TỪNG bị truy tố vì phạm tội, mưu toan phạm tội, hoặc giúp đỡ phạm tội không?" },
-      { en:"Have you EVER had any arrest or conviction vacated, expunged, or sealed by a court?", vi:"Bạn có TỪNG bị bắt hoặc kết án mà sau đó được tòa án hủy bỏ, xóa bỏ, hoặc niêm phong không?" },
-      { en:"Have you EVER failed to file a Federal, state, or local tax return?", vi:"Bạn có TỪNG không nộp tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?" },
-      { en:"Do you owe any Federal, State, or local taxes that are overdue?", vi:"Bạn có nợ thuế Liên Bang, Tiểu Bang, hoặc địa phương đã quá hạn không?" },
-      { en:"Have you EVER called yourself a 'nonresident' on a Federal, State, or local tax return?", vi:"Bạn có TỪNG khai mình là \"không cư trú\" (nonresident) trên tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?" },
-      { en:"Have you EVER failed to support your dependents or to pay alimony?", vi:"Bạn có TỪNG không cấp dưỡng cho người phụ thuộc hoặc không trả tiền cấp dưỡng vợ/chồng không?" },
+      { en:"Have you EVER been a member of or associated with any organization, association, fund, foundation, party, club, society, or similar group?",
+        vi:"Bạn có TỪNG là thành viên hoặc có liên hệ với bất kỳ tổ chức, hội đoàn, quỹ, đảng phái, câu lạc bộ, hội, hay nhóm tương tự nào không?",
+        es:"¿ALGUNA VEZ ha sido miembro o ha estado asociado con alguna organización, asociación, fondo, fundación, partido, club, sociedad o grupo similar?" },
+      { en:"Have you EVER been a habitual drunkard?",
+        vi:"Bạn có TỪNG là người nghiện rượu mãn tính không?",
+        es:"¿ALGUNA VEZ ha sido un bebedor habitual?" },
+      { en:"Have you EVER advocated or practiced polygamy?",
+        vi:"Bạn có TỪNG ủng hộ hoặc thực hành chế độ đa thê không?",
+        es:"¿ALGUNA VEZ ha defendido o practicado la poligamia?" },
+      { en:"Have you EVER been a prostitute or procured anyone for prostitution?",
+        vi:"Bạn có TỪNG hành nghề mại dâm hoặc môi giới mại dâm không?",
+        es:"¿ALGUNA VEZ ha sido prostituto/a o ha procurado a alguien para la prostitución?" },
+      { en:"Have you EVER sold or smuggled controlled substances, illegal drugs, or narcotics?",
+        vi:"Bạn có TỪNG bán hoặc buôn lậu chất kiểm soát, ma túy bất hợp pháp, hoặc thuốc gây nghiện không?",
+        es:"¿ALGUNA VEZ ha vendido o contrabandeado sustancias controladas, drogas ilegales o narcóticos?" },
+      { en:"Have you EVER been arrested, cited, or detained by any law enforcement officer?",
+        vi:"Bạn có TỪNG bị bắt, bị phạt, hoặc bị tạm giữ bởi bất kỳ nhân viên thi hành luật nào không?",
+        es:"¿ALGUNA VEZ ha sido arrestado, citado o detenido por algún agente del orden?" },
+      { en:"Have you EVER been charged with committing, attempting to commit, or assisting in committing a crime or offense?",
+        vi:"Bạn có TỪNG bị truy tố vì phạm tội, mưu toan phạm tội, hoặc giúp đỡ phạm tội không?",
+        es:"¿ALGUNA VEZ ha sido acusado de cometer, intentar cometer o ayudar a cometer un crimen o delito?" },
+      { en:"Have you EVER had any arrest or conviction vacated, expunged, or sealed by a court?",
+        vi:"Bạn có TỪNG bị bắt hoặc kết án mà sau đó được tòa án hủy bỏ, xóa bỏ, hoặc niêm phong không?",
+        es:"¿ALGUNA VEZ ha tenido un arresto o condena anulado, eliminado o sellado por un tribunal?" },
+      { en:"Have you EVER failed to file a Federal, state, or local tax return?",
+        vi:"Bạn có TỪNG không nộp tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?",
+        es:"¿ALGUNA VEZ ha dejado de presentar una declaración de impuestos federal, estatal o local?" },
+      { en:"Do you owe any Federal, State, or local taxes that are overdue?",
+        vi:"Bạn có nợ thuế Liên Bang, Tiểu Bang, hoặc địa phương đã quá hạn không?",
+        es:"¿Debe impuestos federales, estatales o locales vencidos?" },
+      { en:"Have you EVER called yourself a 'nonresident' on a Federal, State, or local tax return?",
+        vi:"Bạn có TỪNG khai mình là \"không cư trú\" (nonresident) trên tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?",
+        es:"¿ALGUNA VEZ se ha declarado \"no residente\" en una declaración de impuestos federal, estatal o local?" },
+      { en:"Have you EVER failed to support your dependents or to pay alimony?",
+        vi:"Bạn có TỪNG không cấp dưỡng cho người phụ thuộc hoặc không trả tiền cấp dưỡng vợ/chồng không?",
+        es:"¿ALGUNA VEZ ha dejado de mantener a sus dependientes o de pagar la pensión alimenticia?" },
     ],
   },
   {
     id: 4,
-    title: "Nhóm 4 · Tuyên thệ trung thành",
-    titleEn: "Oath of Allegiance",
-    intro: "Đây là Lời Tuyên Thệ Trung Thành mà bạn sẽ đọc tại buổi lễ nhập tịch. Hãy đọc cùng với officer và luyện tập để cảm thấy tự tin.",
+    title: { en:"Group 4 · Oath of Allegiance", vi:"Nhóm 4 · Tuyên thệ trung thành", es:"Grupo 4 · Juramento de Lealtad" },
+    intro: { en:"This is the Oath of Allegiance you will recite at your naturalization ceremony. Read along with the officer and practice until you feel confident.",
+             vi:"Đây là Lời Tuyên Thệ Trung Thành mà bạn sẽ đọc tại buổi lễ nhập tịch. Hãy đọc cùng với officer và luyện tập để cảm thấy tự tin.",
+             es:"Este es el Juramento de Lealtad que recitará en su ceremonia de naturalización. Léalo junto con el oficial y practique hasta sentirse seguro." },
     mode: "oath",
   },
   {
     id: 5,
-    title: "Nhóm 5 · Bài thi Civics",
-    titleEn: "Civics Test",
-    intro: "Bạn đã hoàn thành luyện tập phỏng vấn. Bước tiếp theo: luyện bài thi civics — câu hỏi về chính phủ và lịch sử Hoa Kỳ.",
+    title: { en:"Group 5 · Civics test", vi:"Nhóm 5 · Bài thi Civics", es:"Grupo 5 · Examen cívico" },
+    intro: { en:"You finished interview practice. Next step: civics practice — questions about U.S. government and history.",
+             vi:"Bạn đã hoàn thành luyện tập phỏng vấn. Bước tiếp theo: luyện bài thi civics — câu hỏi về chính phủ và lịch sử Hoa Kỳ.",
+             es:"Terminó la práctica de entrevista. Siguiente paso: práctica cívica — preguntas sobre el gobierno y la historia de EE.UU." },
     mode: "civics-link",
   },
 ];
+
+// Pick the active-language string from an {en, vi, es} object, falling back
+// to English then to whatever string is present.
+function pickLang(obj) {
+  if (!obj) return '';
+  if (typeof obj === 'string') return obj;
+  const lang = state && state.lang === 'es' ? 'es' : state && state.lang === 'vi' ? 'vi' : 'en';
+  return obj[lang] || obj.en || obj.vi || obj.es || '';
+}
 
 // ══ STATE ══
 let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null,
@@ -3182,7 +3284,241 @@ const UI_TEXT = {
                                   es:'Se usa para preguntas sobre sus senadores, gobernador y capital estatal. Los funcionarios cambian después de las elecciones — verifique las respuestas actuales en <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates" target="_blank">uscis.gov/testupdates</a>.' },
 
   "start.button":               { en:"Start Practice Session →",              vi:"Bắt Đầu Luyện Thi →",                                 es:"Iniciar Sesión de Práctica →" },
+
+  // ─── Quiz screen ────────────────────────────────────────────────────────
+  "quiz.questionOf":            { en:"Question {n} of {m}",                  vi:"Câu {n} / {m}",                                       es:"Pregunta {n} de {m}" },
+  "quiz.chooseAnswer":          { en:"Choose your answer",                   vi:"Chọn câu trả lời",                                    es:"Elige tu respuesta" },
+  "quiz.listen":                { en:"🔊 Listen",                            vi:"🔊 Nghe",                                              es:"🔊 Escuchar" },
+  "quiz.correct":               { en:"✓ Correct!",                           vi:"✓ Chính xác!",                                        es:"✓ ¡Correcto!" },
+  "quiz.incorrect":             { en:"✗ Incorrect",                          vi:"✗ Chưa đúng",                                         es:"✗ Incorrecto" },
+  "quiz.wellDone":              { en:"Well done.",                           vi:"Làm tốt lắm.",                                        es:"¡Bien hecho!" },
+  "quiz.accepted":              { en:"Accepted:",                            vi:"Đáp án đúng:",                                        es:"Aceptado:" },
+  "quiz.nextQuestion":          { en:"Next Question →",                      vi:"Câu tiếp theo →",                                     es:"Siguiente pregunta →" },
+  "quiz.seeResults":            { en:"See Results →",                        vi:"Xem kết quả →",                                       es:"Ver resultados →" },
+  "quiz.translationPending":    { en:"Translation to {lang} coming soon — showing English for now.",
+                                  vi:"Chưa có bản dịch tiếng {lang} — đang hiển thị tiếng Anh.",
+                                  es:"Traducción al {lang} próximamente — mostrando inglés por ahora." },
+  "quiz.translationPendingShort": { en:"Translation to {lang} coming soon",
+                                    vi:"Bản dịch tiếng {lang} sẽ có sớm",
+                                    es:"Traducción al {lang} próximamente" },
+  "quiz.exemptionBanner":       { en:"You are practicing in {langName} — bring a qualified interpreter to your USCIS interview.",
+                                  vi:"Bạn đang luyện tập bằng tiếng {langName} — nhớ mang phiên dịch viên đến buổi phỏng vấn USCIS.",
+                                  es:"Está practicando en {langName} — lleve un intérprete calificado a su entrevista de USCIS." },
+
+  // ─── Result screen ──────────────────────────────────────────────────────
+  "result.passed":              { en:"PASSED",                               vi:"ĐẠT",                                                  es:"APROBADO" },
+  "result.notYet":              { en:"NOT YET",                              vi:"CHƯA ĐẠT",                                            es:"AÚN NO" },
+  "result.passedSub":           { en:"You answered {n} correctly — enough to pass. Keep practicing!",
+                                  vi:"Bạn trả lời đúng {n} câu — đủ để đậu. Tiếp tục luyện tập!",
+                                  es:"Respondiste {n} correctamente — suficiente para aprobar. ¡Sigue practicando!" },
+  "result.failedSub":           { en:"You got {n} correct. You need {pass} to pass. Keep going!",
+                                  vi:"Bạn đúng {n} câu. Cần {pass} câu để đậu. Cố lên!",
+                                  es:"Obtuviste {n} correctas. Necesitas {pass} para aprobar. ¡Sigue adelante!" },
+  "result.correct":             { en:"Correct",                              vi:"Đúng",                                                 es:"Correctas" },
+  "result.wrong":               { en:"Wrong",                                vi:"Sai",                                                  es:"Incorrectas" },
+  "result.asked":               { en:"Asked",                                vi:"Đã hỏi",                                               es:"Preguntadas" },
+  "result.practiceAgain":       { en:"Practice Again",                       vi:"Luyện tập lại",                                       es:"Practicar de nuevo" },
+  "result.changeVersion":       { en:"Change Version or Language",           vi:"Đổi phiên bản hoặc ngôn ngữ",                         es:"Cambiar versión o idioma" },
+
+  // ─── Quiz mode toggle (MCQ vs Speak) — vi-only feature today, but the
+  //     labels are user-visible so they need translations for completeness. ─
+  "quiz.modeMcq":               { en:"Multiple choice",                      vi:"Chọn đáp án",                                         es:"Opción múltiple" },
+  "quiz.modeSpeak":             { en:"Speak answer",                         vi:"Trả lời miệng",                                       es:"Responder hablando" },
+
+  // ─── Interview tab ──────────────────────────────────────────────────────
+  "iv.home.title":              { en:"USCIS Interview Practice",             vi:"Luyện tập phỏng vấn USCIS",                            es:"Práctica de entrevista USCIS" },
+  "iv.home.subtitle":           { en:"A guided practice of the naturalization interview · 5 groups",
+                                  vi:"Hướng dẫn luyện tập phỏng vấn nhập tịch · 5 nhóm",
+                                  es:"Una práctica guiada de la entrevista de naturalización · 5 grupos" },
+  "iv.home.body1":              { en:"The USCIS naturalization interview has several parts. This page simulates each one so you get used to how the officer asks questions and how to answer with confidence.",
+                                  vi:"Buổi phỏng vấn nhập tịch USCIS gồm nhiều phần khác nhau. Trang này mô phỏng từng phần để bạn quen với cách officer đặt câu hỏi và cách trả lời tự tin.",
+                                  es:"La entrevista de naturalización USCIS tiene varias partes. Esta página simula cada una para que se acostumbre a cómo el oficial hace preguntas y a responder con confianza." },
+  "iv.home.body2.label":        { en:"5 groups:",                             vi:"5 nhóm:",                                              es:"5 grupos:" },
+  "iv.home.body2.list":         { en:"Personal information · Residency history · Good moral character · Oath of Allegiance · Civics test",
+                                  vi:"Thông tin cá nhân · Lịch sử cư trú · Phẩm chất đạo đức · Tuyên thệ trung thành · Bài thi civics",
+                                  es:"Información personal · Historial de residencia · Buen carácter moral · Juramento de Lealtad · Examen cívico" },
+  "iv.home.privacy":            { en:"This website <strong>does not collect, store, or transmit</strong> any personal information. Anything you type stays in your browser and disappears when you close the page.",
+                                  vi:"Trang web <strong>không thu thập, lưu trữ, hoặc gửi đi</strong> bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt và sẽ biến mất khi bạn đóng trang.",
+                                  es:"Este sitio web <strong>no recopila, almacena ni transmite</strong> ninguna información personal. Lo que escriba permanece en su navegador y desaparece al cerrar la página." },
+  "iv.home.start":              { en:"Start practice →",                     vi:"Bắt đầu luyện tập →",                                 es:"Comenzar práctica →" },
+
+  "iv.disc.title":              { en:"Privacy notice",                       vi:"Thông báo quyền riêng tư",                            es:"Aviso de privacidad" },
+  "iv.disc.subtitle":           { en:"Privacy notice — please read and acknowledge",
+                                  vi:"Thông báo quyền riêng tư — vui lòng đọc và xác nhận",
+                                  es:"Aviso de privacidad — por favor lea y reconozca" },
+  "iv.disc.body1":              { en:"The site <strong>formn400.org</strong> does not collect, store, or share any personal information. Anything you type stays in your browser and disappears when you close the page.",
+                                  vi:"Trang web <strong>formn400.org</strong> không thu thập, lưu trữ, hoặc chia sẻ bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt của bạn và sẽ biến mất khi bạn đóng trang.",
+                                  es:"El sitio <strong>formn400.org</strong> no recopila, almacena ni comparte ninguna información personal. Lo que escriba permanece en su navegador y desaparece al cerrar la página." },
+  "iv.disc.body2":              { en:"This is a <strong>practice tool</strong> — not legal advice. If you need advice about your naturalization application, consult an immigration attorney or accredited representative.",
+                                  vi:"Đây là <strong>công cụ luyện tập</strong> — không phải tư vấn pháp lý. Nếu bạn cần lời khuyên về hồ sơ nhập tịch, hãy tham khảo luật sư di trú hoặc đại diện được công nhận.",
+                                  es:"Esta es una <strong>herramienta de práctica</strong> — no es asesoría legal. Si necesita asesoría sobre su solicitud de naturalización, consulte a un abogado de inmigración o representante acreditado." },
+  "iv.disc.ack":                { en:"I understand",                          vi:"Tôi đã hiểu",                                          es:"Entiendo" },
+  "iv.disc.continue":           { en:"Start practice →",                     vi:"Bắt đầu luyện tập →",                                 es:"Comenzar práctica →" },
+
+  "iv.personal.progress":       { en:"Before group 1 · Personalization info", vi:"Trước nhóm 1 · Thông tin để cá nhân hóa",            es:"Antes del grupo 1 · Información para personalizar" },
+  "iv.personal.title":          { en:"Personal information (optional)",      vi:"Thông tin cá nhân (tùy chọn)",                        es:"Información personal (opcional)" },
+  "iv.personal.subtitle":       { en:"Optional — used only to personalize this practice session",
+                                  vi:"Tùy chọn — chỉ dùng để cá nhân hóa bài luyện tập này",
+                                  es:"Opcional — solo se usa para personalizar esta sesión de práctica" },
+  "iv.personal.privacy":        { en:"This information is used only to personalize practice in your browser. The site does not transmit any of it.",
+                                  vi:"Thông tin này chỉ dùng để cá nhân hóa bài luyện tập trong trình duyệt của bạn. Trang web không gửi đi bất kỳ nội dung nào.",
+                                  es:"Esta información se usa solo para personalizar la práctica en su navegador. El sitio no transmite ningún contenido." },
+  "iv.personal.fullName":       { en:"Full legal name",                      vi:"Họ và tên đầy đủ",                                    es:"Nombre legal completo" },
+  "iv.personal.fullName.ph":    { en:"e.g., John Doe",                       vi:"VD: Nguyễn Văn A",                                    es:"Ej.: Juan Pérez" },
+  "iv.personal.dob":            { en:"Date of birth",                        vi:"Ngày sinh",                                            es:"Fecha de nacimiento" },
+  "iv.personal.dob.ph":         { en:"e.g., May 15, 1975",                   vi:"VD: 15 Tháng 5, 1975",                                es:"Ej.: 15 de mayo de 1975" },
+  "iv.personal.address":        { en:"Current address",                      vi:"Địa chỉ hiện tại",                                    es:"Dirección actual" },
+  "iv.personal.address.ph":     { en:"e.g., 123 Main St, San Jose, CA",      vi:"VD: 123 Main St, San Jose, CA",                       es:"Ej.: 123 Main St, San Jose, CA" },
+  "iv.personal.otherNames":     { en:"Other names used (if any)",            vi:"Tên khác đã dùng (nếu có)",                           es:"Otros nombres usados (si los hay)" },
+  "iv.personal.otherNames.ph":  { en:"e.g., None, or list other names",      vi:"VD: Không, hoặc liệt kê tên khác",                    es:"Ej.: Ninguno, o liste otros nombres" },
+  "iv.personal.birthCountry":   { en:"Country of birth",                     vi:"Quốc gia nơi sinh",                                   es:"País de nacimiento" },
+  "iv.personal.birthCountry.ph":{ en:"e.g., Vietnam",                        vi:"VD: Việt Nam",                                        es:"Ej.: México" },
+  "iv.personal.continue":       { en:"Continue →",                           vi:"Tiếp tục →",                                          es:"Continuar →" },
+  "iv.personal.skip":           { en:"Skip this step →",                     vi:"Bỏ qua bước này →",                                  es:"Omitir este paso →" },
+
+  "iv.g3.title":                { en:"⚠️ Important notice",                  vi:"⚠️ Lưu ý quan trọng",                                 es:"⚠️ Aviso importante" },
+  "iv.g3.body1":                { en:"These are questions you <strong>will be asked</strong> in the real USCIS interview.",
+                                  vi:"Đây là các câu hỏi bạn <strong>sẽ được hỏi</strong> trong buổi phỏng vấn USCIS thật.",
+                                  es:"Estas son preguntas que <strong>le harán</strong> en la entrevista USCIS real." },
+  "iv.g3.body2":                { en:"The purpose of this section is to help you <strong>get used to how questions are asked</strong> — NOT to collect your answers.",
+                                  vi:"Mục đích của phần này là giúp bạn <strong>quen với cách đặt câu hỏi</strong> — KHÔNG phải để thu thập câu trả lời của bạn.",
+                                  es:"El propósito de esta sección es ayudarle a <strong>familiarizarse con cómo se hacen las preguntas</strong> — NO para recopilar sus respuestas." },
+  "iv.g3.body3":                { en:"<strong>formn400.org does NOT record, store, or view your answers.</strong>",
+                                  vi:"<strong>formn400.org KHÔNG ghi lại, lưu trữ, hoặc xem câu trả lời của bạn.</strong>",
+                                  es:"<strong>formn400.org NO graba, almacena ni ve sus respuestas.</strong>" },
+  "iv.g3.body4":                { en:"Your real answers at the interview depend on your personal circumstances. Consult an immigration attorney if you need advice.",
+                                  vi:"Câu trả lời thật trong buổi phỏng vấn phụ thuộc vào hoàn cảnh cá nhân của bạn. Hãy tham khảo luật sư nhập cư nếu cần tư vấn.",
+                                  es:"Sus respuestas reales en la entrevista dependen de sus circunstancias personales. Consulte a un abogado de inmigración si necesita asesoría." },
+  "iv.g3.continue":             { en:"I understand, continue practice →",    vi:"Tôi đã hiểu, tiếp tục luyện tập →",                  es:"Entiendo, continuar la práctica →" },
+  "iv.g3.skip":                 { en:"Skip this group →",                    vi:"Bỏ qua nhóm này →",                                  es:"Omitir este grupo →" },
+
+  "iv.sample.label":            { en:"Sample answer",                        vi:"Gợi ý cách trả lời",                                  es:"Respuesta de ejemplo" },
+  "iv.sample.empty":            { en:"(No data — you skipped the personal info step. Answer based on your own information.)",
+                                  vi:"(Không có dữ liệu — bạn đã bỏ qua bước nhập thông tin cá nhân. Hãy tự trả lời theo thông tin của bạn.)",
+                                  es:"(Sin datos — omitió el paso de información personal. Responda según su propia información.)" },
+  "iv.grade.up":                { en:"I'm confident",                        vi:"Tôi tự tin",                                          es:"Tengo confianza" },
+  "iv.grade.down":              { en:"Need more practice",                   vi:"Cần luyện thêm",                                      es:"Necesito más práctica" },
+  "iv.yn.yes":                  { en:"Yes",                                  vi:"Có",                                                  es:"Sí" },
+  "iv.yn.no":                   { en:"No",                                   vi:"Không",                                               es:"No" },
+  "iv.next.q":                  { en:"Next question →",                      vi:"Câu tiếp theo →",                                    es:"Siguiente pregunta →" },
+  "iv.next.qAnswered":          { en:"I've answered → Next question",        vi:"Tôi đã trả lời → Câu tiếp theo",                     es:"Ya respondí → Siguiente pregunta" },
+  "iv.next.group":              { en:"Next group →",                         vi:"Sang nhóm tiếp theo →",                              es:"Siguiente grupo →" },
+  "iv.next.finish":             { en:"Finish →",                             vi:"Hoàn thành →",                                       es:"Finalizar →" },
+  "iv.listen":                  { en:"🔊 Listen again",                      vi:"🔊 Nghe lại",                                         es:"🔊 Escuchar de nuevo" },
+  "iv.progress.groupOfTotal":   { en:"Group {n}/{total} · Question {i}/{q} · {title}",
+                                  vi:"Nhóm {n}/{total} · Câu {i}/{q} · {title}",
+                                  es:"Grupo {n}/{total} · Pregunta {i}/{q} · {title}" },
+  "iv.progress.groupTitle":     { en:"Group {n}/{total} · {title}",          vi:"Nhóm {n}/{total} · {title}",                          es:"Grupo {n}/{total} · {title}" },
+
+  "iv.oath.title":              { en:"Oath of Allegiance",                   vi:"Tuyên Thệ Trung Thành",                               es:"Juramento de Lealtad" },
+  "iv.oath.subtitle":           { en:"Oath of Allegiance · the oath you read at your naturalization ceremony",
+                                  vi:"Tuyên Thệ Trung Thành · lời tuyên thệ bạn đọc tại buổi lễ nhập tịch",
+                                  es:"Juramento de Lealtad · el juramento que lee en su ceremonia de naturalización" },
+  "iv.oath.body":               { en:"<strong>Read aloud and practice so you feel confident.</strong> Each section below has the English (the officer reads), the translation, and a plain-language explanation.",
+                                  vi:"<strong>Hãy đọc to và luyện tập để cảm thấy tự tin.</strong> Mỗi đoạn dưới đây có bản tiếng Anh (officer sẽ đọc), bản dịch, và một câu giải thích đơn giản.",
+                                  es:"<strong>Lea en voz alta y practique para sentirse seguro.</strong> Cada sección a continuación tiene el inglés (que lee el oficial), la traducción y una explicación en lenguaje sencillo." },
+  "iv.oath.listenFull":         { en:"🔊 Hear the officer read the oath",    vi:"🔊 Nghe officer đọc lời tuyên thệ",                  es:"🔊 Escuche al oficial leer el juramento" },
+
+  "iv.civics.bridge":           { en:"You've finished interview practice! The last step is <strong>civics practice</strong> — 128 questions from the 2025 test or 100 from the 2008 test. Pick the version that matches when you filed Form N-400.",
+                                  vi:"Bạn đã luyện tập phỏng vấn xong! Bước cuối là <strong>luyện thi civics</strong> — 128 câu hỏi của bài thi 2025 hoặc 100 câu của bài 2008. Hãy chọn phiên bản phù hợp với ngày bạn nộp đơn N-400.",
+                                  es:"¡Terminó la práctica de entrevista! El último paso es <strong>práctica de educación cívica</strong> — 128 preguntas del examen 2025 o 100 del examen 2008. Elija la versión que coincida con cuándo presentó el Formulario N-400." },
+  "iv.civics.goCivics":         { en:"Go to civics practice →",              vi:"Sang luyện thi civics →",                              es:"Ir a la práctica cívica →" },
+
+  "iv.done.title":              { en:"You finished practice!",                vi:"Bạn đã luyện tập xong!",                              es:"¡Terminó la práctica!" },
+  "iv.done.sub":                { en:"Good luck and congratulations on becoming a U.S. citizen soon. Check with USCIS for your official interview schedule.",
+                                  vi:"Chúc bạn thi đậu và sớm trở thành công dân Hoa Kỳ. Hãy tham khảo USCIS để biết lịch hẹn phỏng vấn chính thức.",
+                                  es:"Buena suerte y felicidades por convertirse pronto en ciudadano estadounidense. Consulte con USCIS para su horario de entrevista oficial." },
+  "iv.done.uscis":              { en:"Schedule with USCIS →",                vi:"Đặt lịch hẹn USCIS →",                                es:"Programar con USCIS →" },
+  "iv.done.retry":              { en:"Practice again",                       vi:"Luyện tập lại",                                       es:"Practicar de nuevo" },
+  "iv.done.toCivics":           { en:"Go to civics practice",                vi:"Sang luyện thi civics",                                es:"Ir a la práctica cívica" },
+
+  // ─── Resources tab ──────────────────────────────────────────────────────
+  "rs.sec.official":            { en:"Official study materials",              vi:"Tài liệu học chính thức",                             es:"Materiales de estudio oficiales" },
+  "rs.sec.official.sub":        { en:"Official USCIS study materials",       vi:"Tài liệu học chính thức từ USCIS",                    es:"Materiales de estudio oficiales de USCIS" },
+  "rs.note":                    { en:"<strong>All materials below are official USCIS documents</strong> — free and public domain. formn400.org does not host any files — the buttons go directly to uscis.gov.",
+                                  vi:"<strong>Tất cả tài liệu bên dưới là tài liệu chính thức của USCIS</strong> — miễn phí và public domain. formn400.org không lưu trữ bất kỳ file nào — các nút bên dưới dẫn thẳng đến uscis.gov.",
+                                  es:"<strong>Todos los materiales a continuación son documentos oficiales de USCIS</strong> — gratuitos y de dominio público. formn400.org no aloja ningún archivo — los botones llevan directamente a uscis.gov." },
+  "rs.sub.2025":                { en:"2025 test (filed Oct 20, 2025 or later)", vi:"Bài thi 2025 (nộp từ ngày 20/10/2025 trở đi)",      es:"Examen 2025 (presentado el 20 oct. 2025 o después)" },
+  "rs.sub.2008":                { en:"2008 test (filed before Oct 20, 2025)", vi:"Bài thi 2008 (nộp trước ngày 20/10/2025)",            es:"Examen 2008 (presentado antes del 20 oct. 2025)" },
+  "rs.sub.6520":                { en:"65/20 Special Consideration",          vi:"Diện 65/20 đặc biệt",                                 es:"Consideración especial 65/20" },
+  "rs.sub.n400":                { en:"Form N-400",                           vi:"Mẫu N-400",                                            es:"Formulario N-400" },
+  "rs.doc.128qa":               { en:"128 questions & answers",              vi:"128 câu hỏi & đáp án",                                 es:"128 preguntas y respuestas" },
+  "rs.doc.flash128":            { en:"128-question flashcards",              vi:"Flashcard 128 câu",                                    es:"Tarjetas de 128 preguntas" },
+  "rs.doc.100qa":               { en:"100 questions & answers",              vi:"100 câu hỏi & đáp án",                                 es:"100 preguntas y respuestas" },
+  "rs.doc.20star.multi":        { en:"20 starred questions (multilingual)",  vi:"20 câu hoa thị (đa ngôn ngữ)",                         es:"20 preguntas con estrella (multilingüe)" },
+  "rs.doc.20star.vi":           { en:"20 starred questions (Vietnamese)",    vi:"20 câu hoa thị (Tiếng Việt)",                          es:"20 preguntas con estrella (vietnamita)" },
+  "rs.doc.n400":                { en:"Form N-400 — Application for Naturalization", vi:"Mẫu N-400 — Đơn xin nhập tịch",               es:"Formulario N-400 — Solicitud de Naturalización" },
+  "rs.doc.n400.desc":           { en:"Form to apply for naturalization — fill out online or print.",
+                                  vi:"Đơn nộp để xin nhập tịch — điền online hoặc in ra.",
+                                  es:"Formulario para solicitar la naturalización — complete en línea o imprima." },
+  "rs.tag.pdf":                 { en:"PDF",                                  vi:"PDF",                                                  es:"PDF" },
+  "rs.tag.web":                 { en:"Web",                                  vi:"Web",                                                  es:"Web" },
+  "rs.tag.en":                  { en:"English",                              vi:"Tiếng Anh",                                            es:"Inglés" },
+  "rs.tag.vi":                  { en:"Vietnamese",                           vi:"Tiếng Việt",                                           es:"Vietnamita" },
+  "rs.tag.es":                  { en:"Spanish",                              vi:"Tiếng Tây Ban Nha",                                    es:"Español" },
+  "rs.tag.multi":               { en:"Multilingual",                         vi:"Đa ngôn ngữ",                                          es:"Multilingüe" },
+  "rs.tag.free":                { en:"Free",                                 vi:"Miễn phí",                                             es:"Gratis" },
+  "rs.btn.view":                { en:"View →",                               vi:"Xem tài liệu →",                                      es:"Ver documento →" },
+
+  "rs.sec.prep":                { en:"Pre-interview preparation",            vi:"Chuẩn bị trước buổi phỏng vấn",                       es:"Preparación previa a la entrevista" },
+  "rs.sec.prep.sub":            { en:"How to prepare for your USCIS interview", vi:"Cách chuẩn bị cho buổi phỏng vấn USCIS",          es:"Cómo prepararse para su entrevista USCIS" },
+  "rs.prep.bring.title":        { en:"What to bring?",                       vi:"Mang theo những gì?",                                 es:"¿Qué llevar?" },
+  "rs.prep.bring.li1":          { en:"Appointment notice",                   vi:"Giấy mời phỏng vấn <em>(appointment notice)</em>",    es:"Aviso de cita <em>(appointment notice)</em>" },
+  "rs.prep.bring.li2":          { en:"Green Card",                           vi:"Thẻ xanh <em>(Green Card)</em>",                       es:"Tarjeta verde <em>(Green Card)</em>" },
+  "rs.prep.bring.li3":          { en:"Passport and travel documents",        vi:"Hộ chiếu và giấy tờ du lịch",                          es:"Pasaporte y documentos de viaje" },
+  "rs.prep.bring.li4":          { en:"Name-change documents (if any)",       vi:"Giấy tờ thay đổi tên (nếu có)",                       es:"Documentos de cambio de nombre (si los hay)" },
+  "rs.prep.bring.li5":          { en:"Interpreter (if you're 50/20, 55/15, or 65/20)", vi:"Phiên dịch viên (nếu thuộc diện 50/20, 55/15, 65/20)", es:"Intérprete (si está bajo 50/20, 55/15 o 65/20)" },
+  "rs.prep.bring.li6":          { en:"Last 5 years of tax documents (if requested)", vi:"Giấy tờ thuế 5 năm gần nhất (nếu được yêu cầu)", es:"Documentos de impuestos de los últimos 5 años (si se solicitan)" },
+  "rs.prep.day.title":          { en:"Interview day",                        vi:"Ngày phỏng vấn",                                       es:"Día de la entrevista" },
+  "rs.prep.day.li1":            { en:"Arrive at least 15 minutes early",     vi:"Đến sớm ít nhất 15 phút",                              es:"Llegue al menos 15 minutos antes" },
+  "rs.prep.day.li2":            { en:"Dress respectfully",                   vi:"Mặc trang phục lịch sự",                               es:"Vístase de manera respetuosa" },
+  "rs.prep.day.li3":            { en:"Turn off your phone before entering",  vi:"Tắt điện thoại trước khi vào phòng",                   es:"Apague su teléfono antes de entrar" },
+  "rs.prep.day.li4":            { en:"The officer will ask you to swear to tell the truth before starting", vi:"Officer sẽ yêu cầu bạn đọc lời tuyên thệ nói thật trước khi bắt đầu", es:"El oficial le pedirá jurar decir la verdad antes de comenzar" },
+  "rs.prep.room.title":         { en:"In the interview room",                vi:"Trong phòng phỏng vấn",                                es:"En la sala de entrevista" },
+  "rs.prep.room.li1":           { en:"Answer clearly and briefly — don't say too much", vi:"Trả lời rõ ràng, ngắn gọn — không nói quá nhiều", es:"Responda con claridad y brevedad — no diga demasiado" },
+  "rs.prep.room.li2":           { en:"If you don't hear well: <em>\"Could you please repeat the question?\"</em>", vi:"Nếu không nghe rõ: <em>\"Could you please repeat the question?\"</em>", es:"Si no escucha bien: <em>\"Could you please repeat the question?\"</em>" },
+  "rs.prep.room.li3":           { en:"If you don't understand: <em>\"Could you please rephrase that?\"</em>", vi:"Nếu không hiểu: <em>\"Could you please rephrase that?\"</em>", es:"Si no entiende: <em>\"Could you please rephrase that?\"</em>" },
+  "rs.prep.room.li4":           { en:"Don't guess — if you don't know, say <em>\"I don't know\"</em>", vi:"Không đoán — nếu không biết, nói <em>\"I don't know\"</em>", es:"No adivine — si no sabe, diga <em>\"I don't know\"</em>" },
+  "rs.prep.room.li5":           { en:"For 50+ applicants: your interpreter sits beside you and the officer knows you'll answer in your native language", vi:"Với diện 50+: phiên dịch viên ngồi cạnh, officer biết bạn sẽ trả lời tiếng Việt", es:"Para solicitantes 50+: su intérprete se sienta a su lado y el oficial sabe que responderá en su idioma nativo" },
+  "rs.prep.civics.title":       { en:"Civics portion",                       vi:"Phần Civics",                                          es:"Parte cívica" },
+  "rs.prep.civics.li1":         { en:"Officer asks at random from the list", vi:"Officer hỏi ngẫu nhiên từ danh sách",                  es:"El oficial pregunta al azar de la lista" },
+  "rs.prep.civics.li2":         { en:"A short sentence is enough — no long explanations needed", vi:"Trả lời bằng một câu ngắn là đủ — không cần giải thích dài", es:"Una oración corta es suficiente — no se necesitan explicaciones largas" },
+  "rs.prep.civics.li3":         { en:"If a question has multiple correct answers, just say one", vi:"Nếu câu trả lời có nhiều đáp án đúng, chỉ cần nói một", es:"Si una pregunta tiene varias respuestas correctas, solo diga una" },
+  "rs.prep.civics.li4":         { en:"The officer stops once you've reached pass or fail", vi:"Officer dừng khi bạn đã đủ điểm đậu hoặc rớt", es:"El oficial se detiene cuando alcanza el aprobado o el reprobado" },
+  "rs.prep.retest.title":       { en:"If you fail",                          vi:"Nếu thi rớt",                                          es:"Si reprueba" },
+  "rs.prep.retest.li1":         { en:"You can retest within 60–90 days",     vi:"Được thi lại trong vòng 60–90 ngày",                   es:"Puede volver a tomarlo en 60–90 días" },
+  "rs.prep.retest.li2":         { en:"You retake only the failed portion (civics or English)", vi:"Chỉ thi lại phần bị rớt (civics hoặc tiếng Anh)", es:"Solo repite la parte reprobada (cívica o inglés)" },
+  "rs.prep.retest.li3":         { en:"Same question bank applies (2008 or 2025 based on filing date)", vi:"Vẫn dùng cùng bộ câu hỏi (2008 hoặc 2025 tùy ngày nộp đơn)", es:"Aplica el mismo banco de preguntas (2008 o 2025 según la fecha de presentación)" },
+
+  "rs.sec.links":               { en:"Useful links",                         vi:"Link hữu ích",                                         es:"Enlaces útiles" },
+  "rs.sec.links.sub":           { en:"Useful links — all on uscis.gov",      vi:"Link hữu ích — đều trên uscis.gov",                    es:"Enlaces útiles — todos en uscis.gov" },
+  "rs.link.status":             { en:"Check your case status",               vi:"Kiểm tra trạng thái hồ sơ",                            es:"Verifique el estado de su caso" },
+  "rs.link.status.desc":        { en:"my.uscis.gov — log in to see N-400 status and schedule appointments", vi:"my.uscis.gov — đăng nhập để xem tình trạng đơn N-400 và đặt lịch hẹn", es:"my.uscis.gov — inicie sesión para ver el estado del N-400 y programar citas" },
+  "rs.link.exceptions":         { en:"Exceptions and accommodations (50/20, 55/15, 65/20)", vi:"Ngoại lệ và điều chỉnh (50/20, 55/15, 65/20)", es:"Excepciones y adaptaciones (50/20, 55/15, 65/20)" },
+  "rs.link.exceptions.desc":    { en:"Rules for English-language exemption and simplified civics test for older applicants", vi:"Quy định miễn trừ tiếng Anh và bài thi civics rút gọn cho người lớn tuổi", es:"Reglas para la exención del idioma inglés y el examen cívico simplificado para solicitantes mayores" },
+  "rs.link.office":             { en:"Find a USCIS field office near you",   vi:"Tìm văn phòng USCIS gần nhất",                         es:"Encuentre una oficina USCIS cercana" },
+  "rs.link.office.desc":        { en:"Look up addresses and hours for USCIS field offices", vi:"Tra cứu địa chỉ và giờ làm việc của văn phòng USCIS", es:"Consulte direcciones y horarios de las oficinas USCIS" },
+  "rs.link.legal":              { en:"Free legal aid",                       vi:"Tư vấn pháp lý miễn phí (legal aid)",                  es:"Asesoría legal gratuita (legal aid)" },
+  "rs.link.legal.desc":         { en:"List of organizations offering free or low-cost legal services", vi:"Danh sách tổ chức cung cấp dịch vụ luật sư miễn phí hoặc giá thấp", es:"Lista de organizaciones que ofrecen servicios legales gratuitos o de bajo costo" },
+  "rs.link.50sheet":            { en:"Fact Sheet for 50+ applicants",        vi:"Fact Sheet cho người 50+",                             es:"Hoja informativa para solicitantes 50+" },
+  "rs.link.50sheet.desc":       { en:"PDF — summary of exceptions for permanent residents 50 and older", vi:"PDF — tóm tắt các diện ngoại lệ dành cho thường trú nhân từ 50 tuổi", es:"PDF — resumen de excepciones para residentes permanentes de 50 años o más" },
 };
+
+// Lookup a UI string for the active display language with English fallback.
+// Substitutes {placeholder} tokens from the optional vars object.
+function t(key, vars) {
+  const entry = UI_TEXT[key];
+  if (!entry) return key;
+  const lang = (state && state.lang === 'es') ? 'es'
+             : (state && state.lang === 'vi') ? 'vi' : 'en';
+  let str = entry[lang] != null ? entry[lang] : entry.en;
+  if (vars) {
+    for (const k of Object.keys(vars)) {
+      str = str.split('{' + k + '}').join(String(vars[k]));
+    }
+  }
+  return str;
+}
 
 function updateUILanguage(lang) {
   // vi/es have full coverage. Other languages fall back to English so the
@@ -3202,6 +3538,10 @@ function updateUILanguage(lang) {
   // hyphenation, font-rendering, and screen-reader voice.
   const htmlLang = useLang === 'vi' ? 'vi' : useLang === 'es' ? 'es' : 'en';
   document.documentElement.setAttribute('lang', htmlLang);
+  // Re-render screens whose content is built in JS (not driven by data-i18n).
+  if (typeof renderInterview === 'function' && state && state.tab === 'interview') {
+    renderInterview();
+  }
 }
 
 function selectState(sel) {
@@ -3287,7 +3627,10 @@ function renderExemptionBanner() {
   const showBanner = isExempt && state.lang !== 'en';
   if (showBanner) {
     const meta = LANG_META[state.lang] || { name: state.lang };
-    banner.innerHTML = `<span class="eb-icon">i</span>You are practicing in <strong>${escapeHtml(meta.name)}</strong> — bring a qualified interpreter to your USCIS interview.`;
+    // The template carries {langName} surrounded by <strong> in the rendered
+    // form; we substitute the bolded name in safely.
+    const msg = t('quiz.exemptionBanner', { langName: '<strong>' + escapeHtml(meta.name) + '</strong>' });
+    banner.innerHTML = `<span class="eb-icon">i</span>${msg}`;
     banner.classList.add('visible');
   } else {
     banner.innerHTML = '';
@@ -3600,11 +3943,11 @@ function renderSpeakInterface(q, questionTextBlock) {
   const supported = !!SR;
   document.getElementById('question-area').innerHTML = `
     <div class="question-card">
-      <div class="q-number">Question ${state.qIndex+1} of ${state.askCount}</div>
+      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: state.qIndex+1, m: state.askCount }))}</div>
       ${questionTextBlock}
       ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
       ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
-      <button class="audio-btn" id="audio-btn" type="button">🔊 Listen</button>
+      <button class="audio-btn" id="audio-btn" type="button">${escapeHtml(t('quiz.listen'))}</button>
     </div>
     <div class="speak-container">
       ${supported ? `
@@ -3650,8 +3993,12 @@ function renderQuestion() {
   // the translated text (for display). We shuffle the objects so the
   // translations stay aligned with their English counterparts.
   const correctEn = q.a[0];
-  const correctVi = (q.vi_a || [])[0] || null;
-  const correctEs = (q.es_a || [])[0] || null;
+  // Prefer display_a_override for the correct option's vi/es text when set —
+  // see Q53: USCIS's official vi/es answers are a long "check uscis.gov"
+  // sentence, not the actual numeric answer. Without the override the option
+  // button would carry that long sentence instead of "Chín (9)" / "Nueve (9)".
+  const correctVi = (q.display_a_override && q.display_a_override.vi) || (q.vi_a || [])[0] || null;
+  const correctEs = (q.display_a_override && q.display_a_override.es) || (q.es_a || [])[0] || null;
   const distractorIndices = shuffle((q.distractors || []).map((_, i) => i)).slice(0, 3);
   const wrongOpts = distractorIndices.map(i => ({
     en: q.distractors[i],
@@ -3686,7 +4033,7 @@ function renderQuestion() {
       // No translation available at all — we should not hit this often now that
       // all 128 2025 questions have at least a suggested translation.
       questionTextBlock = `
-        <div class="translation-pending-banner">Translation to ${escapeHtml(langName)} coming soon — showing English for now.</div>
+        <div class="translation-pending-banner">${escapeHtml(t('quiz.translationPending', { lang: langName }))}</div>
         <div class="q-text-en-fallback"><span class="en-tag">EN</span>${escapeHtml(q.q)}</div>`;
     }
   } else {
@@ -3704,14 +4051,14 @@ function renderQuestion() {
 
   document.getElementById('question-area').innerHTML = `
     <div class="question-card">
-      <div class="q-number">Question ${state.qIndex+1} of ${state.askCount}</div>
+      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: state.qIndex+1, m: state.askCount }))}</div>
       ${questionTextBlock}
       ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
       ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
-      <button class="audio-btn" id="audio-btn" type="button">🔊 Listen</button>
+      <button class="audio-btn" id="audio-btn" type="button">${escapeHtml(t('quiz.listen'))}</button>
     </div>
     <div class="answer-section">
-      <div class="answer-label">Choose your answer</div>
+      <div class="answer-label">${escapeHtml(t('quiz.chooseAnswer'))}</div>
       <div class="answer-options" id="opts">
         ${opts.map((opt,i) => {
           // In native-language mode show the translated text as primary with
@@ -3775,13 +4122,26 @@ function selectAnswer(el, chosen) {
     ? `<span class="trans-hint">${escapeHtml(hintLabel)}</span>` : '';
   let translationLine = '';
   if (taText) translationLine = `<br><em>${escapeHtml(taText)}</em>${hintPill}`;
-  else if (nativeMode && !isCorrect) translationLine = `<br><span class="translation-pending">Translation to ${escapeHtml(langName)} coming soon</span>`;
+  else if (nativeMode && !isCorrect) translationLine = `<br><span class="translation-pending">${escapeHtml(t('quiz.translationPendingShort', { lang: langName }))}</span>`;
+
+  // Q53-style override: USCIS's official vi/es answers for "How many seats on
+  // the Supreme Court?" are a "check uscis.gov" boilerplate sentence, not a
+  // number. When the question carries display_a_override, prefer those values
+  // in the feedback box so the user actually sees the numeric answer.
+  let acceptedDisplay;
+  if (q.display_a_override) {
+    const ov = q.display_a_override;
+    const ovText = state.lang === 'vi' ? (ov.vi || ov.en) : state.lang === 'es' ? (ov.es || ov.en) : ov.en;
+    acceptedDisplay = ovText;
+  } else {
+    acceptedDisplay = q.a.join(' / ');
+  }
 
   document.getElementById('feedback-area').innerHTML = `
     <div class="feedback-box ${isCorrect?'correct':'wrong'}">
-      <div class="fb-title">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>
+      <div class="fb-title">${escapeHtml(isCorrect ? t('quiz.correct') : t('quiz.incorrect'))}</div>
       <div class="fb-answer">
-        ${isCorrect ? 'Well done.' : `Accepted: <strong>${escapeHtml(q.a.join(' / '))}</strong>`}
+        ${isCorrect ? escapeHtml(t('quiz.wellDone')) : `${escapeHtml(t('quiz.accepted'))} <strong>${escapeHtml(acceptedDisplay)}</strong>`}
         ${translationLine}
       </div>
     </div>`;
@@ -3791,7 +4151,7 @@ function selectAnswer(el, chosen) {
   const btn = document.createElement('button');
   btn.className = 'btn-next';
   btn.type = 'button';
-  btn.textContent = ended ? 'See Results →' : 'Next Question →';
+  btn.textContent = ended ? t('quiz.seeResults') : t('quiz.nextQuestion');
   btn.addEventListener('click', ended ? showResult : nextQuestion);
   ac.appendChild(btn);
 }
@@ -3807,14 +4167,17 @@ function showResult() {
   const passed = state.correct >= state.passThreshold;
   const total = state.correct + state.wrong;
   document.getElementById('result-icon').textContent = passed ? '🎉' : '📚';
-  document.getElementById('result-verdict').textContent = passed ? 'PASSED' : 'NOT YET';
+  document.getElementById('result-verdict').textContent = passed ? t('result.passed') : t('result.notYet');
   document.getElementById('result-verdict').className = 'result-verdict '+(passed?'pass':'fail');
   document.getElementById('result-sub').textContent = passed
-    ? `You answered ${state.correct} correctly — enough to pass. Keep practicing to build confidence!`
-    : `You got ${state.correct} correct. You need ${state.passThreshold} to pass. Keep going!`;
+    ? t('result.passedSub', { n: state.correct })
+    : t('result.failedSub', { n: state.correct, pass: state.passThreshold });
   document.getElementById('res-correct').textContent = state.correct;
   document.getElementById('res-wrong').textContent = state.wrong;
   document.getElementById('res-total').textContent = total;
+  // Pick up the static result-screen labels (data-i18n attributes) in the
+  // current language since updateUILanguage runs lazily.
+  updateUILanguage(state.lang);
   showScreen('result');
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -3862,15 +4225,15 @@ function renderInterview() {
 function renderInterviewHome() {
   return `
     <div class="iv-card">
-      <h2 class="iv-title">Luyện tập phỏng vấn USCIS</h2>
-      <p class="iv-subtitle">A guided practice of the naturalization interview · 5 nhóm</p>
+      <h2 class="iv-title">${escapeHtml(t('iv.home.title'))}</h2>
+      <p class="iv-subtitle">${escapeHtml(t('iv.home.subtitle'))}</p>
       <div class="iv-body">
-        <p>Buổi phỏng vấn nhập tịch USCIS gồm nhiều phần khác nhau. Trang này mô phỏng từng phần để bạn quen với cách officer đặt câu hỏi và cách trả lời tự tin.</p>
-        <p><strong>5 nhóm:</strong> Thông tin cá nhân · Lịch sử cư trú · Phẩm chất đạo đức · Tuyên thệ trung thành · Bài thi civics</p>
-        <p>Trang web <strong>không thu thập, lưu trữ, hoặc gửi đi</strong> bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt và sẽ biến mất khi bạn đóng trang.</p>
+        <p>${escapeHtml(t('iv.home.body1'))}</p>
+        <p><strong>${escapeHtml(t('iv.home.body2.label'))}</strong> ${escapeHtml(t('iv.home.body2.list'))}</p>
+        <p>${t('iv.home.privacy')}</p>
       </div>
       <div class="iv-action-row">
-        <button class="btn-primary" onclick="advanceInterview('disclaimer')">Bắt đầu luyện tập →</button>
+        <button class="btn-primary" onclick="advanceInterview('disclaimer')">${escapeHtml(t('iv.home.start'))}</button>
       </div>
     </div>`;
 }
@@ -3878,18 +4241,18 @@ function renderInterviewHome() {
 function renderInterviewDisclaimer() {
   return `
     <div class="iv-card">
-      <h2 class="iv-title">Thông báo quyền riêng tư</h2>
-      <p class="iv-subtitle">Privacy notice — please read and acknowledge</p>
+      <h2 class="iv-title">${escapeHtml(t('iv.disc.title'))}</h2>
+      <p class="iv-subtitle">${escapeHtml(t('iv.disc.subtitle'))}</p>
       <div class="iv-body">
-        <p>Trang web <strong>formn400.org</strong> không thu thập, lưu trữ, hoặc chia sẻ bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt của bạn và sẽ biến mất khi bạn đóng trang.</p>
-        <p>Đây là <strong>công cụ luyện tập</strong> — không phải tư vấn pháp lý. Nếu bạn cần lời khuyên về hồ sơ nhập tịch, hãy tham khảo luật sư di trú hoặc đại diện được công nhận.</p>
+        <p>${t('iv.disc.body1')}</p>
+        <p>${t('iv.disc.body2')}</p>
       </div>
       <label class="iv-ack-row">
         <input type="checkbox" id="iv-ack-disclaimer" onchange="onAckDisclaimerChange(this)" ${state.interview.ackDisclaimer ? 'checked' : ''}>
-        <span class="iv-ack-label">Tôi đã hiểu</span>
+        <span class="iv-ack-label">${escapeHtml(t('iv.disc.ack'))}</span>
       </label>
       <div class="iv-action-row">
-        <button class="btn-primary" id="iv-ack-next" ${state.interview.ackDisclaimer ? '' : 'disabled'} onclick="advanceInterview('personal')">Bắt đầu luyện tập →</button>
+        <button class="btn-primary" id="iv-ack-next" ${state.interview.ackDisclaimer ? '' : 'disabled'} onclick="advanceInterview('personal')">${escapeHtml(t('iv.disc.continue'))}</button>
       </div>
     </div>`;
 }
@@ -3904,35 +4267,35 @@ function renderInterviewPersonal() {
   const p = state.interview.personal;
   return `
     <div class="iv-card">
-      <div class="iv-progress">Trước nhóm 1 · Thông tin để cá nhân hóa</div>
-      <h2 class="iv-title">Thông tin cá nhân (tùy chọn)</h2>
-      <p class="iv-subtitle">Optional — used only to personalize this practice session</p>
-      <div class="iv-privacy-banner">Thông tin này chỉ dùng để cá nhân hóa bài luyện tập trong trình duyệt của bạn. Trang web không gửi đi bất kỳ nội dung nào.</div>
+      <div class="iv-progress">${escapeHtml(t('iv.personal.progress'))}</div>
+      <h2 class="iv-title">${escapeHtml(t('iv.personal.title'))}</h2>
+      <p class="iv-subtitle">${escapeHtml(t('iv.personal.subtitle'))}</p>
+      <div class="iv-privacy-banner">${escapeHtml(t('iv.personal.privacy'))}</div>
       <div class="iv-form">
         <div class="iv-field">
-          <label for="iv-fullName">Họ và tên đầy đủ</label>
-          <input id="iv-fullName" type="text" value="${escapeHtml(p.fullName)}" oninput="updatePersonal('fullName', this.value)" placeholder="VD: Nguyễn Văn A">
+          <label for="iv-fullName">${escapeHtml(t('iv.personal.fullName'))}</label>
+          <input id="iv-fullName" type="text" value="${escapeHtml(p.fullName)}" oninput="updatePersonal('fullName', this.value)" placeholder="${escapeHtml(t('iv.personal.fullName.ph'))}">
         </div>
         <div class="iv-field">
-          <label for="iv-dob">Ngày sinh</label>
-          <input id="iv-dob" type="text" value="${escapeHtml(p.dob)}" oninput="updatePersonal('dob', this.value)" placeholder="VD: 15 Tháng 5, 1975">
+          <label for="iv-dob">${escapeHtml(t('iv.personal.dob'))}</label>
+          <input id="iv-dob" type="text" value="${escapeHtml(p.dob)}" oninput="updatePersonal('dob', this.value)" placeholder="${escapeHtml(t('iv.personal.dob.ph'))}">
         </div>
         <div class="iv-field">
-          <label for="iv-address">Địa chỉ hiện tại</label>
-          <input id="iv-address" type="text" value="${escapeHtml(p.address)}" oninput="updatePersonal('address', this.value)" placeholder="VD: 123 Main St, San Jose, CA">
+          <label for="iv-address">${escapeHtml(t('iv.personal.address'))}</label>
+          <input id="iv-address" type="text" value="${escapeHtml(p.address)}" oninput="updatePersonal('address', this.value)" placeholder="${escapeHtml(t('iv.personal.address.ph'))}">
         </div>
         <div class="iv-field">
-          <label for="iv-otherNames">Tên khác đã dùng (nếu có)</label>
-          <input id="iv-otherNames" type="text" value="${escapeHtml(p.otherNames)}" oninput="updatePersonal('otherNames', this.value)" placeholder="VD: Không, hoặc liệt kê tên khác">
+          <label for="iv-otherNames">${escapeHtml(t('iv.personal.otherNames'))}</label>
+          <input id="iv-otherNames" type="text" value="${escapeHtml(p.otherNames)}" oninput="updatePersonal('otherNames', this.value)" placeholder="${escapeHtml(t('iv.personal.otherNames.ph'))}">
         </div>
         <div class="iv-field">
-          <label for="iv-birthCountry">Quốc gia nơi sinh</label>
-          <input id="iv-birthCountry" type="text" value="${escapeHtml(p.birthCountry)}" oninput="updatePersonal('birthCountry', this.value)" placeholder="VD: Việt Nam">
+          <label for="iv-birthCountry">${escapeHtml(t('iv.personal.birthCountry'))}</label>
+          <input id="iv-birthCountry" type="text" value="${escapeHtml(p.birthCountry)}" oninput="updatePersonal('birthCountry', this.value)" placeholder="${escapeHtml(t('iv.personal.birthCountry.ph'))}">
         </div>
       </div>
       <div class="iv-action-row">
-        <button class="btn-primary" onclick="startInterviewGroups()">Tiếp tục →</button>
-        <button class="iv-btn-skip" onclick="startInterviewGroups()">Bỏ qua bước này →</button>
+        <button class="btn-primary" onclick="startInterviewGroups()">${escapeHtml(t('iv.personal.continue'))}</button>
+        <button class="iv-btn-skip" onclick="startInterviewGroups()">${escapeHtml(t('iv.personal.skip'))}</button>
       </div>
     </div>`;
 }
@@ -3951,17 +4314,17 @@ function startInterviewGroups() {
 function renderInterviewG3Warning() {
   return `
     <div class="iv-warning">
-      <div class="iv-warning-title">⚠️ Lưu ý quan trọng</div>
+      <div class="iv-warning-title">${escapeHtml(t('iv.g3.title'))}</div>
       <div class="iv-warning-body">
-        <p>Đây là các câu hỏi bạn <strong>sẽ được hỏi</strong> trong buổi phỏng vấn USCIS thật.</p>
-        <p>Mục đích của phần này là giúp bạn <strong>quen với cách đặt câu hỏi</strong> — KHÔNG phải để thu thập câu trả lời của bạn.</p>
-        <p><strong>formn400.org KHÔNG ghi lại, lưu trữ, hoặc xem câu trả lời của bạn.</strong></p>
-        <p>Câu trả lời thật trong buổi phỏng vấn phụ thuộc vào hoàn cảnh cá nhân của bạn. Hãy tham khảo luật sư nhập cư nếu cần tư vấn.</p>
+        <p>${t('iv.g3.body1')}</p>
+        <p>${t('iv.g3.body2')}</p>
+        <p>${t('iv.g3.body3')}</p>
+        <p>${escapeHtml(t('iv.g3.body4'))}</p>
       </div>
     </div>
     <div class="iv-action-row">
-      <button class="btn-primary" onclick="ackG3AndContinue()">Tôi đã hiểu, tiếp tục luyện tập →</button>
-      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+      <button class="btn-primary" onclick="ackG3AndContinue()">${escapeHtml(t('iv.g3.continue'))}</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">${escapeHtml(t('iv.g3.skip'))}</button>
     </div>`;
 }
 
@@ -3987,16 +4350,23 @@ function renderInterviewGroup() {
 
   const q = g.questions[i];
   const totalQs = g.questions.length;
+  const lang = state.lang === 'es' ? 'es' : state.lang === 'vi' ? 'vi' : 'en';
+  // Native-language line for the question (vi/es) — falls back to English.
+  const qNative = pickLang(q) || q.en;
+  const qEn = q.en;
+  const showEnSecondary = lang !== 'en' && qNative !== qEn;
 
   // Group 1: render sample answer using personal-input data when supplied.
   let belowQuestion = '';
   if (g.mode === 'listen-sample') {
     const value = state.interview.personal[q.field] || '';
+    const tpl = pickLang(q.template) || '{v}';
+    const sampleLabel = escapeHtml(t('iv.sample.label'));
     if (value.trim()) {
-      const filled = q.template.replace('{v}', value);
-      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">Gợi ý cách trả lời</div>${escapeHtml(filled)}</div>`;
+      const filled = tpl.replace('{v}', value);
+      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">${sampleLabel}</div>${escapeHtml(filled)}</div>`;
     } else {
-      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">Gợi ý cách trả lời</div><em style="color:var(--text-muted)">(Không có dữ liệu — bạn đã bỏ qua bước nhập thông tin cá nhân. Hãy tự trả lời theo thông tin của bạn.)</em></div>`;
+      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">${sampleLabel}</div><em style="color:var(--text-muted)">${escapeHtml(t('iv.sample.empty'))}</em></div>`;
     }
   }
 
@@ -4005,35 +4375,35 @@ function renderInterviewGroup() {
     const pick = state.interview._lastGrade;
     interaction = `
       <div class="iv-grade-row">
-        <button class="iv-grade-btn ${pick==='up'?'picked':''}" onclick="onSelfGrade('up')"><span class="gr-emoji">👍</span>Tôi tự tin</button>
-        <button class="iv-grade-btn ${pick==='down'?'picked':''}" onclick="onSelfGrade('down')"><span class="gr-emoji">👎</span>Cần luyện thêm</button>
+        <button class="iv-grade-btn ${pick==='up'?'picked':''}" onclick="onSelfGrade('up')"><span class="gr-emoji">👍</span>${escapeHtml(t('iv.grade.up'))}</button>
+        <button class="iv-grade-btn ${pick==='down'?'picked':''}" onclick="onSelfGrade('down')"><span class="gr-emoji">👎</span>${escapeHtml(t('iv.grade.down'))}</button>
       </div>`;
   } else if (g.mode === 'yes-no') {
     const pick = state.interview._lastYN;
     interaction = `
       <div class="iv-yn-row">
-        <button class="iv-yn-btn ${pick==='yes'?'picked':''}" onclick="onYesNo('yes')"><span class="yn-emoji">Yes</span>Có</button>
-        <button class="iv-yn-btn ${pick==='no'?'picked':''}" onclick="onYesNo('no')"><span class="yn-emoji">No</span>Không</button>
+        <button class="iv-yn-btn ${pick==='yes'?'picked':''}" onclick="onYesNo('yes')"><span class="yn-emoji">Yes</span>${escapeHtml(t('iv.yn.yes'))}</button>
+        <button class="iv-yn-btn ${pick==='no'?'picked':''}" onclick="onYesNo('no')"><span class="yn-emoji">No</span>${escapeHtml(t('iv.yn.no'))}</button>
       </div>
-      ${g.afterNote ? `<div class="iv-after-note">${escapeHtml(g.afterNote)}</div>` : ''}`;
+      ${g.afterNote ? `<div class="iv-after-note">${escapeHtml(pickLang(g.afterNote))}</div>` : ''}`;
   }
 
   const nextLabel = (i + 1 >= totalQs)
-    ? (state.interview.groupIdx + 1 >= INTERVIEW_GROUPS.length ? "Hoàn thành →" : "Sang nhóm tiếp theo →")
-    : (g.mode === 'listen-sample' ? "Tôi đã trả lời → Câu tiếp theo" : "Câu tiếp theo →");
+    ? (state.interview.groupIdx + 1 >= INTERVIEW_GROUPS.length ? t('iv.next.finish') : t('iv.next.group'))
+    : (g.mode === 'listen-sample' ? t('iv.next.qAnswered') : t('iv.next.q'));
 
   return `
-    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · Câu ${i+1}/${totalQs} · ${escapeHtml(g.title)}</div>
+    <div class="iv-progress">${escapeHtml(t('iv.progress.groupOfTotal', { n: g.id, total: INTERVIEW_GROUPS.length, i: i+1, q: totalQs, title: pickLang(g.title) }))}</div>
     <div class="iv-q-card">
-      <div class="iv-q-vi">${escapeHtml(q.vi)}</div>
-      <div class="iv-q-en"><span class="en-label">EN</span>${escapeHtml(q.en)}</div>
-      <button class="audio-btn" id="audio-btn" type="button" onclick="speakInterviewQuestion()">🔊 Nghe lại</button>
+      <div class="iv-q-vi">${escapeHtml(qNative)}</div>
+      ${showEnSecondary ? `<div class="iv-q-en"><span class="en-label">EN</span>${escapeHtml(qEn)}</div>` : ''}
+      <button class="audio-btn" id="audio-btn" type="button" onclick="speakInterviewQuestion()">${escapeHtml(t('iv.listen'))}</button>
       ${belowQuestion}
       ${interaction}
     </div>
     <div class="iv-action-row">
       <button class="btn-primary" onclick="nextInterviewQuestion()">${escapeHtml(nextLabel)}</button>
-      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">${escapeHtml(t('iv.g3.skip'))}</button>
     </div>`;
 }
 
@@ -4054,44 +4424,49 @@ function onYesNo(yn) {
 }
 
 function renderOathScreen(g) {
-  const clauses = INTERVIEW_OATH.map(c => `
+  const lang = state.lang === 'es' ? 'es' : state.lang === 'vi' ? 'vi' : 'en';
+  const clauses = INTERVIEW_OATH.map(c => {
+    const nativeText = lang === 'vi' ? c.vi : lang === 'es' ? c.es : null;
+    const gloss = pickLang(c.gloss);
+    return `
     <div class="iv-oath-clause">
       <div class="iv-oath-en">${escapeHtml(c.en)}</div>
-      <div class="iv-oath-vi">${escapeHtml(c.vi)}</div>
-      <div class="iv-oath-gloss">${escapeHtml(c.gloss)}</div>
-    </div>`).join('');
+      ${nativeText ? `<div class="iv-oath-vi">${escapeHtml(nativeText)}</div>` : ''}
+      <div class="iv-oath-gloss">${escapeHtml(gloss)}</div>
+    </div>`;
+  }).join('');
   return `
-    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · ${escapeHtml(g.title)}</div>
+    <div class="iv-progress">${escapeHtml(t('iv.progress.groupTitle', { n: g.id, total: INTERVIEW_GROUPS.length, title: pickLang(g.title) }))}</div>
     <div class="iv-card">
-      <h2 class="iv-title">Tuyên Thệ Trung Thành</h2>
-      <p class="iv-subtitle">Oath of Allegiance · the oath you read at your naturalization ceremony</p>
+      <h2 class="iv-title">${escapeHtml(t('iv.oath.title'))}</h2>
+      <p class="iv-subtitle">${escapeHtml(t('iv.oath.subtitle'))}</p>
       <div class="iv-body">
-        <p>${escapeHtml(g.intro)}</p>
-        <p><strong>Hãy đọc to và luyện tập để cảm thấy tự tin.</strong> Mỗi đoạn dưới đây có bản tiếng Anh (officer sẽ đọc), bản tiếng Việt, và một câu giải thích đơn giản.</p>
+        <p>${escapeHtml(pickLang(g.intro))}</p>
+        <p>${t('iv.oath.body')}</p>
       </div>
       <div style="margin: 18px 0;">
-        <button class="audio-btn" type="button" onclick="speakFullOath()">🔊 Nghe officer đọc lời tuyên thệ</button>
+        <button class="audio-btn" type="button" onclick="speakFullOath()">${escapeHtml(t('iv.oath.listenFull'))}</button>
       </div>
       <div class="iv-oath-clauses">${clauses}</div>
     </div>
     <div class="iv-action-row">
-      <button class="btn-primary" onclick="advanceToNextGroup()">Sang nhóm tiếp theo →</button>
-      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+      <button class="btn-primary" onclick="advanceToNextGroup()">${escapeHtml(t('iv.next.group'))}</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">${escapeHtml(t('iv.g3.skip'))}</button>
     </div>`;
 }
 
 function renderCivicsLinkScreen(g) {
   return `
-    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · ${escapeHtml(g.title)}</div>
+    <div class="iv-progress">${escapeHtml(t('iv.progress.groupTitle', { n: g.id, total: INTERVIEW_GROUPS.length, title: pickLang(g.title) }))}</div>
     <div class="iv-card">
-      <h2 class="iv-title">${escapeHtml(g.title)}</h2>
+      <h2 class="iv-title">${escapeHtml(pickLang(g.title))}</h2>
       <div class="iv-body">
-        <p>${escapeHtml(g.intro)}</p>
-        <p>Bạn đã luyện tập phỏng vấn xong! Bước cuối là <strong>luyện thi civics</strong> — 128 câu hỏi của bài thi 2025 hoặc 100 câu của bài 2008. Hãy chọn phiên bản phù hợp với ngày bạn nộp đơn N-400.</p>
+        <p>${escapeHtml(pickLang(g.intro))}</p>
+        <p>${t('iv.civics.bridge')}</p>
       </div>
       <div class="iv-action-row">
-        <button class="btn-primary" onclick="switchTab('test')">Sang luyện thi civics →</button>
-        <button class="iv-btn-skip" onclick="advanceInterview('done')">Hoàn thành →</button>
+        <button class="btn-primary" onclick="switchTab('test')">${escapeHtml(t('iv.civics.goCivics'))}</button>
+        <button class="iv-btn-skip" onclick="advanceInterview('done')">${escapeHtml(t('iv.next.finish'))}</button>
       </div>
     </div>`;
 }
@@ -4100,12 +4475,12 @@ function renderInterviewDone() {
   return `
     <div class="iv-card iv-done">
       <span class="iv-done-emoji">🎉</span>
-      <div class="iv-done-title">Bạn đã luyện tập xong!</div>
-      <p class="iv-done-sub">Chúc bạn thi đậu và sớm trở thành công dân Hoa Kỳ. Hãy tham khảo USCIS để biết lịch hẹn phỏng vấn chính thức.</p>
+      <div class="iv-done-title">${escapeHtml(t('iv.done.title'))}</div>
+      <p class="iv-done-sub">${escapeHtml(t('iv.done.sub'))}</p>
       <div class="iv-action-row" style="justify-content: center;">
-        <a href="https://my.uscis.gov/" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;text-align:center;">Đặt lịch hẹn USCIS →</a>
-        <button class="btn-outline" onclick="resetInterview()">Luyện tập lại</button>
-        <button class="btn-outline" onclick="switchTab('test')">Sang luyện thi civics</button>
+        <a href="https://my.uscis.gov/" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;text-align:center;">${escapeHtml(t('iv.done.uscis'))}</a>
+        <button class="btn-outline" onclick="resetInterview()">${escapeHtml(t('iv.done.retry'))}</button>
+        <button class="btn-outline" onclick="switchTab('test')">${escapeHtml(t('iv.done.toCivics'))}</button>
       </div>
     </div>`;
 }
@@ -4167,24 +4542,36 @@ function skipGroup() {
   advanceToNextGroup();
 }
 
+// Speak the current interview question in the active display language. Falls
+// back to English text + English voice when no translation is available.
+function interviewSpeechFor(q) {
+  const lang = state.lang === 'es' ? 'es' : state.lang === 'vi' ? 'vi' : 'en';
+  const text = (lang !== 'en' && q[lang]) ? q[lang] : q.en;
+  const tts = (LANG_META[lang] || LANG_META.en).tts;
+  return { text, tts };
+}
+
 function autoPlayInterviewQuestion() {
-  // Auto-play the Vietnamese version of the current officer question on
-  // render so the user hears it like a real interview. The 🔊 Nghe lại
-  // button stays available for replay. iOS Safari blocks autoplay before
-  // any user gesture; the user has tapped Start → Begin practice so the
-  // gesture chain is satisfied. If it still fails, the manual button works.
+  // Auto-play the current officer question on render so the user hears it
+  // like a real interview. The "🔊 Listen again" button stays available for
+  // replay. iOS Safari blocks autoplay before any user gesture; the user has
+  // tapped Start → Begin practice so the gesture chain is satisfied. If it
+  // still fails, the manual button works.
   const g = currentInterviewGroup();
   if (!g || !g.questions) return;
   const q = g.questions[state.interview.qIdx];
   if (!q) return;
-  setTimeout(() => speakText(q.vi, 'vi-VN'), 350);
+  const s = interviewSpeechFor(q);
+  setTimeout(() => speakText(s.text, s.tts), 350);
 }
 
 function speakInterviewQuestion() {
   const g = currentInterviewGroup();
   if (!g || !g.questions) return;
   const q = g.questions[state.interview.qIdx];
-  if (q) speakText(q.vi, 'vi-VN');
+  if (!q) return;
+  const s = interviewSpeechFor(q);
+  speakText(s.text, s.tts);
 }
 
 function speakFullOath() {
