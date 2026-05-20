@@ -52,6 +52,12 @@ The 2008 USCIS multilingual PDFs cover only 100 questions, so the 2025 bank pick
   q: "English question text",
   a: ["accepted answer 1", "accepted answer 2", ...],   // any one accepts; omitted for stateField/dynamic
   distractors: ["wrong 1", "wrong 2", "wrong 3"],       // 3 used per render; omitted for stateField (generated)
+  // Optional parallel translation arrays (display-only — grading still uses
+  // English from `a` / `distractors`). When present in native-language mode
+  // (exemption routes + non-en lang), `renderQuestion` shows the translated
+  // text large and the English in a small gray subtitle line under it.
+  distractors_vi: ["...", "...", "..."], distractors_vi_suggested: true,
+  distractors_es: ["...", "...", "..."], distractors_es_suggested: true,
 
   // 65/20 subset marker — USCIS's "★" set per test version:
   starred_6520: true,
