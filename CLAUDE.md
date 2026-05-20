@@ -113,6 +113,24 @@ keyword overlap but not a full match — yellow highlight), `wrong`.
 Speak mode does not exist for Spanish yet; that's a planned follow-up
 once the matching heuristics have been validated for Vietnamese.
 
+## Resources tab (Tài Liệu)
+
+A third top-tab with three sections of static content:
+  1. **Official study materials** — direct links to the USCIS PDFs and
+     pages for the 2025 / 2008 / 65-20 question banks and Form N-400.
+     Each card has language tags (Tiếng Anh / Tiếng Việt / Tiếng Tây
+     Ban Nha / Đa ngôn ngữ) and a "Miễn phí" tag.
+  2. **Pre-interview preparation tips** — 5 cards covering what to
+     bring, interview-day logistics, in-room phrases, the civics
+     portion, and the retest process.
+  3. **Useful links** — `my.uscis.gov`, exceptions-and-accommodations,
+     find-a-field-office, free legal aid, 50+ fact sheet.
+
+The screen is plain HTML (no dynamic rendering) — content never changes
+based on state. All external links use `target="_blank"
+rel="noopener noreferrer"` and point only to `uscis.gov`; this app does
+not host any of the PDFs.
+
 ## Interview Practice (5-group simulation)
 
 A separate top-tab next to Practice Test. Walks the user through the

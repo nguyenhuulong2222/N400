@@ -943,6 +943,189 @@
   }
   .tab-btn:not(.active):hover { color: var(--navy); }
 
+  /* ── RESOURCES (Tài Liệu) ── */
+  .rs-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 28px 0 4px;
+    line-height: 1.3;
+  }
+  .rs-section-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .rs-subsection {
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    margin: 22px 0 10px;
+  }
+  .rs-note {
+    background: #f0f4ff;
+    border-left: 4px solid var(--navy);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .rs-note strong { color: var(--navy); font-weight: 700; }
+
+  .rs-doc-list { display: grid; gap: 12px; }
+  .rs-doc-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 14px;
+    align-items: center;
+  }
+  .rs-doc-main { grid-column: 1; }
+  .rs-doc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .rs-doc-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .rs-doc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .rs-tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #eef1fa;
+    color: var(--navy-mid);
+    letter-spacing: 0.02em;
+  }
+  .rs-tag-free {
+    background: #f0fdf4;
+    color: var(--correct);
+  }
+  .rs-doc-btn {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    background: var(--navy);
+    color: white;
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.18s ease, transform 0.15s ease;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .rs-doc-btn:hover { background: var(--navy-mid); transform: translateY(-1px); }
+  @media (max-width: 520px) {
+    .rs-doc-card {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+    }
+    .rs-doc-btn { grid-column: 1; grid-row: auto; justify-self: start; }
+  }
+
+  .rs-prep-grid { display: grid; gap: 12px; }
+  .rs-prep-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .rs-prep-icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+  .rs-prep-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .rs-prep-list {
+    margin: 0;
+    padding-left: 22px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .rs-prep-list li { margin-bottom: 4px; }
+  .rs-prep-list li:last-child { margin-bottom: 0; }
+  .rs-prep-list em {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .rs-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .rs-link-list li {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(13,32,82,0.05);
+  }
+  .rs-link-list a {
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rs-link-list a::after {
+    content: '↗';
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: auto;
+    font-size: 13px;
+  }
+  .rs-link-list a:hover { color: var(--navy-mid); }
+  .rs-link-list .rs-link-desc {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
   /* ── INTERVIEW PRACTICE ── */
   .iv-card {
     background: var(--bg-card);
@@ -1657,6 +1840,7 @@
   <nav class="tab-bar" id="tab-bar" role="tablist">
     <button class="tab-btn active" id="tab-btn-test" data-tab="test" type="button" data-i18n="tab.test">Practice Test</button>
     <button class="tab-btn" id="tab-btn-interview" data-tab="interview" type="button" data-i18n="tab.interview">Interview Practice</button>
+    <button class="tab-btn" id="tab-btn-resources" data-tab="resources" type="button" data-i18n="tab.resources">Resources</button>
   </nav>
 
   <!-- ══ SCREEN 1: ONBOARDING ══ -->
@@ -1874,6 +2058,211 @@
        generated on first tab activation. -->
   <div id="screen-interview" class="screen">
     <div id="interview-body"></div>
+  </div>
+
+  <!-- ══ SCREEN: RESOURCES (Tài Liệu) ══ -->
+  <!-- All content here is static: every link points directly to uscis.gov.
+       We don't host any of these PDFs — formn400.org is link-only. -->
+  <div id="screen-resources" class="screen">
+    <h2 class="rs-section-title">Tài liệu học chính thức</h2>
+    <p class="rs-section-sub">Official USCIS study materials</p>
+    <div class="rs-note"><strong>Tất cả tài liệu bên dưới là tài liệu chính thức của USCIS</strong> — miễn phí và public domain. formn400.org không lưu trữ bất kỳ file nào — các nút bên dưới dẫn thẳng đến uscis.gov.</div>
+
+    <div class="rs-subsection">Bài thi 2025 (filed Oct 20, 2025 or later)</div>
+    <div class="rs-doc-list">
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">128 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">PDF</span>
+            <span class="rs-tag">Tiếng Anh</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/2025-Civics-Test-128-Questions-and-Answers.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">Flashcard 128 câu</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">Web</span>
+            <span class="rs-tag">Tiếng Anh</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/study-for-the-test" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+    </div>
+
+    <div class="rs-subsection">Bài thi 2008 (filed before Oct 20, 2025)</div>
+    <div class="rs-doc-list">
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">PDF</span>
+            <span class="rs-tag">Tiếng Anh</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/100q.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">PDF</span>
+            <span class="rs-tag">Tiếng Việt</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">100 câu hỏi &amp; đáp án</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">PDF</span>
+            <span class="rs-tag">Tiếng Tây Ban Nha</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/USCIS/Office%20of%20Citizenship/Citizenship%20Resource%20Center%20Site/Publications/PDFs/100q_Spanish.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+    </div>
+
+    <div class="rs-subsection">65/20 Special Consideration</div>
+    <div class="rs-doc-list">
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">20 câu hoa thị (đa ngôn ngữ)</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">Web</span>
+            <span class="rs-tag">Đa ngôn ngữ</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/citizenship-multilingual-resources" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">20 câu hoa thị (Tiếng Việt)</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">PDF</span>
+            <span class="rs-tag">Tiếng Việt</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/65-20q_Vietnamese.pdf" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+    </div>
+
+    <div class="rs-subsection">Form N-400</div>
+    <div class="rs-doc-list">
+      <div class="rs-doc-card">
+        <div class="rs-doc-main">
+          <div class="rs-doc-title">Form N-400 — Application for Naturalization</div>
+          <div class="rs-doc-tags">
+            <span class="rs-tag">Web</span>
+            <span class="rs-tag">Tiếng Anh</span>
+            <span class="rs-tag rs-tag-free">Miễn phí</span>
+          </div>
+          <div class="rs-doc-desc">Đơn nộp để xin nhập tịch — điền online hoặc in ra.</div>
+        </div>
+        <a class="rs-doc-btn" href="https://www.uscis.gov/n-400" target="_blank" rel="noopener noreferrer">Xem tài liệu →</a>
+      </div>
+    </div>
+
+    <h2 class="rs-section-title">Chuẩn bị trước buổi phỏng vấn</h2>
+    <p class="rs-section-sub">How to prepare for your USCIS interview</p>
+    <div class="rs-prep-grid">
+      <div class="rs-prep-card">
+        <div class="rs-prep-icon">📋</div>
+        <h3 class="rs-prep-title">Mang theo những gì?</h3>
+        <ul class="rs-prep-list">
+          <li>Giấy mời phỏng vấn <em>(appointment notice)</em></li>
+          <li>Thẻ xanh <em>(Green Card)</em></li>
+          <li>Hộ chiếu và giấy tờ du lịch</li>
+          <li>Giấy tờ thay đổi tên (nếu có)</li>
+          <li>Phiên dịch viên (nếu thuộc diện 50/20, 55/15, 65/20)</li>
+          <li>Giấy tờ thuế 5 năm gần nhất (nếu được yêu cầu)</li>
+        </ul>
+      </div>
+
+      <div class="rs-prep-card">
+        <div class="rs-prep-icon">⏰</div>
+        <h3 class="rs-prep-title">Ngày phỏng vấn</h3>
+        <ul class="rs-prep-list">
+          <li>Đến sớm ít nhất 15 phút</li>
+          <li>Mặc trang phục lịch sự</li>
+          <li>Tắt điện thoại trước khi vào phòng</li>
+          <li>Officer sẽ yêu cầu bạn đọc lời tuyên thệ nói thật trước khi bắt đầu</li>
+        </ul>
+      </div>
+
+      <div class="rs-prep-card">
+        <div class="rs-prep-icon">🗣️</div>
+        <h3 class="rs-prep-title">Trong phòng phỏng vấn</h3>
+        <ul class="rs-prep-list">
+          <li>Trả lời rõ ràng, ngắn gọn — không nói quá nhiều</li>
+          <li>Nếu không nghe rõ: <em>"Could you please repeat the question?"</em></li>
+          <li>Nếu không hiểu: <em>"Could you please rephrase that?"</em></li>
+          <li>Không đoán — nếu không biết, nói <em>"I don't know"</em></li>
+          <li>Với diện 50+: phiên dịch viên ngồi cạnh, officer biết bạn sẽ trả lời tiếng Việt</li>
+        </ul>
+      </div>
+
+      <div class="rs-prep-card">
+        <div class="rs-prep-icon">✅</div>
+        <h3 class="rs-prep-title">Phần Civics</h3>
+        <ul class="rs-prep-list">
+          <li>Officer hỏi ngẫu nhiên từ danh sách</li>
+          <li>Trả lời bằng một câu ngắn là đủ — không cần giải thích dài</li>
+          <li>Nếu câu trả lời có nhiều đáp án đúng, chỉ cần nói một</li>
+          <li>Officer dừng khi bạn đã đủ điểm đậu hoặc rớt</li>
+        </ul>
+      </div>
+
+      <div class="rs-prep-card">
+        <div class="rs-prep-icon">🔄</div>
+        <h3 class="rs-prep-title">Nếu thi rớt</h3>
+        <ul class="rs-prep-list">
+          <li>Được thi lại trong vòng 60–90 ngày</li>
+          <li>Chỉ thi lại phần bị rớt (civics hoặc tiếng Anh)</li>
+          <li>Vẫn dùng cùng bộ câu hỏi (2008 hoặc 2025 tùy ngày nộp đơn)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="rs-section-title">Link hữu ích</h2>
+    <p class="rs-section-sub">Useful links — all on uscis.gov</p>
+    <ul class="rs-link-list">
+      <li>
+        <a href="https://my.uscis.gov" target="_blank" rel="noopener noreferrer">Kiểm tra trạng thái hồ sơ
+          <span class="rs-link-desc">my.uscis.gov — đăng nhập để xem tình trạng đơn N-400 và đặt lịch hẹn</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.uscis.gov/citizenship/exceptions-and-accommodations" target="_blank" rel="noopener noreferrer">Ngoại lệ và điều chỉnh (50/20, 55/15, 65/20)
+          <span class="rs-link-desc">Quy định miễn trừ tiếng Anh và bài thi civics rút gọn cho người lớn tuổi</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://my.uscis.gov/find-a-field-office" target="_blank" rel="noopener noreferrer">Tìm văn phòng USCIS gần nhất
+          <span class="rs-link-desc">Tra cứu địa chỉ và giờ làm việc của văn phòng USCIS</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.uscis.gov/avoid-scams/find-legal-services" target="_blank" rel="noopener noreferrer">Tư vấn pháp lý miễn phí (legal aid)
+          <span class="rs-link-desc">Danh sách tổ chức cung cấp dịch vụ luật sư miễn phí hoặc giá thấp</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.uscis.gov/sites/default/files/document/fact-sheets/Fact-Sheet-Promoting-Citizenship-for-50-and-Older.pdf" target="_blank" rel="noopener noreferrer">Fact Sheet cho người 50+
+          <span class="rs-link-desc">PDF — tóm tắt các diện ngoại lệ dành cho thường trú nhân từ 50 tuổi</span>
+        </a>
+      </li>
+    </ul>
   </div>
 
   <footer class="site-footer">
@@ -2702,6 +3091,7 @@ function selectLang(el) {
 const UI_TEXT = {
   "tab.test":                   { en:"Practice Test",                        vi:"Luyện Thi",                                           es:"Examen de Práctica" },
   "tab.interview":              { en:"Interview Practice",                   vi:"Luyện Phỏng Vấn",                                     es:"Práctica de Entrevista" },
+  "tab.resources":              { en:"Resources",                            vi:"Tài Liệu",                                            es:"Recursos" },
 
   "header.title":               { en:"Civics Practice Test",                 vi:"Luyện Thi Công Dân",                                  es:"Examen de Práctica Cívica" },
   "header.subtitle":            { en:"Free practice for the U.S. naturalization civics exam", vi:"Luyện tập miễn phí cho kỳ thi công dân nhập tịch Hoa Kỳ", es:"Práctica gratuita para el examen cívico de naturalización de EE.UU." },
@@ -3442,9 +3832,11 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   if (tab === 'test') {
     showScreen('onboard');
-  } else {
+  } else if (tab === 'interview') {
     renderInterview();
     showScreen('interview');
+  } else if (tab === 'resources') {
+    showScreen('resources');
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
