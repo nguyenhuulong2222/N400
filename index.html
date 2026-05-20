@@ -911,6 +911,306 @@
 
   .answer-options { display: grid; gap: 9px; }
 
+  /* ── TAB BAR (Practice Test vs. Interview Practice) ── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    margin: 0 auto 28px;
+    width: fit-content;
+    box-shadow: var(--shadow);
+  }
+  .tab-bar.hidden { display: none; }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.18s ease;
+  }
+  .tab-btn.active {
+    background: var(--navy);
+    color: white;
+    box-shadow: 0 3px 12px rgba(13,32,82,0.2);
+  }
+  .tab-btn:not(.active):hover { color: var(--navy); }
+
+  /* ── INTERVIEW PRACTICE ── */
+  .iv-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .iv-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .iv-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+  .iv-body { font-size: 15px; color: var(--text); line-height: 1.65; }
+  .iv-body p + p { margin-top: 12px; }
+  .iv-body strong { color: var(--navy); }
+
+  .iv-ack-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: #f7f9ff;
+    border-radius: 10px;
+    border: 1px solid #e4ebfa;
+    cursor: pointer;
+  }
+  .iv-ack-row input[type=checkbox] {
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+    accent-color: var(--navy); cursor: pointer;
+  }
+  .iv-ack-row .iv-ack-label {
+    font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5;
+  }
+
+  /* Big warning shown before the moral-character group */
+  .iv-warning {
+    background: #fff8e6;
+    border: 1.5px solid #f5d76e;
+    border-left: 5px solid #d4a017;
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .iv-warning-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #6b4f00;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .iv-warning-body { font-size: 14.5px; color: #4a3500; line-height: 1.65; }
+  .iv-warning-body p + p { margin-top: 10px; }
+
+  .iv-progress {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .iv-q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .iv-q-vi {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .iv-q-en {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .iv-q-en .en-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-right: 6px;
+  }
+
+  .iv-sample {
+    background: #f0f4ff;
+    border-left: 3px solid var(--navy-light);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    margin-top: 12px;
+  }
+  .iv-sample .iv-sample-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .iv-yn-row, .iv-grade-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .iv-yn-btn, .iv-grade-btn {
+    flex: 1;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .iv-yn-btn:hover, .iv-grade-btn:hover {
+    border-color: var(--navy-light);
+    background: #f0f4ff;
+  }
+  .iv-yn-btn.picked, .iv-grade-btn.picked {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: white;
+  }
+  .iv-yn-btn .yn-emoji, .iv-grade-btn .gr-emoji {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .iv-after-note {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.55;
+  }
+
+  /* Oath display */
+  .iv-oath-clauses { display: grid; gap: 14px; }
+  .iv-oath-clause {
+    background: var(--bg-card);
+    border-left: 3px solid var(--navy);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .iv-oath-en {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--navy);
+    line-height: 1.55;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .iv-oath-vi {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .iv-oath-gloss {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.5;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .iv-done {
+    text-align: center;
+    padding: 36px 24px;
+  }
+  .iv-done-emoji { font-size: 56px; display: block; margin-bottom: 12px; }
+  .iv-done-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .iv-done-sub { font-size: 15px; color: var(--text-mid); margin-bottom: 22px; line-height: 1.6; }
+
+  .iv-action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .iv-btn-skip {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+  }
+  .iv-btn-skip:hover { border-color: var(--text-mid); color: var(--text); }
+
+  .iv-form { display: grid; gap: 14px; margin-top: 16px; }
+  .iv-field { display: flex; flex-direction: column; gap: 4px; }
+  .iv-field label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+  }
+  .iv-field input {
+    padding: 11px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card);
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px;
+    color: var(--text);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .iv-field input:focus {
+    outline: none;
+    border-color: var(--navy);
+    background: #f7f9ff;
+  }
+  .iv-field .iv-field-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .iv-privacy-banner {
+    background: #f0f4ff;
+    border-left: 3px solid var(--navy);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+
   /* ── SPEAK MODE (oral interview simulation, Vietnamese only) ── */
   .mode-toggle {
     display: none;
@@ -1353,6 +1653,12 @@
     </div>
   </header>
 
+  <!-- ══ TAB BAR ══ -->
+  <nav class="tab-bar" id="tab-bar" role="tablist">
+    <button class="tab-btn active" id="tab-btn-test" data-tab="test" type="button" data-i18n="tab.test">Practice Test</button>
+    <button class="tab-btn" id="tab-btn-interview" data-tab="interview" type="button" data-i18n="tab.interview">Interview Practice</button>
+  </nav>
+
   <!-- ══ SCREEN 1: ONBOARDING ══ -->
   <div id="screen-onboard" class="screen active">
 
@@ -1560,6 +1866,14 @@
         <button class="btn-outline" onclick="goHome()">Change Version or Language</button>
       </div>
     </div>
+  </div>
+
+  <!-- ══ SCREEN: INTERVIEW PRACTICE ══ -->
+  <!-- The whole interview flow renders dynamically into #interview-body
+       based on state.interview.phase. Initial content is the entry card,
+       generated on first tab activation. -->
+  <div id="screen-interview" class="screen">
+    <div id="interview-body"></div>
   </div>
 
   <footer class="site-footer">
@@ -2168,6 +2482,103 @@ const STATE_DATA = {
 
 const DATA_AS_OF = "2026-01";
 
+// ══ INTERVIEW PRACTICE DATA ══
+// Five-group simulation of the USCIS naturalization interview. All content
+// in Vietnamese (primary) + English (secondary). Anything the user enters
+// stays in JS memory only — see Invariant VIII in CLAUDE.md.
+const INTERVIEW_OATH = [
+  { en:"I hereby declare, on oath, that I absolutely and entirely renounce and abjure all allegiance and fidelity to any foreign prince, potentate, state, or sovereignty, of whom or which I have heretofore been a subject or citizen;",
+    vi:"Tôi xin tuyên thệ rằng tôi hoàn toàn và tuyệt đối từ bỏ mọi lòng trung thành với bất kỳ vị vua, lãnh chúa, nhà nước, hoặc chủ quyền nước ngoài nào mà trước đây tôi đã từng là thần dân hoặc công dân;",
+    gloss:"Bạn tuyên bố từ bỏ lòng trung thành với quốc gia mà bạn từng là công dân." },
+  { en:"that I will support and defend the Constitution and laws of the United States of America against all enemies, foreign and domestic;",
+    vi:"rằng tôi sẽ ủng hộ và bảo vệ Hiến Pháp và luật pháp của Hợp Chủng Quốc Hoa Kỳ chống lại mọi kẻ thù trong và ngoài nước;",
+    gloss:"Bạn cam kết ủng hộ và bảo vệ Hiến Pháp Hoa Kỳ chống lại mọi kẻ thù." },
+  { en:"that I will bear true faith and allegiance to the same;",
+    vi:"rằng tôi sẽ thật sự trung thành;",
+    gloss:"Bạn sẽ thật sự trung thành với Hoa Kỳ." },
+  { en:"that I will bear arms on behalf of the United States when required by the law;",
+    vi:"rằng tôi sẽ cầm vũ khí thay mặt Hoa Kỳ khi luật pháp yêu cầu;",
+    gloss:"Bạn sẵn sàng phục vụ trong quân đội nếu luật pháp yêu cầu." },
+  { en:"that I will perform noncombatant service in the Armed Forces of the United States when required by the law;",
+    vi:"rằng tôi sẽ phục vụ phi chiến đấu trong Lực Lượng Vũ Trang Hoa Kỳ khi luật pháp yêu cầu;",
+    gloss:"Bạn sẵn sàng phục vụ phi chiến đấu trong quân đội nếu luật pháp yêu cầu." },
+  { en:"that I will perform work of national importance under civilian direction when required by the law;",
+    vi:"rằng tôi sẽ làm công việc quan trọng của quốc gia dưới sự chỉ đạo dân sự khi luật pháp yêu cầu;",
+    gloss:"Bạn sẵn sàng làm công việc dân sự quan trọng cho quốc gia nếu luật pháp yêu cầu." },
+  { en:"and that I take this obligation freely, without any mental reservation or purpose of evasion; so help me God.",
+    vi:"và rằng tôi tự nguyện nhận trách nhiệm này, không có bất kỳ sự dè dặt nào về mặt tinh thần hoặc ý định trốn tránh; xin Chúa giúp con.",
+    gloss:"Bạn tự nguyện chấp nhận lời tuyên thệ này, không có ý định trốn tránh." },
+];
+
+const INTERVIEW_GROUPS = [
+  {
+    id: 1,
+    title: "Nhóm 1 · Thông tin cá nhân",
+    titleEn: "Personal Information",
+    intro: "Officer sẽ hỏi về thông tin cá nhân của bạn. Trang luyện tập sẽ dùng thông tin bạn vừa nhập để gợi ý cách trả lời.",
+    mode: "listen-sample",
+    requiresPersonalInput: true,
+    questions: [
+      { en:"What is your full legal name?",      vi:"Họ và tên đầy đủ của bạn là gì?",      field:"fullName",     template:"Tên đầy đủ của tôi là {v}." },
+      { en:"What is your date of birth?",        vi:"Ngày sinh của bạn là ngày nào?",       field:"dob",          template:"Tôi sinh ngày {v}." },
+      { en:"What is your current address?",      vi:"Địa chỉ hiện tại của bạn là gì?",      field:"address",      template:"Tôi sống tại {v}." },
+      { en:"Have you ever used any other names?",vi:"Bạn có từng dùng tên khác không?",     field:"otherNames",   template:"{v}" },
+      { en:"What country were you born in?",     vi:"Bạn sinh ở quốc gia nào?",             field:"birthCountry", template:"Tôi sinh ra ở {v}." },
+    ],
+  },
+  {
+    id: 2,
+    title: "Nhóm 2 · Lịch sử cư trú",
+    titleEn: "Residency History",
+    intro: "Officer sẽ hỏi về thời gian bạn sống tại Hoa Kỳ. Hãy lắng nghe câu hỏi, trả lời theo tình hình thực tế, rồi tự đánh giá mức độ tự tin.",
+    mode: "self-grade",
+    questions: [
+      { en:"How long have you been a permanent resident?", vi:"Bạn đã là thường trú nhân được bao lâu?" },
+      { en:"Have you traveled outside the US in the last 5 years?", vi:"Trong 5 năm qua bạn có đi ra ngoài Hoa Kỳ không?" },
+      { en:"What was your longest trip outside the US? How long were you gone?", vi:"Chuyến đi dài nhất ra khỏi Hoa Kỳ của bạn là chuyến nào? Bạn đi bao lâu?" },
+      { en:"Have you lived at your current address for the last 3 months?", vi:"Bạn đã sống ở địa chỉ hiện tại trong 3 tháng qua chưa?" },
+      { en:"Have you been physically present in the US for at least 30 months in the last 5 years?", vi:"Bạn đã có mặt thực tế tại Hoa Kỳ ít nhất 30 tháng trong 5 năm qua chưa?" },
+    ],
+  },
+  {
+    id: 3,
+    title: "Nhóm 3 · Phẩm chất đạo đức tốt",
+    titleEn: "Good Moral Character",
+    intro: "Phần này gồm các câu hỏi Có/Không về hành vi trong quá khứ.",
+    requiresWarning: true,
+    mode: "yes-no",
+    afterNote: "Trong buổi phỏng vấn thật, bạn cần trả lời thành thật. Nếu câu trả lời là \"Yes\", officer sẽ hỏi thêm chi tiết.",
+    questions: [
+      { en:"Have you EVER been a member of or associated with any organization, association, fund, foundation, party, club, society, or similar group?", vi:"Bạn có TỪNG là thành viên hoặc có liên hệ với bất kỳ tổ chức, hội đoàn, quỹ, đảng phái, câu lạc bộ, hội, hay nhóm tương tự nào không?" },
+      { en:"Have you EVER been a habitual drunkard?", vi:"Bạn có TỪNG là người nghiện rượu mãn tính không?" },
+      { en:"Have you EVER advocated or practiced polygamy?", vi:"Bạn có TỪNG ủng hộ hoặc thực hành chế độ đa thê không?" },
+      { en:"Have you EVER been a prostitute or procured anyone for prostitution?", vi:"Bạn có TỪNG hành nghề mại dâm hoặc môi giới mại dâm không?" },
+      { en:"Have you EVER sold or smuggled controlled substances, illegal drugs, or narcotics?", vi:"Bạn có TỪNG bán hoặc buôn lậu chất kiểm soát, ma túy bất hợp pháp, hoặc thuốc gây nghiện không?" },
+      { en:"Have you EVER been arrested, cited, or detained by any law enforcement officer?", vi:"Bạn có TỪNG bị bắt, bị phạt, hoặc bị tạm giữ bởi bất kỳ nhân viên thi hành luật nào không?" },
+      { en:"Have you EVER been charged with committing, attempting to commit, or assisting in committing a crime or offense?", vi:"Bạn có TỪNG bị truy tố vì phạm tội, mưu toan phạm tội, hoặc giúp đỡ phạm tội không?" },
+      { en:"Have you EVER had any arrest or conviction vacated, expunged, or sealed by a court?", vi:"Bạn có TỪNG bị bắt hoặc kết án mà sau đó được tòa án hủy bỏ, xóa bỏ, hoặc niêm phong không?" },
+      { en:"Have you EVER failed to file a Federal, state, or local tax return?", vi:"Bạn có TỪNG không nộp tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?" },
+      { en:"Do you owe any Federal, State, or local taxes that are overdue?", vi:"Bạn có nợ thuế Liên Bang, Tiểu Bang, hoặc địa phương đã quá hạn không?" },
+      { en:"Have you EVER called yourself a 'nonresident' on a Federal, State, or local tax return?", vi:"Bạn có TỪNG khai mình là \"không cư trú\" (nonresident) trên tờ khai thuế Liên Bang, Tiểu Bang, hoặc địa phương không?" },
+      { en:"Have you EVER failed to support your dependents or to pay alimony?", vi:"Bạn có TỪNG không cấp dưỡng cho người phụ thuộc hoặc không trả tiền cấp dưỡng vợ/chồng không?" },
+    ],
+  },
+  {
+    id: 4,
+    title: "Nhóm 4 · Tuyên thệ trung thành",
+    titleEn: "Oath of Allegiance",
+    intro: "Đây là Lời Tuyên Thệ Trung Thành mà bạn sẽ đọc tại buổi lễ nhập tịch. Hãy đọc cùng với officer và luyện tập để cảm thấy tự tin.",
+    mode: "oath",
+  },
+  {
+    id: 5,
+    title: "Nhóm 5 · Bài thi Civics",
+    titleEn: "Civics Test",
+    intro: "Bạn đã hoàn thành luyện tập phỏng vấn. Bước tiếp theo: luyện bài thi civics — câu hỏi về chính phủ và lịch sử Hoa Kỳ.",
+    mode: "civics-link",
+  },
+];
+
 // ══ STATE ══
 let state = { route:null, lang:'en', langExplicit:false, userState:null, questions:[], qIndex:0, correct:0, wrong:0, answered:false, passThreshold:12, failThreshold:9, askCount:20, currentRenderedQ:null,
   // ── Speak-mode state ─────────────────────────────────────────────────
@@ -2175,7 +2586,19 @@ let state = { route:null, lang:'en', langExplicit:false, userState:null, questio
   // Vietnamese only). speakVerdict holds 'correct' / 'partial' / 'wrong' /
   // null for the current question — set by the recognizer and consumed when
   // the user advances to the next question.
-  mode:'mcq', recognition:null, listening:false, speakVerdict:null, speakTranscript:'' };
+  mode:'mcq', recognition:null, listening:false, speakVerdict:null, speakTranscript:'',
+  // ── Tab + interview state ────────────────────────────────────────────
+  // INVARIANT VIII: `interview.personal` exists ONLY in this JS object for
+  // the current session. It is never serialized, transmitted, or stored.
+  tab:'test',
+  interview: {
+    phase:'home',       // 'home' | 'disclaimer' | 'personal' | 'g3-warning' | 'g1'..'g5' | 'done'
+    groupIdx: 0,        // 0-based index into INTERVIEW_GROUPS
+    qIdx: 0,
+    ackDisclaimer: false,
+    ackG3: false,
+    personal: { fullName:'', dob:'', address:'', otherNames:'', birthCountry:'' },
+  } };
 
 const ROUTE_CONFIG = {
   "2025":      { passThreshold:12, failThreshold:9,  askCount:20, label:"2025 Test · 128 Questions" },
@@ -2207,6 +2630,11 @@ function showScreen(id) {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
+  // The top tab bar only makes sense on entry screens. Hide while a quiz
+  // is in progress or the result is being shown — switching tabs mid-quiz
+  // would be confusing.
+  const tabBar = document.getElementById('tab-bar');
+  if (tabBar) tabBar.classList.toggle('hidden', id === 'quiz' || id === 'result');
 }
 
 function selectRoute(el) {
@@ -2272,6 +2700,9 @@ function selectLang(el) {
 // vi/es have full coverage; zh/tl/ko fall back to English until those
 // translations are produced.
 const UI_TEXT = {
+  "tab.test":                   { en:"Practice Test",                        vi:"Luyện Thi",                                           es:"Examen de Práctica" },
+  "tab.interview":              { en:"Interview Practice",                   vi:"Luyện Phỏng Vấn",                                     es:"Práctica de Entrevista" },
+
   "header.title":               { en:"Civics Practice Test",                 vi:"Luyện Thi Công Dân",                                  es:"Examen de Práctica Cívica" },
   "header.subtitle":            { en:"Free practice for the U.S. naturalization civics exam", vi:"Luyện tập miễn phí cho kỳ thi công dân nhập tịch Hoa Kỳ", es:"Práctica gratuita para el examen cívico de naturalización de EE.UU." },
   "header.badge.free":          { en:"100% Free",                            vi:"100% Miễn Phí",                                       es:"100% Gratis" },
@@ -2430,6 +2861,11 @@ function checkStartEnabled() {
 // markup, but running this once ensures lang=en is reflected on <html>
 // and prevents stale content if the bank ever ships pre-translated.
 updateUILanguage('en');
+
+// Wire the top-level tab bar (Practice Test ↔ Interview Practice).
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
 
 // ══ QUIZ ENGINE ══
 function shuffle(arr) {
@@ -2995,6 +3431,380 @@ function showResult() {
 
 function restartQuiz() { startQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
 function goHome() { showScreen('onboard'); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ══ TAB NAVIGATION + INTERVIEW PRACTICE ══════════════════════════════════
+// INVARIANT VIII: nothing in this section writes to localStorage / cookies /
+// network. The personal-info object lives only inside `state.interview` and
+// is dropped when the user reloads or closes the tab.
+
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  if (tab === 'test') {
+    showScreen('onboard');
+  } else {
+    renderInterview();
+    showScreen('interview');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderInterview() {
+  const phase = state.interview.phase;
+  const body = document.getElementById('interview-body');
+  if (!body) return;
+  switch (phase) {
+    case 'home':        body.innerHTML = renderInterviewHome(); break;
+    case 'disclaimer':  body.innerHTML = renderInterviewDisclaimer(); break;
+    case 'personal':    body.innerHTML = renderInterviewPersonal(); break;
+    case 'g3-warning':  body.innerHTML = renderInterviewG3Warning(); break;
+    case 'done':        body.innerHTML = renderInterviewDone(); break;
+    default:
+      if (phase.startsWith('g')) {
+        body.innerHTML = renderInterviewGroup();
+        autoPlayInterviewQuestion();
+      }
+  }
+}
+
+function renderInterviewHome() {
+  return `
+    <div class="iv-card">
+      <h2 class="iv-title">Luyện tập phỏng vấn USCIS</h2>
+      <p class="iv-subtitle">A guided practice of the naturalization interview · 5 nhóm</p>
+      <div class="iv-body">
+        <p>Buổi phỏng vấn nhập tịch USCIS gồm nhiều phần khác nhau. Trang này mô phỏng từng phần để bạn quen với cách officer đặt câu hỏi và cách trả lời tự tin.</p>
+        <p><strong>5 nhóm:</strong> Thông tin cá nhân · Lịch sử cư trú · Phẩm chất đạo đức · Tuyên thệ trung thành · Bài thi civics</p>
+        <p>Trang web <strong>không thu thập, lưu trữ, hoặc gửi đi</strong> bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt và sẽ biến mất khi bạn đóng trang.</p>
+      </div>
+      <div class="iv-action-row">
+        <button class="btn-primary" onclick="advanceInterview('disclaimer')">Bắt đầu luyện tập →</button>
+      </div>
+    </div>`;
+}
+
+function renderInterviewDisclaimer() {
+  return `
+    <div class="iv-card">
+      <h2 class="iv-title">Thông báo quyền riêng tư</h2>
+      <p class="iv-subtitle">Privacy notice — please read and acknowledge</p>
+      <div class="iv-body">
+        <p>Trang web <strong>formn400.org</strong> không thu thập, lưu trữ, hoặc chia sẻ bất kỳ thông tin cá nhân nào. Mọi thông tin bạn nhập chỉ tồn tại trong trình duyệt của bạn và sẽ biến mất khi bạn đóng trang.</p>
+        <p>Đây là <strong>công cụ luyện tập</strong> — không phải tư vấn pháp lý. Nếu bạn cần lời khuyên về hồ sơ nhập tịch, hãy tham khảo luật sư di trú hoặc đại diện được công nhận.</p>
+      </div>
+      <label class="iv-ack-row">
+        <input type="checkbox" id="iv-ack-disclaimer" onchange="onAckDisclaimerChange(this)" ${state.interview.ackDisclaimer ? 'checked' : ''}>
+        <span class="iv-ack-label">Tôi đã hiểu</span>
+      </label>
+      <div class="iv-action-row">
+        <button class="btn-primary" id="iv-ack-next" ${state.interview.ackDisclaimer ? '' : 'disabled'} onclick="advanceInterview('personal')">Bắt đầu luyện tập →</button>
+      </div>
+    </div>`;
+}
+
+function onAckDisclaimerChange(el) {
+  state.interview.ackDisclaimer = el.checked;
+  const nextBtn = document.getElementById('iv-ack-next');
+  if (nextBtn) nextBtn.disabled = !el.checked;
+}
+
+function renderInterviewPersonal() {
+  const p = state.interview.personal;
+  return `
+    <div class="iv-card">
+      <div class="iv-progress">Trước nhóm 1 · Thông tin để cá nhân hóa</div>
+      <h2 class="iv-title">Thông tin cá nhân (tùy chọn)</h2>
+      <p class="iv-subtitle">Optional — used only to personalize this practice session</p>
+      <div class="iv-privacy-banner">Thông tin này chỉ dùng để cá nhân hóa bài luyện tập trong trình duyệt của bạn. Trang web không gửi đi bất kỳ nội dung nào.</div>
+      <div class="iv-form">
+        <div class="iv-field">
+          <label for="iv-fullName">Họ và tên đầy đủ</label>
+          <input id="iv-fullName" type="text" value="${escapeHtml(p.fullName)}" oninput="updatePersonal('fullName', this.value)" placeholder="VD: Nguyễn Văn A">
+        </div>
+        <div class="iv-field">
+          <label for="iv-dob">Ngày sinh</label>
+          <input id="iv-dob" type="text" value="${escapeHtml(p.dob)}" oninput="updatePersonal('dob', this.value)" placeholder="VD: 15 Tháng 5, 1975">
+        </div>
+        <div class="iv-field">
+          <label for="iv-address">Địa chỉ hiện tại</label>
+          <input id="iv-address" type="text" value="${escapeHtml(p.address)}" oninput="updatePersonal('address', this.value)" placeholder="VD: 123 Main St, San Jose, CA">
+        </div>
+        <div class="iv-field">
+          <label for="iv-otherNames">Tên khác đã dùng (nếu có)</label>
+          <input id="iv-otherNames" type="text" value="${escapeHtml(p.otherNames)}" oninput="updatePersonal('otherNames', this.value)" placeholder="VD: Không, hoặc liệt kê tên khác">
+        </div>
+        <div class="iv-field">
+          <label for="iv-birthCountry">Quốc gia nơi sinh</label>
+          <input id="iv-birthCountry" type="text" value="${escapeHtml(p.birthCountry)}" oninput="updatePersonal('birthCountry', this.value)" placeholder="VD: Việt Nam">
+        </div>
+      </div>
+      <div class="iv-action-row">
+        <button class="btn-primary" onclick="startInterviewGroups()">Tiếp tục →</button>
+        <button class="iv-btn-skip" onclick="startInterviewGroups()">Bỏ qua bước này →</button>
+      </div>
+    </div>`;
+}
+
+function updatePersonal(field, value) {
+  state.interview.personal[field] = value;
+}
+
+function startInterviewGroups() {
+  state.interview.groupIdx = 0;
+  state.interview.qIdx = 0;
+  state.interview.phase = 'g1';
+  renderInterview();
+}
+
+function renderInterviewG3Warning() {
+  return `
+    <div class="iv-warning">
+      <div class="iv-warning-title">⚠️ Lưu ý quan trọng</div>
+      <div class="iv-warning-body">
+        <p>Đây là các câu hỏi bạn <strong>sẽ được hỏi</strong> trong buổi phỏng vấn USCIS thật.</p>
+        <p>Mục đích của phần này là giúp bạn <strong>quen với cách đặt câu hỏi</strong> — KHÔNG phải để thu thập câu trả lời của bạn.</p>
+        <p><strong>formn400.org KHÔNG ghi lại, lưu trữ, hoặc xem câu trả lời của bạn.</strong></p>
+        <p>Câu trả lời thật trong buổi phỏng vấn phụ thuộc vào hoàn cảnh cá nhân của bạn. Hãy tham khảo luật sư nhập cư nếu cần tư vấn.</p>
+      </div>
+    </div>
+    <div class="iv-action-row">
+      <button class="btn-primary" onclick="ackG3AndContinue()">Tôi đã hiểu, tiếp tục luyện tập →</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+    </div>`;
+}
+
+function ackG3AndContinue() {
+  state.interview.ackG3 = true;
+  state.interview.phase = 'g3';
+  state.interview.qIdx = 0;
+  renderInterview();
+}
+
+function currentInterviewGroup() {
+  return INTERVIEW_GROUPS[state.interview.groupIdx];
+}
+
+function renderInterviewGroup() {
+  const g = currentInterviewGroup();
+  const i = state.interview.qIdx;
+
+  // Special-case: group 4 (oath) and group 5 (civics link) don't iterate
+  // through questions in the same way.
+  if (g.mode === 'oath') return renderOathScreen(g);
+  if (g.mode === 'civics-link') return renderCivicsLinkScreen(g);
+
+  const q = g.questions[i];
+  const totalQs = g.questions.length;
+
+  // Group 1: render sample answer using personal-input data when supplied.
+  let belowQuestion = '';
+  if (g.mode === 'listen-sample') {
+    const value = state.interview.personal[q.field] || '';
+    if (value.trim()) {
+      const filled = q.template.replace('{v}', value);
+      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">Gợi ý cách trả lời</div>${escapeHtml(filled)}</div>`;
+    } else {
+      belowQuestion = `<div class="iv-sample"><div class="iv-sample-label">Gợi ý cách trả lời</div><em style="color:var(--text-muted)">(Không có dữ liệu — bạn đã bỏ qua bước nhập thông tin cá nhân. Hãy tự trả lời theo thông tin của bạn.)</em></div>`;
+    }
+  }
+
+  let interaction = '';
+  if (g.mode === 'self-grade') {
+    const pick = state.interview._lastGrade;
+    interaction = `
+      <div class="iv-grade-row">
+        <button class="iv-grade-btn ${pick==='up'?'picked':''}" onclick="onSelfGrade('up')"><span class="gr-emoji">👍</span>Tôi tự tin</button>
+        <button class="iv-grade-btn ${pick==='down'?'picked':''}" onclick="onSelfGrade('down')"><span class="gr-emoji">👎</span>Cần luyện thêm</button>
+      </div>`;
+  } else if (g.mode === 'yes-no') {
+    const pick = state.interview._lastYN;
+    interaction = `
+      <div class="iv-yn-row">
+        <button class="iv-yn-btn ${pick==='yes'?'picked':''}" onclick="onYesNo('yes')"><span class="yn-emoji">Yes</span>Có</button>
+        <button class="iv-yn-btn ${pick==='no'?'picked':''}" onclick="onYesNo('no')"><span class="yn-emoji">No</span>Không</button>
+      </div>
+      ${g.afterNote ? `<div class="iv-after-note">${escapeHtml(g.afterNote)}</div>` : ''}`;
+  }
+
+  const nextLabel = (i + 1 >= totalQs)
+    ? (state.interview.groupIdx + 1 >= INTERVIEW_GROUPS.length ? "Hoàn thành →" : "Sang nhóm tiếp theo →")
+    : (g.mode === 'listen-sample' ? "Tôi đã trả lời → Câu tiếp theo" : "Câu tiếp theo →");
+
+  return `
+    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · Câu ${i+1}/${totalQs} · ${escapeHtml(g.title)}</div>
+    <div class="iv-q-card">
+      <div class="iv-q-vi">${escapeHtml(q.vi)}</div>
+      <div class="iv-q-en"><span class="en-label">EN</span>${escapeHtml(q.en)}</div>
+      <button class="audio-btn" id="audio-btn" type="button" onclick="speakInterviewQuestion()">🔊 Nghe lại</button>
+      ${belowQuestion}
+      ${interaction}
+    </div>
+    <div class="iv-action-row">
+      <button class="btn-primary" onclick="nextInterviewQuestion()">${escapeHtml(nextLabel)}</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+    </div>`;
+}
+
+function onSelfGrade(grade) {
+  state.interview._lastGrade = grade;
+  document.querySelectorAll('.iv-grade-btn').forEach(b => {
+    b.classList.toggle('picked', (b.textContent.trim().startsWith('👍') && grade==='up') ||
+                                  (b.textContent.trim().startsWith('👎') && grade==='down'));
+  });
+}
+
+function onYesNo(yn) {
+  state.interview._lastYN = yn;
+  document.querySelectorAll('.iv-yn-btn').forEach(b => {
+    b.classList.toggle('picked', (b.textContent.trim().startsWith('Yes') && yn==='yes') ||
+                                  (b.textContent.trim().startsWith('No')  && yn==='no'));
+  });
+}
+
+function renderOathScreen(g) {
+  const clauses = INTERVIEW_OATH.map(c => `
+    <div class="iv-oath-clause">
+      <div class="iv-oath-en">${escapeHtml(c.en)}</div>
+      <div class="iv-oath-vi">${escapeHtml(c.vi)}</div>
+      <div class="iv-oath-gloss">${escapeHtml(c.gloss)}</div>
+    </div>`).join('');
+  return `
+    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · ${escapeHtml(g.title)}</div>
+    <div class="iv-card">
+      <h2 class="iv-title">Tuyên Thệ Trung Thành</h2>
+      <p class="iv-subtitle">Oath of Allegiance · the oath you read at your naturalization ceremony</p>
+      <div class="iv-body">
+        <p>${escapeHtml(g.intro)}</p>
+        <p><strong>Hãy đọc to và luyện tập để cảm thấy tự tin.</strong> Mỗi đoạn dưới đây có bản tiếng Anh (officer sẽ đọc), bản tiếng Việt, và một câu giải thích đơn giản.</p>
+      </div>
+      <div style="margin: 18px 0;">
+        <button class="audio-btn" type="button" onclick="speakFullOath()">🔊 Nghe officer đọc lời tuyên thệ</button>
+      </div>
+      <div class="iv-oath-clauses">${clauses}</div>
+    </div>
+    <div class="iv-action-row">
+      <button class="btn-primary" onclick="advanceToNextGroup()">Sang nhóm tiếp theo →</button>
+      <button class="iv-btn-skip" onclick="skipGroup()">Bỏ qua nhóm này →</button>
+    </div>`;
+}
+
+function renderCivicsLinkScreen(g) {
+  return `
+    <div class="iv-progress">Nhóm ${g.id}/${INTERVIEW_GROUPS.length} · ${escapeHtml(g.title)}</div>
+    <div class="iv-card">
+      <h2 class="iv-title">${escapeHtml(g.title)}</h2>
+      <div class="iv-body">
+        <p>${escapeHtml(g.intro)}</p>
+        <p>Bạn đã luyện tập phỏng vấn xong! Bước cuối là <strong>luyện thi civics</strong> — 128 câu hỏi của bài thi 2025 hoặc 100 câu của bài 2008. Hãy chọn phiên bản phù hợp với ngày bạn nộp đơn N-400.</p>
+      </div>
+      <div class="iv-action-row">
+        <button class="btn-primary" onclick="switchTab('test')">Sang luyện thi civics →</button>
+        <button class="iv-btn-skip" onclick="advanceInterview('done')">Hoàn thành →</button>
+      </div>
+    </div>`;
+}
+
+function renderInterviewDone() {
+  return `
+    <div class="iv-card iv-done">
+      <span class="iv-done-emoji">🎉</span>
+      <div class="iv-done-title">Bạn đã luyện tập xong!</div>
+      <p class="iv-done-sub">Chúc bạn thi đậu và sớm trở thành công dân Hoa Kỳ. Hãy tham khảo USCIS để biết lịch hẹn phỏng vấn chính thức.</p>
+      <div class="iv-action-row" style="justify-content: center;">
+        <a href="https://my.uscis.gov/" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;text-align:center;">Đặt lịch hẹn USCIS →</a>
+        <button class="btn-outline" onclick="resetInterview()">Luyện tập lại</button>
+        <button class="btn-outline" onclick="switchTab('test')">Sang luyện thi civics</button>
+      </div>
+    </div>`;
+}
+
+function resetInterview() {
+  state.interview.phase = 'home';
+  state.interview.groupIdx = 0;
+  state.interview.qIdx = 0;
+  state.interview.ackDisclaimer = false;
+  state.interview.ackG3 = false;
+  delete state.interview._lastGrade;
+  delete state.interview._lastYN;
+  renderInterview();
+}
+
+function advanceInterview(phase) {
+  // If we're about to enter group 3 and the warning hasn't been
+  // acknowledged yet, divert through the warning screen first.
+  if (phase === 'g3' && !state.interview.ackG3) phase = 'g3-warning';
+  state.interview.phase = phase;
+  state.interview.qIdx = 0;
+  renderInterview();
+}
+
+function advanceToNextGroup() {
+  const nextIdx = state.interview.groupIdx + 1;
+  if (nextIdx >= INTERVIEW_GROUPS.length) {
+    state.interview.phase = 'done';
+    renderInterview();
+    return;
+  }
+  state.interview.groupIdx = nextIdx;
+  state.interview.qIdx = 0;
+  delete state.interview._lastGrade;
+  delete state.interview._lastYN;
+  const nextGroup = INTERVIEW_GROUPS[nextIdx];
+  // Group 3 has a mandatory warning that gates entry.
+  if (nextGroup.requiresWarning && !state.interview.ackG3) {
+    state.interview.phase = 'g3-warning';
+  } else {
+    state.interview.phase = 'g' + nextGroup.id;
+  }
+  renderInterview();
+}
+
+function nextInterviewQuestion() {
+  const g = currentInterviewGroup();
+  if (g.questions && state.interview.qIdx + 1 < g.questions.length) {
+    state.interview.qIdx++;
+    delete state.interview._lastGrade;
+    delete state.interview._lastYN;
+    renderInterview();
+    return;
+  }
+  advanceToNextGroup();
+}
+
+function skipGroup() {
+  advanceToNextGroup();
+}
+
+function autoPlayInterviewQuestion() {
+  // Auto-play the Vietnamese version of the current officer question on
+  // render so the user hears it like a real interview. The 🔊 Nghe lại
+  // button stays available for replay. iOS Safari blocks autoplay before
+  // any user gesture; the user has tapped Start → Begin practice so the
+  // gesture chain is satisfied. If it still fails, the manual button works.
+  const g = currentInterviewGroup();
+  if (!g || !g.questions) return;
+  const q = g.questions[state.interview.qIdx];
+  if (!q) return;
+  setTimeout(() => speakText(q.vi, 'vi-VN'), 350);
+}
+
+function speakInterviewQuestion() {
+  const g = currentInterviewGroup();
+  if (!g || !g.questions) return;
+  const q = g.questions[state.interview.qIdx];
+  if (q) speakText(q.vi, 'vi-VN');
+}
+
+function speakFullOath() {
+  // Read the oath as one block in English, slowly.
+  const text = INTERVIEW_OATH.map(c => c.en).join(' ');
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.75;     // deliberately slow — give the user time to read along
+  window.speechSynthesis.speak(u);
+}
 
 function speakText(text, langCode) {
   if (!('speechSynthesis' in window)) return;

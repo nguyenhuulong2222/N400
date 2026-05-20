@@ -113,6 +113,44 @@ keyword overlap but not a full match — yellow highlight), `wrong`.
 Speak mode does not exist for Spanish yet; that's a planned follow-up
 once the matching heuristics have been validated for Vietnamese.
 
+## Interview Practice (5-group simulation)
+
+A separate top-tab next to Practice Test. Walks the user through the
+USCIS naturalization interview in five groups:
+
+  1. **Personal information** — optional personal-info form (name, DOB,
+     address, other names, birth country) feeds personalized sample
+     answers. Listen-only mode, no grading.
+  2. **Residency history** — listen + self-grade (👍 confident / 👎 needs
+     more practice). No transcription.
+  3. **Good moral character** — Yes/No questions. A mandatory full-screen
+     warning is shown before the first question and must be acknowledged.
+  4. **Oath of Allegiance** — the 7 clauses of the oath shown bilingually
+     with a plain-language Vietnamese gloss for each. TTS reads the
+     English oath slowly (rate 0.75) for read-along practice.
+  5. **Civics test link** — bridges back to the Practice Test tab.
+
+UI lives in `screen-interview`, content is dynamically rendered into
+`#interview-body` based on `state.interview.phase`. All data structures
+(`INTERVIEW_GROUPS`, `INTERVIEW_OATH`) sit alongside `STATE_DATA` /
+`CURRENT_OFFICIALS` near the top of the script block.
+
+## INVARIANTS
+
+These are non-negotiable. They take precedence over feature requests and
+must be preserved in every future change.
+
+**VIII. NO PERSONAL DATA COLLECTION** — The app collects zero personal
+data. Any information entered by users (name, DOB, address, etc.) exists
+only in JavaScript memory for that session and is never transmitted,
+stored, or logged anywhere. No localStorage, no cookies, no network
+calls carrying user input, no analytics that record content.
+
+This applies in particular to the Interview Practice personal-info
+form: those values live exclusively in `state.interview.personal` and
+disappear on page reload. Any future feature touching user input must
+verify it does not violate this invariant.
+
 ## Known gaps and bugs
 
 - **Q29 (your U.S. representative) is excluded** in both banks (2025 Q29 / 2008 Q23). It needs district-level data (435 reps, frequent turnover); we don't ship that table. Question is marked `excluded:true` and filtered from the asked pool.
