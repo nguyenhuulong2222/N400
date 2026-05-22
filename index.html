@@ -1905,6 +1905,62 @@
     margin-top: 6px;
   }
 
+  /* Policy banner (PM-602-0194) — yellow, dismissible, shown on
+     onboarding when state.lang ∈ ht/lo/my. Per safety rule the copy
+     never says the user's country is affected, only that some
+     applications "may be paused". */
+  .policy-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: #fef9c3;
+    color: #854d0e;
+    border: 1.5px solid #e9c870;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .policy-banner[hidden] { display: none; }
+  .policy-banner-body { flex: 1; min-width: 0; }
+  .policy-banner-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #713f12;
+  }
+  .policy-banner-text { margin: 0 0 6px; }
+  .policy-banner-text:last-of-type { margin-bottom: 8px; }
+  .policy-banner-links {
+    margin: 0;
+    font-size: 13px;
+  }
+  .policy-banner-links a {
+    color: #854d0e;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .policy-banner-dismiss {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1.5px solid #c8a14d;
+    border-radius: 999px;
+    color: #713f12;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .policy-banner-dismiss:hover { background: rgba(255,255,255,.45); border-color: #854d0e; }
+  @media (max-width: 480px) {
+    .policy-banner { flex-direction: column; gap: 10px; }
+    .policy-banner-dismiss { align-self: flex-end; }
+  }
+
   /* About + Privacy screens — shared layout. */
   .page-back-btn {
     background: transparent;
@@ -2052,6 +2108,28 @@
 
   <!-- ══ SCREEN 1: ONBOARDING ══ -->
   <div id="screen-onboard" class="screen active">
+
+    <!-- ══ Policy banner (PM-602-0194) ══════════════════════════════════════
+         Dismissible, language-triggered. Shows when the user has selected
+         ht / lo / my (Haitian Creole, Lao, Burmese), since the underlying
+         policy applies to applicants from certain high-risk countries —
+         but the banner does NOT claim the user's country is paused
+         (language ≠ nationality, per prior safety rule). Dismissal stored
+         in sessionStorage under a versioned key so a future memo update
+         reissues the notice. -->
+    <div id="policy-banner" class="policy-banner" role="status" aria-live="polite" hidden>
+      <div class="policy-banner-body">
+        <div class="policy-banner-title" data-i18n="policy.title">⚠️ Important Notice</div>
+        <p class="policy-banner-text" data-i18n="policy.body1">According to USCIS policy information, some immigration or naturalization applications for nationals of certain countries may be paused or subject to additional review.</p>
+        <p class="policy-banner-text" data-i18n-html="policy.body2"><strong>formN400.org is a study tool only.</strong> This website does not process applications, does not represent USCIS, and does not provide legal advice.</p>
+        <p class="policy-banner-links">
+          <a href="https://my.uscis.gov" target="_blank" rel="noopener noreferrer" data-i18n="policy.link.status">Check your case status — my.uscis.gov</a>
+          ·
+          <a href="https://www.uscis.gov/sites/default/files/document/policy-alerts/PM-602-0194-PendingApplicationsAdditionalHighRiskCountries-20260101.pdf" target="_blank" rel="noopener noreferrer" data-i18n="policy.link.memo">Source: USCIS Policy Memorandum PM-602-0194 (PDF)</a>
+        </p>
+      </div>
+      <button type="button" class="policy-banner-dismiss" onclick="dismissPolicyBanner()" data-i18n="policy.banner.dismiss" aria-label="Dismiss notice">Dismiss</button>
+    </div>
 
     <details class="exemption-card">
       <summary class="exemption-summary">
@@ -3804,6 +3882,33 @@ function selectLang(el) {
   // Reflect the chosen language in the URL so the page can be shared with a
   // pre-selected language and so hreflang links resolve to a real state.
   syncLangToURL(state.lang);
+  // Show / hide the PM-602-0194 policy banner depending on the new language.
+  updatePolicyBanner();
+}
+
+// PM-602-0194 informational banner. Visible on the onboarding screen when
+// the user has selected ht / lo / my (Haitian Creole, Lao, Burmese) AND
+// has not previously dismissed it in this browsing session. The banner
+// states only that "some applications from certain high-risk countries
+// may be paused" — it does NOT claim the user's country is affected,
+// because language ≠ nationality. Dismissal stored under a memo-versioned
+// key so a future memo update issues a fresh notice.
+const POLICY_BANNER_LANGS = new Set(['ht','lo','my']);
+const POLICY_BANNER_DISMISS_KEY = 'formn400_policy_banner_pm6020194_dismissed';
+function updatePolicyBanner() {
+  const el = document.getElementById('policy-banner');
+  if (!el) return;
+  const dismissed = (() => {
+    try { return sessionStorage.getItem(POLICY_BANNER_DISMISS_KEY) === '1'; }
+    catch (e) { return false; }
+  })();
+  const shouldShow = !dismissed && state && POLICY_BANNER_LANGS.has(state.lang);
+  el.hidden = !shouldShow;
+}
+function dismissPolicyBanner() {
+  try { sessionStorage.setItem(POLICY_BANNER_DISMISS_KEY, '1'); } catch (e) { /* private mode — accept the transient state */ }
+  const el = document.getElementById('policy-banner');
+  if (el) el.hidden = true;
 }
 
 // Update the URL's ?lang= param to match the active language without
@@ -3844,14 +3949,14 @@ const UI_TEXT = {
                                   zh:"USCIS 提供基于年龄和居住时间的三种豁免，可免除英语和/或公民测验的要求。资格在提交 N-400 表格时确定。",
                                   tl:"Nag-aalok ang USCIS ng tatlong exemption batay sa edad at paninirahan mula sa mga kinakailangan sa wikang Ingles at/o sibika. Tinutukoy ang pagiging karapat-dapat sa oras ng pag-file ng Form N-400.",
                                   ko:"USCIS는 영어 및/또는 시민권 시험 요구사항에 대해 연령과 거주 기간에 따른 3가지 면제를 제공합니다. 자격은 N-400 양식 제출 시점에 결정됩니다." ,
-                                  hi:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  ht:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  th:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  lo:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  hmn:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  my:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  pt:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.",
-                                  ru:"USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400." },
+                                  hi:"USCIS अंग्रेज़ी और/या नागरिक शास्त्र आवश्यकताओं से तीन आयु- और निवास-आधारित छूट प्रदान करता है। पात्रता Form N-400 दाखिल करते समय निर्धारित होती है।",
+                                  ht:"USCIS ofri twa dispans ki baze sou laj ak rezidans pou egzijans Anglè ak/oswa egzijans sivik yo. Yo detèmine elijibilite a lè w ranpli Fòm N-400.",
+                                  th:"USCIS เสนอข้อยกเว้นสามประเภทตามอายุและการพำนัก จากข้อกำหนดด้านภาษาอังกฤษและ/หรือความเป็นพลเมือง สิทธิ์จะพิจารณาเมื่อยื่นแบบฟอร์ม N-400",
+                                  lo:"USCIS ສະເໜີການຍົກເວັ້ນສາມຢ່າງ ໂດຍອີງໃສ່ອາຍຸ ແລະ ການອາໄສ ຈາກຂໍ້ກຳນົດດ້ານພາສາອັງກິດ ແລະ/ຫຼື ພົນລະເມືອງ. ສິດທິຖືກກຳນົດໃນເວລາຍື່ນແບບຟອມ N-400.",
+                                  hmn:"USCIS muaj peb txoj kev zam raws hnub nyoog thiab sij hawm nyob hauv Asmeskas rau cov kev xav tau ntawm lus Askiv thiab/lossis civics. Txoj cai raug txiav txim thaum xa Daim N-400.",
+                                  my:"USCIS သည် အင်္ဂလိပ်စာ နှင့်/သို့မဟုတ် နိုင်ငံသား စာမေးပွဲ လိုအပ်ချက်များမှ အသက်အရွယ်နှင့် နေထိုင်မှု အပေါ်အခြေခံ ကင်းလွတ်ခွင့် သုံးခုကို ပေးပါသည်။ အရည်အချင်းကို Form N-400 တင်သွင်းသည့်အချိန်တွင် ဆုံးဖြတ်ပါသည်။",
+                                  pt:"O USCIS oferece três isenções baseadas em idade e residência dos requisitos de inglês e/ou educação cívica. A elegibilidade é determinada no momento da apresentação do Formulário N-400.",
+                                  ru:"USCIS предлагает три льготы по возрасту и сроку проживания от требований по английскому языку и/или гражданскому экзамену. Право определяется при подаче формы N-400." },
   "exemption.tier_50_title":    { en:"Age 50+ · 20 years permanent residency", vi:"Từ 50 tuổi · 20 năm thường trú",                    es:"50+ años · 20 años de residencia permanente" , zh:"50+ 岁 · 永久居民 20 年", tl:"50+ taong gulang · 20 taon ng permanenteng paninirahan", ko:"50세 이상 · 영주권자 20년 이상" , hi:"50+ आयु · 20 वर्ष की स्थायी निवासिता", ht:"50+ Laj · 20 lane rezidans pèmanan", th:"อายุ 50 ปีขึ้นไป · ผู้พำนักถาวร 20 ปี", lo:"ອາຍຸ 50+ · ການອາໄສຖາວອນ 20 ປີ", hmn:"50+ xyoo · 20 xyoo nyob mus tas li", my:"အသက် ၅၀+ · အမြဲတမ်းနေထိုင်ခွင့် ၂၀ နှစ်", pt:"50+ anos · 20 anos de residência permanente", ru:"50+ лет · 20 лет постоянного проживания" },
   "exemption.tier_50_desc":     { en:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
                                   vi:"<strong>Miễn Anh ngữ.</strong> Làm bài thi công dân bằng tiếng mẹ đẻ. Bạn phải mang theo thông dịch viên của mình khi đi phỏng vấn.",
@@ -3859,14 +3964,14 @@ const UI_TEXT = {
                                   zh:"<strong>免英语。</strong>以您的母语参加公民测试。您必须自带翻译员参加面试。",
                                   tl:"<strong>Exempt sa Ingles.</strong> Kunin ang eksamen sa sibika sa iyong katutubong wika. Dapat kang magdala ng sarili mong interpreter sa panayam.",
                                   ko:"<strong>영어 면제.</strong> 모국어로 시민권 시험을 보십시오. 인터뷰에 자신의 통역사를 데려와야 합니다." ,
-                                  hi:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  ht:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  th:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  lo:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  hmn:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  my:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  pt:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  ru:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview." },
+                                  hi:"<strong>अंग्रेज़ी से छूट।</strong> अपनी मातृभाषा में नागरिक शास्त्र परीक्षा दें। आपको साक्षात्कार के लिए अपना दुभाषिया लाना होगा।",
+                                  ht:"<strong>Egzante Anglè.</strong> Pase egzamen sivik la nan lang natifnatal ou. Ou dwe mennen pwòp entèprèt ou nan entèvyou a.",
+                                  th:"<strong>ยกเว้นภาษาอังกฤษ</strong> สอบความเป็นพลเมืองในภาษาแม่ของคุณ ต้องนำล่ามของคุณเองมาที่การสัมภาษณ์",
+                                  lo:"<strong>ຍົກເວັ້ນພາສາອັງກິດ.</strong> ສອບເສັງພົນລະເມືອງເປັນພາສາແມ່ຂອງທ່ານ. ທ່ານຕ້ອງນຳລ່າມຂອງທ່ານເອງມາທີ່ການສຳພາດ.",
+                                  hmn:"<strong>Zam lus Askiv.</strong> Xeem civics hauv koj cov lus tsev. Koj yuav tsum coj koj tus neeg txhais lus tuaj rau qhov kev xam phaj.",
+                                  my:"<strong>အင်္ဂလိပ်စာ ကင်းလွတ်။</strong> နိုင်ငံသား စာမေးပွဲကို သင်၏ မိခင်ဘာသာစကားဖြင့် ဖြေဆိုပါ။ အင်တာဗျူးသို့ ကိုယ်ပိုင် စကားပြန် တစ်ဦးကို ခေါ်ဆောင်လာရပါမည်။",
+                                  pt:"<strong>Isento de inglês.</strong> Faça o exame cívico em seu idioma nativo. Você deve levar seu próprio intérprete à entrevista.",
+                                  ru:"<strong>Освобождение от английского.</strong> Сдавайте гражданский экзамен на родном языке. На собеседование нужно привести своего переводчика." },
   "exemption.tier_55_title":    { en:"Age 55+ · 15 years permanent residency", vi:"Từ 55 tuổi · 15 năm thường trú",                    es:"55+ años · 15 años de residencia permanente" , zh:"55+ 岁 · 永久居民 15 年", tl:"55+ taong gulang · 15 taon ng permanenteng paninirahan", ko:"55세 이상 · 영주권자 15년 이상" , hi:"55+ आयु · 15 वर्ष की स्थायी निवासिता", ht:"55+ Laj · 15 lane rezidans pèmanan", th:"อายุ 55 ปีขึ้นไป · ผู้พำนักถาวร 15 ปี", lo:"ອາຍຸ 55+ · ການອາໄສຖາວອນ 15 ປີ", hmn:"55+ xyoo · 15 xyoo nyob mus tas li", my:"အသက် ၅၅+ · အမြဲတမ်းနေထိုင်ခွင့် ၁၅ နှစ်", pt:"55+ anos · 15 anos de residência permanente", ru:"55+ лет · 15 лет постоянного проживания" },
   "exemption.tier_55_desc":     { en:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
                                   vi:"<strong>Miễn Anh ngữ.</strong> Làm bài thi công dân bằng tiếng mẹ đẻ. Bạn phải mang theo thông dịch viên của mình khi đi phỏng vấn.",
@@ -3874,14 +3979,14 @@ const UI_TEXT = {
                                   zh:"<strong>免英语。</strong>以您的母语参加公民测试。您必须自带翻译员参加面试。",
                                   tl:"<strong>Exempt sa Ingles.</strong> Kunin ang eksamen sa sibika sa iyong katutubong wika. Dapat kang magdala ng sarili mong interpreter sa panayam.",
                                   ko:"<strong>영어 면제.</strong> 모국어로 시민권 시험을 보십시오. 인터뷰에 자신의 통역사를 데려와야 합니다." ,
-                                  hi:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  ht:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  th:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  lo:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  hmn:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  my:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  pt:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview.",
-                                  ru:"<strong>English exempt.</strong> Take the civics test in your native language. You must bring your own interpreter to the interview." },
+                                  hi:"<strong>अंग्रेज़ी से छूट।</strong> अपनी मातृभाषा में नागरिक शास्त्र परीक्षा दें। आपको साक्षात्कार के लिए अपना दुभाषिया लाना होगा।",
+                                  ht:"<strong>Egzante Anglè.</strong> Pase egzamen sivik la nan lang natifnatal ou. Ou dwe mennen pwòp entèprèt ou nan entèvyou a.",
+                                  th:"<strong>ยกเว้นภาษาอังกฤษ</strong> สอบความเป็นพลเมืองในภาษาแม่ของคุณ ต้องนำล่ามของคุณเองมาที่การสัมภาษณ์",
+                                  lo:"<strong>ຍົກເວັ້ນພາສາອັງກິດ.</strong> ສອບເສັງພົນລະເມືອງເປັນພາສາແມ່ຂອງທ່ານ. ທ່ານຕ້ອງນຳລ່າມຂອງທ່ານເອງມາທີ່ການສຳພາດ.",
+                                  hmn:"<strong>Zam lus Askiv.</strong> Xeem civics hauv koj cov lus tsev. Koj yuav tsum coj koj tus neeg txhais lus tuaj rau qhov kev xam phaj.",
+                                  my:"<strong>အင်္ဂလိပ်စာ ကင်းလွတ်။</strong> နိုင်ငံသား စာမေးပွဲကို သင်၏ မိခင်ဘာသာစကားဖြင့် ဖြေဆိုပါ။ အင်တာဗျူးသို့ ကိုယ်ပိုင် စကားပြန် တစ်ဦးကို ခေါ်ဆောင်လာရပါမည်။",
+                                  pt:"<strong>Isento de inglês.</strong> Faça o exame cívico em seu idioma nativo. Você deve levar seu próprio intérprete à entrevista.",
+                                  ru:"<strong>Освобождение от английского.</strong> Сдавайте гражданский экзамен на родном языке. На собеседование нужно привести своего переводчика." },
   "exemption.tier_65_title":    { en:"Age 65+ · 20 years permanent residency", vi:"Từ 65 tuổi · 20 năm thường trú",                    es:"65+ años · 20 años de residencia permanente" , zh:"65+ 岁 · 永久居民 20 年", tl:"65+ taong gulang · 20 taon ng permanenteng paninirahan", ko:"65세 이상 · 영주권자 20년 이상" , hi:"65+ आयु · 20 वर्ष की स्थायी निवासिता", ht:"65+ Laj · 20 lane rezidans pèmanan", th:"อายุ 65 ปีขึ้นไป · ผู้พำนักถาวร 20 ปี", lo:"ອາຍຸ 65+ · ການອາໄສຖາວອນ 20 ປີ", hmn:"65+ xyoo · 20 xyoo nyob mus tas li", my:"အသက် ၆၅+ · အမြဲတမ်းနေထိုင်ခွင့် ၂၀ နှစ်", pt:"65+ anos · 20 anos de residência permanente", ru:"65+ лет · 20 лет постоянного проживания" },
   "exemption.tier_65_desc":     { en:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
                                   vi:"<strong>Miễn Anh ngữ + bài thi công dân rút gọn.</strong> Chỉ cần học 20 câu hỏi có dấu sao, bằng tiếng mẹ đẻ.",
@@ -3889,14 +3994,14 @@ const UI_TEXT = {
                                   zh:"<strong>免英语 + 简化公民测试。</strong>以您的母语只学习 20 道带星号的问题。",
                                   tl:"<strong>Exempt sa Ingles + pinasimpleng eksamen sa sibika.</strong> Pag-aralan lamang ang 20 katanungang may bituin, sa iyong katutubong wika.",
                                   ko:"<strong>영어 면제 + 간소화된 시민권 시험.</strong> 별표 표시된 20문항만 모국어로 학습하세요." ,
-                                  hi:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  ht:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  th:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  lo:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  hmn:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  my:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  pt:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language.",
-                                  ru:"<strong>English exempt + simplified civics test.</strong> Study only the 20 starred questions, in your native language." },
+                                  hi:"<strong>अंग्रेज़ी से छूट + सरलीकृत नागरिक शास्त्र परीक्षा।</strong> केवल 20 तारांकित प्रश्न पढ़ें, अपनी मातृभाषा में।",
+                                  ht:"<strong>Egzante Anglè + egzamen sivik senplifye.</strong> Etidye sèlman 20 kesyon ki gen zetwal yo, nan lang natifnatal ou.",
+                                  th:"<strong>ยกเว้นภาษาอังกฤษ + ข้อสอบความเป็นพลเมืองแบบสั้น</strong> ศึกษาเฉพาะ 20 คำถามที่มีดอกจัน เป็นภาษาแม่ของคุณ",
+                                  lo:"<strong>ຍົກເວັ້ນພາສາອັງກິດ + ການສອບເສັງພົນລະເມືອງແບບງ່າຍ.</strong> ສຶກສາພຽງ 20 ຄຳຖາມທີ່ມີດາວ ເປັນພາສາແມ່ຂອງທ່ານ.",
+                                  hmn:"<strong>Zam lus Askiv + civics xeem yooj yim.</strong> Kawm tsuas yog 20 lo lus nug uas muaj hnub qub, hauv koj cov lus tsev.",
+                                  my:"<strong>အင်္ဂလိပ်စာ ကင်းလွတ် + ရိုးရှင်းသော နိုင်ငံသား စာမေးပွဲ။</strong> ကြယ်ပါ မေးခွန်း ၂၀ ကိုသာ မိခင်ဘာသာစကားဖြင့် လေ့လာပါ။",
+                                  pt:"<strong>Isento de inglês + exame cívico simplificado.</strong> Estude apenas as 20 perguntas com estrela, em seu idioma nativo.",
+                                  ru:"<strong>Освобождение от английского + упрощённый гражданский экзамен.</strong> Изучите только 20 отмеченных вопросов на родном языке." },
   "exemption.link_uscis":       { en:'<span class="el-label">USCIS</span> · Exceptions &amp; Accommodations →',
                                   vi:'<span class="el-label">USCIS</span> · Trường hợp ngoại lệ &amp; điều chỉnh →',
                                   es:'<span class="el-label">USCIS</span> · Excepciones y adaptaciones →' ,
@@ -3959,7 +4064,7 @@ const UI_TEXT = {
 
   "route.6520.badge":           { en:"Age 65+ · Resident 20+ years",           vi:"Từ 65 tuổi · Thường trú 20 năm trở lên",             es:"65+ años · Residente 20+ años" , zh:"65+ 岁 · 居住 20+ 年", tl:"65+ taong gulang · Naninirahan ng 20+ taon", ko:"65세 이상 · 거주 20년 이상" , hi:"65+ आयु · 20+ वर्ष निवासी", ht:"65+ Laj · Rezidan 20+ lane", th:"อายุ 65 ปีขึ้นไป · พำนัก 20 ปีขึ้นไป", lo:"ອາຍຸ 65+ · ອາໄສ 20+ ປີ", hmn:"65+ xyoo · Nyob 20+ xyoo", my:"အသက် ၆၅+ · ၂၀+ နှစ် နေထိုင်", pt:"65+ anos · Residente 20+ anos", ru:"65+ лет · Резидент 20+ лет" },
   "route.6520.title":           { en:"65/20 Exemption Practice",               vi:"Luyện Thi Miễn Trừ 65/20",                           es:"Práctica de Exención 65/20" , zh:"65/20 豁免练习", tl:"Pagsasanay sa 65/20 Exemption", ko:"65/20 면제 연습" , hi:"65/20 छूट अभ्यास", ht:"Antrenman Dispans 65/20", th:"แบบฝึกหัดยกเว้น 65/20", lo:"ບົດທົດສອບການຍົກເວັ້ນ 65/20", hmn:"Xyaum Kev Zam 65/20", my:"၆၅/၂၀ ကင်းလွတ်ခွင့် လေ့ကျင့်ခန်း", pt:"Prática Isenção 65/20", ru:"Практика 65/20" },
-  "route.6520.desc":            { en:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", vi:"Bài thi ngắn hơn — chỉ học 20 câu hỏi có dấu sao. Chọn ngày bạn nộp Mẫu N-400 bên dưới.", es:"Examen más corto — estudie solo las 20 preguntas marcadas. Elija cuándo presentó el Formulario N-400 abajo." , zh:"更短的考试 — 只学习 20 道带星号的题目。请在下方选择您提交 N-400 表格的时间。", tl:"Mas maikling eksamen — pag-aralan lamang ang 20 tanong na may bituin. Piliin sa ibaba kung kailan mo isinampa ang Form N-400.", ko:"더 짧은 시험 — 별표 표시된 20문항만 학습하세요. 아래에서 N-400 양식 제출 시기를 선택하세요." , hi:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", ht:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", th:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", lo:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", hmn:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", my:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", pt:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", ru:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below." },
+  "route.6520.desc":            { en:"Shorter test — study only the 20 starred questions. Pick when you filed Form N-400 below.", vi:"Bài thi ngắn hơn — chỉ học 20 câu hỏi có dấu sao. Chọn ngày bạn nộp Mẫu N-400 bên dưới.", es:"Examen más corto — estudie solo las 20 preguntas marcadas. Elija cuándo presentó el Formulario N-400 abajo." , zh:"更短的考试 — 只学习 20 道带星号的题目。请在下方选择您提交 N-400 表格的时间。", tl:"Mas maikling eksamen — pag-aralan lamang ang 20 tanong na may bituin. Piliin sa ibaba kung kailan mo isinampa ang Form N-400.", ko:"더 짧은 시험 — 별표 표시된 20문항만 학습하세요. 아래에서 N-400 양식 제출 시기를 선택하세요." , hi:"छोटी परीक्षा — केवल 20 तारांकित प्रश्न पढ़ें। नीचे चुनें कि आपने Form N-400 कब दाखिल किया।", ht:"Egzamen ki pi kout — sèlman etidye 20 kesyon ki gen zetwal yo. Chwazi anba a lè ou te ranpli Fòm N-400 a.", th:"ข้อสอบสั้นกว่า — ศึกษาเฉพาะ 20 คำถามที่มีดอกจัน เลือกด้านล่างว่าคุณยื่นแบบฟอร์ม N-400 เมื่อใด", lo:"ການສອບເສັງສັ້ນກວ່າ — ສຶກສາພຽງ 20 ຄຳຖາມທີ່ມີດາວ. ເລືອກຂ້າງລຸ່ມເມື່ອທ່ານຍື່ນແບບຟອມ N-400.", hmn:"Xeem luv dua — kawm tsuas yog 20 lo lus nug uas muaj hnub qub. Xaiv hauv qab thaum koj xa Daim Ntawv N-400.", my:"ပိုတိုသော စာမေးပွဲ — ကြယ်ပါ မေးခွန်း ၂၀ ကိုသာ လေ့လာပါ။ Form N-400 ကို မည်သည့်အချိန် တင်သွင်းသည်ကို အောက်တွင် ရွေးပါ။", pt:"Teste mais curto — estude apenas as 20 perguntas com estrela. Escolha abaixo quando você arquivou o Formulário N-400.", ru:"Более короткий тест — изучите только 20 отмеченных вопросов. Выберите ниже, когда вы подали форму N-400." },
   "route.6520.stat_pool":       { en:"20 Questions",                           vi:"20 Câu Hỏi",                                         es:"20 Preguntas" , zh:"20 道题", tl:"20 Tanong", ko:"20 문항" , hi:"20 प्रश्न", ht:"20 Kesyon", th:"20 คำถาม", lo:"20 ຄຳຖາມ", hmn:"20 Lo Lus Nug", my:"မေးခွန်း ၂၀ ခု", pt:"20 Perguntas", ru:"20 вопросов" },
   "route.6520.stat_asked":      { en:"10 Asked",                               vi:"Hỏi 10 Câu",                                         es:"10 Preguntadas" , zh:"问 10 题", tl:"10 Tinatanong", ko:"10개 출제" , hi:"10 पूछे जाएँगे", ht:"10 Mande", th:"ถาม 10 ข้อ", lo:"ຖາມ 10 ຄຳ", hmn:"Nug 10 Nqe", my:"၁၀ မေးမည်", pt:"10 Perguntas", ru:"10 задают" },
   "route.6520.stat_pass":       { en:"6 to Pass",                              vi:"6 Để Đậu",                                           es:"6 para Aprobar" , zh:"答对 6 题及格", tl:"6 para Pumasa", ko:"6개 정답 합격" , hi:"6 पास के लिए", ht:"6 pou Pase", th:"ผ่าน 6 ข้อ", lo:"ຜ່ານ 6", hmn:"6 thiaj Dhau", my:"အောင်ရန် ၆", pt:"6 para Passar", ru:"6 для прохождения" },
@@ -3972,14 +4077,14 @@ const UI_TEXT = {
 
   "route.5020.badge":           { en:"Age 50+ · Resident 20+ years",           vi:"Từ 50 tuổi · Thường trú 20 năm trở lên",             es:"50+ años · Residente 20+ años" , zh:"50+ 岁 · 居住 20+ 年", tl:"50+ taong gulang · Naninirahan ng 20+ taon", ko:"50세 이상 · 거주 20년 이상" , hi:"50+ आयु · 20+ वर्ष निवासी", ht:"50+ Laj · Rezidan 20+ lane", th:"อายุ 50 ปีขึ้นไป · พำนัก 20 ปีขึ้นไป", lo:"ອາຍຸ 50+ · ອາໄສ 20+ ປີ", hmn:"50+ xyoo · Nyob 20+ xyoo", my:"အသက် ၅၀+ · ၂၀+ နှစ် နေထိုင်", pt:"50+ anos · Residente 20+ anos", ru:"50+ лет · Резидент 20+ лет" },
   "route.5020.title":           { en:"50/20 Practice",                         vi:"Luyện Thi 50/20",                                    es:"Práctica 50/20" , zh:"50/20 练习", tl:"Pagsasanay 50/20", ko:"50/20 연습" , hi:"50/20 अभ्यास", ht:"Antrenman 50/20", th:"แบบฝึกหัด 50/20", lo:"ບົດທົດສອບ 50/20", hmn:"Xyaum 50/20", my:"၅၀/၂၀ လေ့ကျင့်ခန်း", pt:"Prática 50/20", ru:"Практика 50/20" },
-  "route.5020.desc":            { en:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", vi:"Toàn bộ bộ câu hỏi công dân — tại buổi phỏng vấn bạn có thể trả lời bằng tiếng mẹ đẻ với thông dịch viên riêng.", es:"Banco completo de preguntas — en su entrevista puede responder en su idioma nativo con su propio intérprete." , zh:"完整公民题库 — 面试时可用母语回答并自带翻译。", tl:"Buong bangko ng tanong sa sibika — sa iyong panayam maaari kang sumagot sa iyong katutubong wika gamit ang sarili mong interpreter.", ko:"전체 시민권 문제 은행 — 인터뷰에서 자신의 통역사와 함께 모국어로 답변할 수 있습니다." , hi:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", ht:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", th:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", lo:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", hmn:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", my:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", pt:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", ru:"Full civics question bank — at your interview you may answer in your native language with your own interpreter." },
+  "route.5020.desc":            { en:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", vi:"Toàn bộ bộ câu hỏi công dân — tại buổi phỏng vấn bạn có thể trả lời bằng tiếng mẹ đẻ với thông dịch viên riêng.", es:"Banco completo de preguntas — en su entrevista puede responder en su idioma nativo con su propio intérprete." , zh:"完整公民题库 — 面试时可用母语回答并自带翻译。", tl:"Buong bangko ng tanong sa sibika — sa iyong panayam maaari kang sumagot sa iyong katutubong wika gamit ang sarili mong interpreter.", ko:"전체 시민권 문제 은행 — 인터뷰에서 자신의 통역사와 함께 모국어로 답변할 수 있습니다." , hi:"पूरा नागरिक शास्त्र प्रश्न बैंक — साक्षात्कार में आप अपने स्वयं के दुभाषिए के साथ अपनी मातृभाषा में उत्तर दे सकते हैं।", ht:"Bank konplè kesyon sivik la — nan entèvyou ou a, ou ka reponn nan lang natifnatal ou avèk pwòp entèprèt ou.", th:"ธนาคารคำถามความเป็นพลเมืองทั้งหมด — ในการสัมภาษณ์คุณสามารถตอบเป็นภาษาแม่ของคุณพร้อมล่ามของคุณเอง", lo:"ທະນາຄານຄຳຖາມພົນລະເມືອງເຕັມຮູບແບບ — ໃນການສຳພາດ ທ່ານສາມາດຕອບເປັນພາສາແມ່ຂອງທ່ານກັບລ່າມຂອງທ່ານເອງ.", hmn:"Tag nrho cov lus nug civics — thaum koj lub kev xam phaj koj teb tau hauv koj cov lus tsev nrog koj tus neeg txhais lus.", my:"နိုင်ငံသား မေးခွန်းဘဏ် အပြည့်အစုံ — အင်တာဗျူးတွင် သင်၏ ကိုယ်ပိုင် စကားပြန်နှင့်အတူ မိခင်ဘာသာစကားဖြင့် ဖြေဆိုနိုင်ပါသည်။", pt:"Banco completo de perguntas cívicas — na entrevista você pode responder em seu idioma nativo com seu próprio intérprete.", ru:"Полный банк гражданских вопросов — на собеседовании можно отвечать на родном языке со своим переводчиком." },
   "route.5020.stat_pool":       { en:"128 Questions",                          vi:"128 Câu Hỏi",                                        es:"128 Preguntas" , zh:"128 道题", tl:"128 Tanong", ko:"128 문항" , hi:"128 प्रश्न", ht:"128 Kesyon", th:"128 คำถาม", lo:"128 ຄຳຖາມ", hmn:"128 Lo Lus Nug", my:"မေးခွန်း ၁၂၈ ခု", pt:"128 Perguntas", ru:"128 вопросов" },
   "route.5020.stat_asked":      { en:"20 Asked",                               vi:"Hỏi 20 Câu",                                         es:"20 Preguntadas" , zh:"问 20 题", tl:"20 Tinatanong", ko:"20개 출제" , hi:"20 पूछे जाएँगे", ht:"20 Mande", th:"ถาม 20 ข้อ", lo:"ຖາມ 20 ຄຳ", hmn:"Nug 20 Nqe", my:"၂၀ မေးမည်", pt:"20 Perguntas", ru:"20 задают" },
   "route.5020.stat_pass":       { en:"12 to Pass",                             vi:"12 Để Đậu",                                          es:"12 para Aprobar" , zh:"答对 12 题及格", tl:"12 para Pumasa", ko:"12개 정답 합격" , hi:"12 पास के लिए", ht:"12 pou Pase", th:"ผ่าน 12 ข้อ", lo:"ຜ່ານ 12", hmn:"12 thiaj Dhau", my:"အောင်ရန် ၁၂", pt:"12 para Passar", ru:"12 для прохождения" },
 
   "route.5515.badge":           { en:"Age 55+ · Resident 15+ years",           vi:"Từ 55 tuổi · Thường trú 15 năm trở lên",             es:"55+ años · Residente 15+ años" , zh:"55+ 岁 · 居住 15+ 年", tl:"55+ taong gulang · Naninirahan ng 15+ taon", ko:"55세 이상 · 거주 15년 이상" , hi:"55+ आयु · 15+ वर्ष निवासी", ht:"55+ Laj · Rezidan 15+ lane", th:"อายุ 55 ปีขึ้นไป · พำนัก 15 ปีขึ้นไป", lo:"ອາຍຸ 55+ · ອາໄສ 15+ ປີ", hmn:"55+ xyoo · Nyob 15+ xyoo", my:"အသက် ၅၅+ · ၁၅+ နှစ် နေထိုင်", pt:"55+ anos · Residente 15+ anos", ru:"55+ лет · Резидент 15+ лет" },
   "route.5515.title":           { en:"55/15 Practice",                         vi:"Luyện Thi 55/15",                                    es:"Práctica 55/15" , zh:"55/15 练习", tl:"Pagsasanay 55/15", ko:"55/15 연습" , hi:"55/15 अभ्यास", ht:"Antrenman 55/15", th:"แบบฝึกหัด 55/15", lo:"ບົດທົດສອບ 55/15", hmn:"Xyaum 55/15", my:"၅၅/၁၅ လေ့ကျင့်ခန်း", pt:"Prática 55/15", ru:"Практика 55/15" },
-  "route.5515.desc":            { en:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", vi:"Toàn bộ bộ câu hỏi công dân — tại buổi phỏng vấn bạn có thể trả lời bằng tiếng mẹ đẻ với thông dịch viên riêng.", es:"Banco completo de preguntas — en su entrevista puede responder en su idioma nativo con su propio intérprete." , zh:"完整公民题库 — 面试时可用母语回答并自带翻译。", tl:"Buong bangko ng tanong sa sibika — sa iyong panayam maaari kang sumagot sa iyong katutubong wika gamit ang sarili mong interpreter.", ko:"전체 시민권 문제 은행 — 인터뷰에서 자신의 통역사와 함께 모국어로 답변할 수 있습니다." , hi:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", ht:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", th:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", lo:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", hmn:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", my:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", pt:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", ru:"Full civics question bank — at your interview you may answer in your native language with your own interpreter." },
+  "route.5515.desc":            { en:"Full civics question bank — at your interview you may answer in your native language with your own interpreter.", vi:"Toàn bộ bộ câu hỏi công dân — tại buổi phỏng vấn bạn có thể trả lời bằng tiếng mẹ đẻ với thông dịch viên riêng.", es:"Banco completo de preguntas — en su entrevista puede responder en su idioma nativo con su propio intérprete." , zh:"完整公民题库 — 面试时可用母语回答并自带翻译。", tl:"Buong bangko ng tanong sa sibika — sa iyong panayam maaari kang sumagot sa iyong katutubong wika gamit ang sarili mong interpreter.", ko:"전체 시민권 문제 은행 — 인터뷰에서 자신의 통역사와 함께 모국어로 답변할 수 있습니다." , hi:"पूरा नागरिक शास्त्र प्रश्न बैंक — साक्षात्कार में आप अपने स्वयं के दुभाषिए के साथ अपनी मातृभाषा में उत्तर दे सकते हैं।", ht:"Bank konplè kesyon sivik la — nan entèvyou ou a, ou ka reponn nan lang natifnatal ou avèk pwòp entèprèt ou.", th:"ธนาคารคำถามความเป็นพลเมืองทั้งหมด — ในการสัมภาษณ์คุณสามารถตอบเป็นภาษาแม่ของคุณพร้อมล่ามของคุณเอง", lo:"ທະນາຄານຄຳຖາມພົນລະເມືອງເຕັມຮູບແບບ — ໃນການສຳພາດ ທ່ານສາມາດຕອບເປັນພາສາແມ່ຂອງທ່ານກັບລ່າມຂອງທ່ານເອງ.", hmn:"Tag nrho cov lus nug civics — thaum koj lub kev xam phaj koj teb tau hauv koj cov lus tsev nrog koj tus neeg txhais lus.", my:"နိုင်ငံသား မေးခွန်းဘဏ် အပြည့်အစုံ — အင်တာဗျူးတွင် သင်၏ ကိုယ်ပိုင် စကားပြန်နှင့်အတူ မိခင်ဘာသာစကားဖြင့် ဖြေဆိုနိုင်ပါသည်။", pt:"Banco completo de perguntas cívicas — na entrevista você pode responder em seu idioma nativo com seu próprio intérprete.", ru:"Полный банк гражданских вопросов — на собеседовании можно отвечать на родном языке со своим переводчиком." },
   "route.5515.stat_pool":       { en:"128 Questions",                          vi:"128 Câu Hỏi",                                        es:"128 Preguntas" , zh:"128 道题", tl:"128 Tanong", ko:"128 문항" , hi:"128 प्रश्न", ht:"128 Kesyon", th:"128 คำถาม", lo:"128 ຄຳຖາມ", hmn:"128 Lo Lus Nug", my:"မေးခွန်း ၁၂၈ ခု", pt:"128 Perguntas", ru:"128 вопросов" },
   "route.5515.stat_asked":      { en:"20 Asked",                               vi:"Hỏi 20 Câu",                                         es:"20 Preguntadas" , zh:"问 20 题", tl:"20 Tinatanong", ko:"20개 출제" , hi:"20 पूछे जाएँगे", ht:"20 Mande", th:"ถาม 20 ข้อ", lo:"ຖາມ 20 ຄຳ", hmn:"Nug 20 Nqe", my:"၂၀ မေးမည်", pt:"20 Perguntas", ru:"20 задают" },
   "route.5515.stat_pass":       { en:"12 to Pass",                             vi:"12 Để Đậu",                                          es:"12 para Aprobar" , zh:"答对 12 题及格", tl:"12 para Pumasa", ko:"12개 정답 합격" , hi:"12 पास के लिए", ht:"12 pou Pase", th:"ผ่าน 12 ข้อ", lo:"ຜ່ານ 12", hmn:"12 thiaj Dhau", my:"အောင်ရန် ၁၂", pt:"12 para Passar", ru:"12 для прохождения" },
@@ -3991,14 +4096,14 @@ const UI_TEXT = {
                                   zh:"<strong>必填：</strong>请为此豁免选择您的母语。",
                                   tl:"<strong>Kinakailangan:</strong> piliin ang iyong katutubong wika para sa exemption na ito.",
                                   ko:"<strong>필수:</strong> 이 면제를 위해 모국어를 선택하세요." ,
-                                  hi:"<strong>Required:</strong> select your native language for this exemption.",
-                                  ht:"<strong>Required:</strong> select your native language for this exemption.",
-                                  th:"<strong>Required:</strong> select your native language for this exemption.",
-                                  lo:"<strong>Required:</strong> select your native language for this exemption.",
-                                  hmn:"<strong>Required:</strong> select your native language for this exemption.",
-                                  my:"<strong>Required:</strong> select your native language for this exemption.",
-                                  pt:"<strong>Required:</strong> select your native language for this exemption.",
-                                  ru:"<strong>Required:</strong> select your native language for this exemption." },
+                                  hi:"<strong>आवश्यक:</strong> इस छूट के लिए अपनी मातृभाषा चुनें।",
+                                  ht:"<strong>Obligatwa:</strong> chwazi lang natifnatal ou pou dispans sa a.",
+                                  th:"<strong>จำเป็น:</strong> เลือกภาษาแม่ของคุณสำหรับการยกเว้นนี้",
+                                  lo:"<strong>ຈຳເປັນ:</strong> ເລືອກພາສາແມ່ຂອງທ່ານສຳລັບການຍົກເວັ້ນນີ້.",
+                                  hmn:"<strong>Yuav tsum:</strong> xaiv koj cov lus tsev rau qhov kev zam no.",
+                                  my:"<strong>လိုအပ်ပါသည်:</strong> ဤကင်းလွတ်ခွင့်အတွက် သင်၏ မိခင်ဘာသာစကားကို ရွေးပါ။",
+                                  pt:"<strong>Obrigatório:</strong> selecione seu idioma nativo para esta isenção.",
+                                  ru:"<strong>Обязательно:</strong> выберите родной язык для этой льготы." },
 
   "state.label":                { en:"Your state (for state-specific questions)", vi:"Tiểu bang của bạn (cho các câu hỏi liên quan tiểu bang)", es:"Su estado (para preguntas específicas del estado)" , zh:"您所在的州（用于州相关问题）", tl:"Ang iyong estado (para sa mga tanong na partikular sa estado)", ko:"귀하의 주 (주별 문항용)" , hi:"आपका राज्य (राज्य-विशिष्ट प्रश्नों के लिए)", ht:"Eta ou (pou kesyon espesifik ak eta a)", th:"รัฐของคุณ (สำหรับคำถามเฉพาะรัฐ)", lo:"ລັດຂອງທ່ານ (ສຳລັບຄຳຖາມສະເພາະລັດ)", hmn:"Koj lub xeev (rau cov lus nug ntsig txog xeev)", my:"သင်၏ပြည်နယ် (ပြည်နယ်အလိုက် မေးခွန်းများအတွက်)", pt:"Seu estado (para perguntas específicas do estado)", ru:"Ваш штат (для вопросов о штате)" },
   "state.placeholder":          { en:"— Select your state —",                  vi:"— Chọn tiểu bang của bạn —",                          es:"— Seleccione su estado —" , zh:"— 选择您的州 —", tl:"— Piliin ang iyong estado —", ko:"— 주를 선택하세요 —" , hi:"— अपना राज्य चुनें —", ht:"— Chwazi eta ou —", th:"— เลือกรัฐของคุณ —", lo:"— ເລືອກລັດຂອງທ່ານ —", hmn:"— Xaiv koj lub xeev —", my:"— သင်၏ပြည်နယ်ကို ရွေးပါ —", pt:"— Selecione seu estado —", ru:"— Выберите штат —" },
@@ -4008,14 +4113,14 @@ const UI_TEXT = {
                                   zh:"用于关于您所在州参议员、州长和州首府的问题。选举后官员会变动 — 请在 <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a> 核实当前答案。",
                                   tl:"Ginagamit para sa mga tanong tungkol sa iyong mga senador, gobernador, at kapitolyo ng estado. Nagbabago ang mga opisyal pagkatapos ng halalan — i-verify ang kasalukuyang mga sagot sa <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
                                   ko:"귀하의 상원의원, 주지사, 주도에 관한 문항에 사용됩니다. 선거 후 공직자가 바뀝니다 — 현재 답변은 <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>에서 확인하세요." ,
-                                  hi:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  ht:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  th:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  lo:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  hmn:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  my:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  pt:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
-                                  ru:"Used for questions about your senators, governor, and state capital. Officials change after elections — verify current answers at <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>." },
+                                  hi:"आपके सीनेटर, गवर्नर और राज्य की राजधानी के बारे में प्रश्नों के लिए। चुनाव के बाद अधिकारी बदलते हैं — वर्तमान उत्तरों की पुष्टि <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a> पर करें।",
+                                  ht:"Yo itilize l pou kesyon sou senatè ou yo, gouvènè a, ak kapital eta a. Ofisyèl yo chanje apre eleksyon — verifye repons aktyèl yo nan <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
+                                  th:"ใช้สำหรับคำถามเกี่ยวกับวุฒิสมาชิก ผู้ว่าการรัฐ และเมืองหลวงของรัฐ เจ้าหน้าที่เปลี่ยนหลังการเลือกตั้ง — ตรวจสอบคำตอบปัจจุบันที่ <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>",
+                                  lo:"ໃຊ້ສຳລັບຄຳຖາມກ່ຽວກັບສະມາຊິກວຸດທິສະພາ, ຜູ້ວ່າການລັດ, ແລະ ນະຄອນຫຼວງລັດ. ເຈົ້າໜ້າທີ່ປ່ຽນຫຼັງການເລືອກຕັ້ງ — ກວດສອບຄຳຕອບປັດຈຸບັນທີ່ <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
+                                  hmn:"Siv rau cov lus nug txog koj cov Senators, tus Governor, thiab lub xeev lub plawv. Cov tub xib hwb hloov tom qab kev xaiv tsa — txheeb xyuas cov lus teb tam sim no ntawm <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
+                                  my:"သင်၏ အထက်လွှတ်တော် အမတ်များ၊ အုပ်ချုပ်ရေးမှူး၊ နှင့် ပြည်နယ် မြို့တော် မေးခွန်းများအတွက် အသုံးပြုပါသည်။ ရွေးကောက်ပွဲပြီးနောက် တာဝန်ရှိသူများ ပြောင်းလဲပါသည် — လက်ရှိ အဖြေများကို <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a> တွင် စစ်ဆေးပါ။",
+                                  pt:"Usado para perguntas sobre seus senadores, governador e capital do estado. Autoridades mudam após as eleições — verifique as respostas atuais em <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>.",
+                                  ru:"Используется для вопросов о ваших сенаторах, губернаторе и столице штата. Должностные лица меняются после выборов — проверяйте актуальные ответы на <a href=\"https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates\" target=\"_blank\">uscis.gov/testupdates</a>." },
 
   "start.button":               { en:"Start Practice Session →",              vi:"Bắt Đầu Luyện Thi →",                                 es:"Iniciar Sesión de Práctica →" , zh:"开始练习 →", tl:"Simulan ang Pagsasanay →", ko:"연습 시작 →" , hi:"अभ्यास सत्र शुरू करें →", ht:"Kòmanse Sesyon Antrenman →", th:"เริ่มเซสชันฝึก →", lo:"ເລີ່ມການຝຶກ →", hmn:"Pib Lub Sij Hawm Xyaum →", my:"လေ့ကျင့်ခန်း စတင်ပါ →", pt:"Iniciar Sessão de Prática →", ru:"Начать практику →" },
 
@@ -4740,6 +4845,22 @@ const UI_TEXT = {
                                   pt:"Fonte: Memorando de Política USCIS PM-602-0194 (PDF)",
                                   ru:"Источник: Меморандум USCIS PM-602-0194 (PDF)" },
 
+  // ─── Policy banner dismiss button (BUG 3, added 2026-05-22) ────────
+  "policy.banner.dismiss":      { en:"Dismiss",
+                                  vi:"Đóng",
+                                  es:"Cerrar",
+                                  zh:"关闭",
+                                  tl:"Isara",
+                                  ko:"닫기",
+                                  hi:"बंद करें",
+                                  ht:"Fèmen",
+                                  th:"ปิด",
+                                  lo:"ປິດ",
+                                  hmn:"Kaw",
+                                  my:"ပိတ်ပါ",
+                                  pt:"Fechar",
+                                  ru:"Закрыть" },
+
   "footer.copyright":           { en:"© 2026 formN400.org — Free civic education resource",
                                   vi:"© 2026 formN400.org — Tài nguyên giáo dục công dân miễn phí",
                                   es:"© 2026 formN400.org — Recurso educativo cívico gratuito",
@@ -5363,6 +5484,9 @@ function checkStartEnabled() {
     state.langExplicit = true;
   }
   updateUILanguage(initial);
+  // Show the PM-602-0194 banner if the user landed with one of the
+  // triggering languages already in the URL.
+  if (typeof updatePolicyBanner === 'function') updatePolicyBanner();
 })();
 
 // Wire the top-level tab bar (Practice Test ↔ Interview Practice).
