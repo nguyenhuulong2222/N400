@@ -5317,6 +5317,33 @@ function checkStartEnabled() {
   }
 })();
 
+// Self-heal: ensure the language grid contains a button for every entry in
+// LANG_META. The grid is statically authored in HTML so it shows up before
+// JS runs, but if the browser is serving a stale cached index.html from
+// before a new language was added, the static markup won't include the new
+// buttons. Injecting them here makes the selector always agree with
+// LANG_META without requiring a hard reload.
+(function ensureLangGridComplete() {
+  const grid = document.querySelector('.lang-grid');
+  if (!grid) return;
+  for (const code of Object.keys(LANG_META)) {
+    if (grid.querySelector(`[data-lang="${code}"]`)) continue;
+    const meta = LANG_META[code];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'lang-btn';
+    btn.setAttribute('data-lang', code);
+    btn.setAttribute('onclick', 'selectLang(this)');
+    const flag = document.createElement('span');
+    flag.className = 'flag';
+    flag.textContent = meta.flag || '🌐';
+    if (meta.flag === '🏳️') flag.setAttribute('aria-hidden', 'true');
+    btn.appendChild(flag);
+    btn.appendChild(document.createTextNode(meta.name || code));
+    grid.appendChild(btn);
+  }
+})();
+
 // Apply the initial UI language. Honors a `?lang=` URL param when present
 // (used by hreflang links and direct sharing of language-specific URLs);
 // falls back to English otherwise.
