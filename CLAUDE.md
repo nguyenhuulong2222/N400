@@ -199,8 +199,17 @@ verify it does not violate this invariant.
 The site is built for organic search. The `<head>` block carries: a
 descriptive `<title>` (per-language, updated via `document.title` on
 `selectLang`), `<meta name="description">`, OG and Twitter card tags
-pointing at `/og-image.png`, `hreflang` links for all six languages, and
-a Schema.org `WebApplication` JSON-LD block.
+pointing at `/og-image.png`, `hreflang` links for every language in
+`LANG_META`, and a Schema.org `WebApplication` JSON-LD block.
+
+The language count in marketing copy (meta tags, JSON-LD, og-image.svg)
+and the hreflang block are kept in sync with `LANG_META` by
+`tools/sync-lang-count.js`. Run it after adding or removing a language:
+
+```
+node tools/sync-lang-count.js          # dry-run
+node tools/sync-lang-count.js --apply  # write + regenerate og-image.png via sips
+```
 
 Sister files at the repo root:
 
@@ -212,9 +221,10 @@ Sister files at the repo root:
 **Binary assets still need to be generated** and committed alongside the
 repo before they go live:
 
-- `og-image.png` — convert `og-image.svg` (1200×630). Use
-  `rsvg-convert -w 1200 -h 630 og-image.svg -o og-image.png` (or any
-  other rasterizer); the OG/Twitter meta tags both point at the PNG.
+- `og-image.png` — regenerated from `og-image.svg` (1200×630) by
+  `tools/sync-lang-count.js --apply` (uses macOS `sips`). If running
+  on a non-macOS host, install librsvg and invoke
+  `rsvg-convert -w 1200 -h 630 og-image.svg -o og-image.png` manually.
 - `icon-192.png` and `icon-512.png` — plain navy circle with "N400"
   centered is sufficient. Used by `manifest.json` for PWA install.
 
