@@ -51,7 +51,7 @@ const indexSubs = [
   {
     name: 'meta description',
     re: /<meta name="description" content="[^"]*">/,
-    replace: () => `<meta name="description" content="Free practice for the U.S. naturalization civics test. 128 official USCIS questions, translated into ${N} languages, with state-specific answers and interview simulation. 100% free, no account.">`,
+    replace: () => `<meta name="description" content="Free practice for the U.S. naturalization civics test. 128 official USCIS questions, available in ${N} languages, with state-specific answers and interview simulation. 100% free, no account.">`,
   },
   {
     name: 'og:title',
@@ -75,13 +75,17 @@ const indexSubs = [
   },
   {
     name: 'JSON-LD description',
-    re: /("description": "Free practice app for the U\.S\. naturalization civics test\. Official USCIS questions in )\d+( languages\.")/,
-    replace: (_, pre, post) => `${pre}${N}${post}`,
+    // Broad whole-field template — matches any prior phrasing of the description
+    // field. Lets the rule remain idempotent across wording changes.
+    re: /"description": "Free practice app for the U\.S\. naturalization civics test\. [^"]*"/,
+    replace: () => `"description": "Free practice app for the U.S. naturalization civics test. Official USCIS questions available in ${N} languages."`,
   },
   {
     name: 'JSON-LD featureList (lang count)',
-    re: /"\d+ languages(?:: [^"]+)?"/,
-    replace: () => `"${N} languages"`,
+    // Match both the old bare "N languages" and the new "Available in N languages"
+    // (with optional ": ..." suffix from even earlier wording) so re-runs stay idempotent.
+    re: /"(?:Available in )?\d+ languages(?:: [^"]+)?"/,
+    replace: () => `"Available in ${N} languages"`,
   },
   {
     name: 'about.sources.translations (English fallback)',
