@@ -13,7 +13,7 @@ A free, single-page web app that drills the U.S. naturalization civics test (For
 
 ```
 /
-  index.html        ← the entire app (HTML + CSS + JS + question data, ~1150 lines)
+  index.html        ← the entire app (HTML + CSS + JS + question data, ~6500 lines)
   CLAUDE.md
   .wrangler/        ← local Cloudflare Wrangler state
   .claude/          ← Claude Code project settings
@@ -157,6 +157,31 @@ UI lives in `screen-interview`, content is dynamically rendered into
 
 These are non-negotiable. They take precedence over feature requests and
 must be preserved in every future change.
+
+**I. DATA SOURCE LÀ USCIS** — Không bịa câu hỏi, không copy app bên thứ ba.
+Bản dịch chỉ từ nguồn USCIS/CLINIC chính thức. KHÔNG máy dịch.
+
+**II. DATA INLINE TRONG index.html** — `QUESTIONS_2025`, `QUESTIONS_2008`,
+`STATE_DATA`, `CURRENT_OFFICIALS` nằm inline (~6500 dòng). Đây là kiến
+trúc đã chọn. Bản skill cũ ghi "data ở JSON" là SAI — bỏ.
+
+**III. KHÔNG BACKEND** — Pure static. Ngoại lệ network: Google Fonts,
+Web Speech API.
+
+**IV. CÂU DYNAMIC KHÔNG NEO VÀO TÊN NGƯỜI** — Câu đáp án đổi sau bầu cử
+/bổ nhiệm (President, VP, Speaker, Chief Justice, Senators, Governor)
+mang `dynamic:true`. KHÔNG hardcode tên officeholder làm đáp án HAY
+distractor, ở BẤT KỲ ngôn ngữ nào (gồm pt/ru/th). Đáp án trỏ tới
+`uscis.gov/citizenship/testupdates`. Hiện cảnh báo ⚡.
+
+**V. LEGAL DISCLAIMER LUÔN HIỆN** — Footer "Not affiliated with USCIS…"
+mọi màn hình. Không gỡ, không thu nhỏ.
+
+**VI. KHÔNG INSIGNIA CHÍNH PHỦ** — Không logo USCIS / seal DHS / Great
+Seal / huy hiệu liên bang (kể cả emoji 🦅 làm biểu tượng chính phủ).
+
+**VII. KHÔNG TƯ VẤN PHÁP LÝ** — Chỉ giáo dục công dân. Câu thủ tục: chỉ
+link `uscis.gov`.
 
 **VIII. NO PERSONAL DATA COLLECTION** — The app collects zero personal
 data. Any information entered by users (name, DOB, address, etc.) exists
