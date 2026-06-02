@@ -5970,11 +5970,19 @@ function renderQuestion() {
     <div class="answer-section">
       <div class="answer-label">${escapeHtml(t('quiz.chooseAnswer'))}</div>
       <div class="answer-options" id="opts">
-        ${opts.map((opt,i) => {
-          // In native-language mode show the translated text as primary with
-          // the English as a small secondary line. When no translation is
-          // attached (or we're not in native mode), fall back to English-only.
-          const translated = nativeMode ? opt[state.lang] : null;
+        ${(() => {
+          // Native-mode bilingual rendering is all-or-nothing per question.
+          // Enabling it only when EVERY option (correct + 3 distractors) has
+          // a native translation avoids the inverted-bilingual artifact —
+          // where a missing `<lang>_a[0]` made the correct option render
+          // English-only while the distractors stayed bilingual, so the
+          // wrong answers visually looked richer than the right one
+          // (audit 2026-06-02). A single missing translation now reverts
+          // the whole question to English-only, which is honest and
+          // consistent. Computed once outside the .map below.
+          var bilingualReady = nativeMode && opts.every(o => o[state.lang]);
+          return opts.map((opt,i) => {
+          const translated = bilingualReady ? opt[state.lang] : null;
           const inner = translated
             ? `<span class="opt-text"><span class="opt-native">${escapeHtml(translated)}</span><span class="opt-en">${escapeHtml(opt.en)}</span></span>`
             : `<span>${escapeHtml(opt.en)}</span>`;
@@ -5983,7 +5991,8 @@ function renderQuestion() {
             <span class="opt-letter">${letters[i]}</span>
             ${inner}
           </button>`;
-        }).join('')}
+          }).join('');
+        })()}
       </div>
     </div>`;
 
