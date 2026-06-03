@@ -3936,8 +3936,7 @@ function syncLangToURL(lang) {
 
 // ══ UI INTERNATIONALIZATION ══
 // Switches every onboarding string at once based on `data-i18n` keys.
-// vi/es have full coverage; zh/tl/ko fall back to English until those
-// translations are produced.
+// All 14 langs in LANG_META have full UI_TEXT coverage (293/293 keys).
 const UI_TEXT = {
   "tab.test":                   { en:"Practice Test",                        vi:"Luyện Thi",                                           es:"Examen de Práctica" , zh:"练习测试", tl:"Pagsasanay na Eksamen", ko:"연습 시험" , hi:"अभ्यास परीक्षा", ht:"Egzamen Antrenman", th:"แบบฝึก", lo:"ບົດຝຶກຫັດ", hmn:"Xeem Xyaum", my:"လေ့ကျင့်ခန်း", pt:"Teste de Prática", ru:"Практика" },
   "tab.interview":              { en:"Interview Practice",                   vi:"Luyện Phỏng Vấn",                                     es:"Práctica de Entrevista" , zh:"面试练习", tl:"Pagsasanay sa Panayam", ko:"인터뷰 연습" , hi:"साक्षात्कार अभ्यास", ht:"Antrenman Entèvyou", th:"ฝึกสัมภาษณ์", lo:"ຝຶກສຳພາດ", hmn:"Xyaum Kev Xam Xaj", my:"တွေ့ဆုံမေးမြန်းခြင်း", pt:"Prática de Entrevista", ru:"Практика интервью" },
@@ -5375,8 +5374,8 @@ function t(key, vars) {
 }
 
 function updateUILanguage(lang) {
-  // All six languages (en/vi/es/zh/tl/ko) have full UI_TEXT coverage. Other
-  // values fall back to English so the page is never blank.
+  // All 14 langs in LANG_META have full UI_TEXT coverage (293/293 keys).
+  // SUPPORTED_LANGS gate is a defensive fallback against an unknown lang code.
   const useLang = SUPPORTED_LANGS.has(lang) ? lang : 'en';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
