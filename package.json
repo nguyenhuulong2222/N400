@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "build:app-data": "node tools/build-app-data.js --apply"
+  }
+}
