@@ -14,6 +14,8 @@ import { norm } from '../src/quiz/normalize.ts';
 import { gradeAnswer } from '../src/quiz/grade.ts';
 import { resolveQuestion, isInfoCardQuestion } from '../src/quiz/resolve.ts';
 import { pickQuestions, getQuestionBankFromData } from '../src/quiz/pick.ts';
+import { buildQuizViewModel } from '../src/store/buildViewModel.ts';
+import { quizReducer, initialState } from '../src/store/state.ts';
 import type { AppData, Question, RouteKey } from '../src/types/quiz.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -252,6 +254,115 @@ for (const q of bank2025) {
 }
 assert(ivHits.length === 0, `Invariant IV — 0 officeholder names in MCQ output (got ${ivHits.length})`);
 for (const h of ivHits.slice(0, 5)) console.log(`     #${h.id} matched /${h.label}/ in "${h.text}"`);
+
+section('buildQuizViewModel — every MCQ produces a valid 4-option VM');
+let vmsBuilt = 0;
+let vmBadFields = 0;
+let vmCorrectGrades = 0;
+let vmNullCount = 0;
+for (const q of bank2025) {
+  const r = resolveQuestion(q);
+  if (r.kind !== 'mcq') continue;
+  const vm = buildQuizViewModel(r, { rng: mulberry32(q.id) });
+  if (vm === null) {
+    vmNullCount++;
+    continue;
+  }
+  vmsBuilt++;
+  if (vm.options.length !== 4) vmBadFields++;
+  if (vm.correctIndex < 0 || vm.correctIndex > 3) vmBadFields++;
+  if (typeof vm.prompt !== 'string' || vm.prompt.length === 0) vmBadFields++;
+  if (typeof vm.id !== 'number' || Number.isNaN(vm.id)) vmBadFields++;
+  for (const opt of vm.options) {
+    if (typeof opt !== 'string' || opt.length === 0) vmBadFields++;
+  }
+  const correctOpt = vm.options[vm.correctIndex];
+  if (typeof correctOpt === 'string' && gradeAnswer(correctOpt, q)) {
+    vmCorrectGrades++;
+  }
+}
+assert(vmsBuilt > 0, `buildQuizViewModel produced ${vmsBuilt} valid VMs from 2025 bank`);
+assert(vmBadFields === 0, `0 VMs with bad fields (got ${vmBadFields})`);
+assert(vmCorrectGrades === vmsBuilt, `every VM's correctIndex option grades true (got ${vmCorrectGrades}/${vmsBuilt})`);
+if (vmNullCount > 0) {
+  console.log(`  ℹ ${vmNullCount} mcq question(s) returned null VM (data shape issue — show error card in UI)`);
+}
+
+section('buildQuizViewModel — null when accepted is empty');
+const fakeMissingAccepted = buildQuizViewModel({
+  question: { id: 0, q: 'test' } as Question,
+  accepted: [],
+  distractors: ['a', 'b', 'c'],
+});
+assert(fakeMissingAccepted === null, 'returns null when accepted is empty');
+
+section('buildQuizViewModel — null when <3 distractors');
+const fakeFewDistractors = buildQuizViewModel({
+  question: { id: 0, q: 'test' } as Question,
+  accepted: ['x'],
+  distractors: ['a', 'b'],
+});
+assert(fakeFewDistractors === null, 'returns null when distractors < 3');
+
+section('quizReducer — state transitions');
+let s = initialState;
+assert(s.screen === 'onboard', 'initial screen is onboard');
+assert(s.route === '2025', "initial route is '2025'");
+assert(s.lang === 'en', "initial lang is 'en'");
+
+s = quizReducer(s, { type: 'set-route', route: '2008' });
+assert(s.route === '2008', 'set-route updates route');
+
+s = quizReducer(s, { type: 'set-lang', lang: 'vi' });
+assert(s.lang === 'vi', 'set-lang updates lang');
+
+const sampleSeq = pickQuestions('2008', data, { rng: mulberry32(7) });
+s = quizReducer(s, { type: 'start', sequence: sampleSeq });
+assert(s.screen === 'quiz', 'start transitions to quiz');
+assert(s.sequence.length === sampleSeq.length, 'sequence carried into state');
+assert(s.index === 0, 'index reset to 0 on start');
+assert(s.correct === 0 && s.wrong === 0, 'counters reset on start');
+
+const firstQ = sampleSeq[0] as Question;
+s = quizReducer(s, { type: 'answer-mcq', correct: true, questionId: firstQ.id });
+assert(s.correct === 1, 'answer-mcq correct increments correct');
+assert(s.lastResult === 'correct', 'lastResult set to correct');
+assert(s.answers.length === 1 && s.answers[0]?.kind === 'mcq', 'answer logged as mcq');
+
+s = quizReducer(s, { type: 'next' });
+assert(s.index === 1, 'next advances index');
+assert(s.lastResult === 'pending', 'next resets lastResult to pending');
+
+s = quizReducer(s, { type: 'answer-mcq', correct: false, questionId: 99 });
+assert(s.wrong === 1, 'wrong increments on incorrect answer');
+
+s = quizReducer(s, { type: 'acknowledge-study-card', questionId: 999 });
+assert(s.correct === 1, 'study card does NOT increment correct');
+assert(s.wrong === 1, 'study card does NOT increment wrong');
+assert(s.lastResult === 'acknowledged', 'lastResult acknowledged');
+assert(s.answers[s.answers.length - 1]?.kind === 'studyCard', 'study card logged');
+
+// fast-forward to end of sequence
+let safety = 0;
+while (s.screen === 'quiz' && safety++ < 50) {
+  s = quizReducer(s, { type: 'next' });
+}
+assert(s.screen === 'result', `reaches result screen after exhausting sequence (safety=${safety})`);
+
+s = quizReducer(s, { type: 'reset' });
+assert(s.screen === 'onboard', 'reset returns to onboard');
+assert(s.route === '2008', 'reset preserves last route');
+assert(s.lang === 'vi', 'reset preserves last lang');
+
+section('App imports smoke — route 2025 + 2008 produce sequences');
+// Cheap proof that pickQuestions(route, data) works from the same call site
+// the App.tsx onboard "Start" button uses.
+const liveSeq2025 = pickQuestions('2025', data);
+const liveSeq2008 = pickQuestions('2008', data);
+assert(liveSeq2025.length >= 20, `route 2025 sequence >= 20 (got ${liveSeq2025.length})`);
+assert(liveSeq2008.length >= 10, `route 2008 sequence >= 10 (got ${liveSeq2008.length})`);
+assert(liveSeq2025[0] !== undefined && !isInfoCardQuestion(liveSeq2025[0]), 'route 2025 first item is gradable');
+assert(liveSeq2008[0] !== undefined && !isInfoCardQuestion(liveSeq2008[0]), 'route 2008 first item is gradable');
 
 section('Done');
 if (failures.length > 0) {

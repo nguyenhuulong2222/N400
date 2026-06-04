@@ -1,45 +1,87 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { loadAppData } from './src/data/load.ts';
 import { pickQuestions } from './src/quiz/pick.ts';
+import { useQuizState } from './src/store/state.ts';
+import { OnboardScreen } from './src/screens/OnboardScreen.tsx';
+import { QuizScreen } from './src/screens/QuizScreen.tsx';
+import { ResultScreen } from './src/screens/ResultScreen.tsx';
 
 const data = loadAppData();
-const sample2025 = pickQuestions('2025', data).length;
-const sample2008 = pickQuestions('2008', data).length;
-const langCount = Object.keys(data.langMeta).length;
-
-const lines = [
-  `Form N-400 data loaded: ${data.questions2025.length} / ${data.questions2008.length} / ${langCount}`,
-  'Quiz engine loaded',
-  `2025 route sample: ${sample2025} questions`,
-  `2008 route sample: ${sample2008} questions`,
-];
 
 export default function App() {
+  const [state, dispatch] = useQuizState();
+  const currentQuestion =
+    state.screen === 'quiz' ? state.sequence[state.index] : undefined;
+
   return (
-    <View style={styles.container}>
-      {lines.map((line, i) => (
-        <Text key={i} style={styles.text}>
-          {line}
-        </Text>
-      ))}
+    <SafeAreaView style={styles.root}>
+      <View style={styles.body}>
+        {state.screen === 'onboard' && (
+          <OnboardScreen
+            selectedRoute={state.route}
+            selectedLang={state.lang}
+            onSelectRoute={(route) => dispatch({ type: 'set-route', route })}
+            onSelectLang={(lang) => dispatch({ type: 'set-lang', lang })}
+            onStart={() => {
+              const sequence = pickQuestions(state.route, data);
+              dispatch({ type: 'start', sequence });
+            }}
+          />
+        )}
+        {state.screen === 'quiz' && currentQuestion && (
+          <QuizScreen
+            question={currentQuestion}
+            index={state.index}
+            total={state.sequence.length}
+            correct={state.correct}
+            wrong={state.wrong}
+            lastResult={state.lastResult}
+            onAnswerMcq={(correct, questionId) =>
+              dispatch({ type: 'answer-mcq', correct, questionId })
+            }
+            onAcknowledgeStudyCard={(questionId) =>
+              dispatch({ type: 'acknowledge-study-card', questionId })
+            }
+            onLogUnsupported={(questionId) =>
+              dispatch({ type: 'log-unsupported', questionId })
+            }
+            onNext={() => dispatch({ type: 'next' })}
+          />
+        )}
+        {state.screen === 'result' && (
+          <ResultScreen
+            route={state.route}
+            correct={state.correct}
+            wrong={state.wrong}
+            answers={state.answers}
+            onTryAgain={() => dispatch({ type: 'reset' })}
+          />
+        )}
+      </View>
+      <Text style={styles.disclaimer}>
+        Not affiliated with USCIS. Educational use only.
+      </Text>
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
   },
-  text: {
-    fontSize: 16,
-    color: '#0b2447',
+  body: {
+    flex: 1,
+  },
+  disclaimer: {
+    fontSize: 11,
+    color: '#888',
     textAlign: 'center',
-    marginVertical: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e0e0e0',
   },
 });
