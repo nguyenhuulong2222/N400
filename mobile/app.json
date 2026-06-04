@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.formn400.app"
+      "bundleIdentifier": "org.formn400.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "org.formn400.app",
@@ -33,6 +36,12 @@
         "projectId": "44dcff55-ec62-4adb-a12e-cb4f26f51613"
       }
     },
-    "owner": "nguyenhuulong22"
+    "owner": "nguyenhuulong22",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/44dcff55-ec62-4adb-a12e-cb4f26f51613"
+    }
   }
 }
