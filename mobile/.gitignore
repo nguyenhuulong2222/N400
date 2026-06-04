@@ -40,5 +40,8 @@ yarn-error.*
 /ios
 /android
 
-# Synced from repo root by `npm run sync-data` (canonical source is ../data.json)
-/data.json
+# NOTE: `mobile/data.json` is intentionally TRACKED so EAS cloud builds receive
+# it. It is regenerated from the canonical repo-root `data.json` by the
+# `npm run sync-data` script (also wired into the prestart hook). After any
+# `node tools/build-app-data.js --apply` run, run `cd mobile && npm run sync-data`
+# and commit the resulting mobile/data.json so the mobile bundle stays in sync.
