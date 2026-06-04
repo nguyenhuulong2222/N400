@@ -70,7 +70,9 @@ in the Resources tab, which opens the system browser to a public
 `uscis.gov` page.
 
 This summary mirrors the full public privacy policy at
-`https://formn400.org/privacy.html`.
+`https://formn400.org/privacy.html`. The privacy policy includes a
+U.S. State Privacy Notice explaining that the app does not collect,
+sell, share, or retain personal information.
 
 For the App Store Privacy Nutrition Label / Google Play Data Safety
 form, every category should be marked **"Data not collected."**
