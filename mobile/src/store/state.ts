@@ -12,6 +12,7 @@ import type {
 } from '../types/quiz.ts';
 
 export type Screen = 'onboard' | 'quiz' | 'result';
+export type Tab = 'practice' | 'resources';
 
 export type AnswerLog = {
   questionId: number;
@@ -22,6 +23,9 @@ export type AnswerLog = {
 export type LastResult = 'pending' | 'correct' | 'wrong' | 'acknowledged';
 
 export type QuizState = {
+  // Top-level tab — orthogonal to `screen`. Switching tabs preserves
+  // in-progress quiz state so the user can pop back to where they left off.
+  tab: Tab;
   screen: Screen;
   route: RouteKey;
   lang: LangCode;
@@ -38,6 +42,7 @@ export type QuizState = {
 };
 
 export type QuizAction =
+  | { type: 'set-tab'; tab: Tab }
   | { type: 'set-route'; route: RouteKey }
   | { type: 'set-lang'; lang: LangCode }
   | { type: 'set-state'; userState: USStateCode | undefined }
@@ -49,6 +54,7 @@ export type QuizAction =
   | { type: 'reset' };
 
 export const initialState: QuizState = {
+  tab: 'practice',
   screen: 'onboard',
   route: '2025',
   lang: 'en',
@@ -63,6 +69,8 @@ export const initialState: QuizState = {
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
+    case 'set-tab':
+      return { ...state, tab: action.tab };
     case 'set-route':
       return { ...state, route: action.route };
     case 'set-lang':
@@ -117,9 +125,10 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, index: nextIndex, lastResult: 'pending' };
     }
     case 'reset':
-      // Keep last route/lang/state choices so the user can try again quickly.
+      // Keep last tab/route/lang/state choices so the user can try again quickly.
       return {
         ...initialState,
+        tab: state.tab,
         route: state.route,
         lang: state.lang,
         userState: state.userState,

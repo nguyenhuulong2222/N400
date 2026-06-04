@@ -515,6 +515,81 @@ section('resolveQuestion — state-resolved capital with userState');
   assert(rUnknown.kind === 'needsState', `unknown state code → needsState (got ${rUnknown.kind})`);
 }
 
+section('No WebView import anywhere in mobile/src or App.tsx');
+{
+  // Walk src/ + App.tsx, fail if any source file mentions WebView.
+  // (`react-native-webview` package is not installed and must NEVER be added —
+  //  Invariant: no WebView in this app.)
+  const repoRoot = path.resolve(here, '..');
+  const filesToScan: string[] = [];
+  function walk(dir: string): void {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name === 'node_modules' || e.name === '.expo') continue;
+        walk(full);
+      } else if (e.isFile() && /\.(ts|tsx)$/.test(e.name)) {
+        filesToScan.push(full);
+      }
+    }
+  }
+  walk(path.join(repoRoot, 'src'));
+  filesToScan.push(path.join(repoRoot, 'App.tsx'));
+
+  // Detect actual WebView usage (package import OR JSX element), not the
+  // string "WebView" inside comments. Two patterns: the npm package and
+  // the JSX/component reference.
+  const WEBVIEW_PACKAGE = /from\s+['"]react-native-webview['"]/;
+  const WEBVIEW_JSX = /<WebView\b/;
+  let webViewHits = 0;
+  const webViewFiles: string[] = [];
+  for (const f of filesToScan) {
+    const content = fs.readFileSync(f, 'utf8');
+    if (WEBVIEW_PACKAGE.test(content) || WEBVIEW_JSX.test(content)) {
+      webViewHits++;
+      webViewFiles.push(path.relative(repoRoot, f));
+    }
+  }
+  assert(webViewHits === 0, `0 WebView imports/JSX across ${filesToScan.length} app source files (got ${webViewHits})`);
+  if (webViewHits > 0) {
+    for (const f of webViewFiles) console.log(`     - ${f}`);
+  }
+}
+
+section('ResourcesScreen — file exists, exports the screen, imports Linking');
+{
+  // Cannot dynamically import a react-native module from plain Node (no
+  // Metro), so verify via file contents. The iOS bundle export also
+  // confirms the import graph is sound.
+  const repoRoot = path.resolve(here, '..');
+  const file = path.join(repoRoot, 'src', 'screens', 'ResourcesScreen.tsx');
+  assert(fs.existsSync(file), 'ResourcesScreen.tsx exists');
+  const content = fs.readFileSync(file, 'utf8');
+  assert(/export function ResourcesScreen\b/.test(content), 'exports a ResourcesScreen function');
+  assert(/from 'react-native'/.test(content), "imports from 'react-native'");
+  assert(/Linking/.test(content), 'imports Linking from react-native');
+  assert(!/from\s+['"]react-native-webview['"]/.test(content), 'no react-native-webview import in ResourcesScreen');
+  assert(!/<WebView\b/.test(content), 'no <WebView> JSX in ResourcesScreen');
+  // App.tsx must import ResourcesScreen
+  const appContent = fs.readFileSync(path.join(repoRoot, 'App.tsx'), 'utf8');
+  assert(/ResourcesScreen/.test(appContent), 'App.tsx references ResourcesScreen');
+}
+
+section('quizReducer — set-tab + initial tab');
+{
+  let st = initialState;
+  assert(st.tab === 'practice', `initial tab is 'practice' (got ${st.tab})`);
+  st = quizReducer(st, { type: 'set-tab', tab: 'resources' });
+  assert(st.tab === 'resources', `set-tab → 'resources' (got ${st.tab})`);
+  // Reset preserves tab
+  st = quizReducer(st, { type: 'reset' });
+  assert(st.tab === 'resources', 'reset preserves tab');
+  // Switching back works
+  st = quizReducer(st, { type: 'set-tab', tab: 'practice' });
+  assert(st.tab === 'practice', "set-tab → 'practice'");
+}
+
 section('quizReducer — set-state action');
 {
   let st = initialState;
