@@ -460,6 +460,79 @@ const fakeFewDistractors = buildQuizViewModel({
 });
 assert(fakeFewDistractors === null, 'returns null when distractors < 3');
 
+section('resolveQuestion — state-resolved capital with userState');
+{
+  const q62 = bank2025.find((q) => q.stateField === 'capital');
+  assert(q62 !== undefined, '2025 capital question found via stateField');
+  if (!q62) throw new Error('cannot continue: capital question missing');
+
+  // No userState / no appData → still Study Card
+  const r0 = resolveQuestion(q62);
+  assert(r0.kind === 'needsState', 'resolveQuestion(q62) without opts → needsState');
+
+  // With appData but no userState → still Study Card
+  const r1 = resolveQuestion(q62, { appData: data });
+  assert(r1.kind === 'needsState', 'resolveQuestion(q62, {appData}) without userState → needsState');
+
+  // With CA → MCQ
+  const rCA = resolveQuestion(q62, { appData: data, userState: 'CA', rng: mulberry32(42) });
+  assert(rCA.kind === 'mcq', `resolveQuestion(q62, {userState: 'CA'}) → mcq (got ${rCA.kind})`);
+  if (rCA.kind === 'mcq') {
+    assert(rCA.accepted.includes('Sacramento'), `accepted includes 'Sacramento' (got ${JSON.stringify(rCA.accepted)})`);
+    assert(gradeAnswer('Sacramento', { ...rCA.question, a: rCA.accepted } as Question),
+      `gradeAnswer('Sacramento', resolved q62) → true`);
+    assert(rCA.distractors.length === 3, `distractors length === 3 (got ${rCA.distractors.length})`);
+    assert(!rCA.distractors.includes('Sacramento'), 'distractors do not include Sacramento');
+    const PLACEHOLDER_PATTERNS = [/D\.C\./, /does not have/, /no U\.S\./, /not a state/];
+    let placeholderHits = 0;
+    for (const dr of rCA.distractors) {
+      for (const p of PLACEHOLDER_PATTERNS) {
+        if (p.test(dr)) placeholderHits++;
+      }
+    }
+    assert(placeholderHits === 0, `0 placeholders in distractors (got ${placeholderHits})`);
+    // Distractors must be unique
+    assert(new Set(rCA.distractors).size === 3, 'distractors are unique');
+  }
+
+  // With DC (capital field is placeholder) → still needsState
+  const rDC = resolveQuestion(q62, { appData: data, userState: 'DC', rng: mulberry32(42) });
+  assert(rDC.kind === 'needsState', `DC (placeholder capital) → needsState (got ${rDC.kind})`);
+
+  // Try a sampling of states — each should resolve to mcq with 3 valid distractors
+  const sampleStates = ['CA', 'NY', 'TX', 'FL', 'AK', 'HI'];
+  let okStates = 0;
+  for (const stateCode of sampleStates) {
+    const r = resolveQuestion(q62, { appData: data, userState: stateCode, rng: mulberry32(stateCode.charCodeAt(0)) });
+    if (r.kind === 'mcq' && r.distractors.length === 3 && !r.distractors.some((d) => /D\.C\./.test(d))) {
+      okStates++;
+    }
+  }
+  assert(okStates === sampleStates.length, `all ${sampleStates.length} sampled states → mcq with clean distractors (got ${okStates})`);
+
+  // Unknown state code → needsState (graceful)
+  const rUnknown = resolveQuestion(q62, { appData: data, userState: 'ZZ' });
+  assert(rUnknown.kind === 'needsState', `unknown state code → needsState (got ${rUnknown.kind})`);
+}
+
+section('quizReducer — set-state action');
+{
+  let st = initialState;
+  assert(st.userState === undefined, 'initial userState is undefined');
+  st = quizReducer(st, { type: 'set-state', userState: 'CA' });
+  assert(st.userState === 'CA', 'set-state sets userState');
+  // Modify route + lang so reset has work to do
+  st = quizReducer(st, { type: 'set-route', route: '2008' });
+  st = quizReducer(st, { type: 'set-lang', lang: 'vi' });
+  st = quizReducer(st, { type: 'reset' });
+  assert(st.userState === 'CA', 'reset preserves userState');
+  assert(st.route === '2008', 'reset preserves route');
+  assert(st.lang === 'vi', 'reset preserves lang');
+  // set-state undefined clears it
+  st = quizReducer(st, { type: 'set-state', userState: undefined });
+  assert(st.userState === undefined, 'set-state with undefined clears userState');
+}
+
 section('quizReducer — state transitions');
 let s = initialState;
 assert(s.screen === 'onboard', 'initial screen is onboard');

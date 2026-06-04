@@ -21,8 +21,12 @@ export default function App() {
           <OnboardScreen
             selectedRoute={state.route}
             selectedLang={state.lang}
+            selectedState={state.userState}
             onSelectRoute={(route) => dispatch({ type: 'set-route', route })}
             onSelectLang={(lang) => dispatch({ type: 'set-lang', lang })}
+            onSelectState={(userState) =>
+              dispatch({ type: 'set-state', userState })
+            }
             onStart={() => {
               const sequence = pickQuestions(state.route, data);
               dispatch({ type: 'start', sequence });
@@ -37,6 +41,7 @@ export default function App() {
             correct={state.correct}
             wrong={state.wrong}
             lang={state.lang}
+            userState={state.userState}
             lastResult={state.lastResult}
             onAnswerMcq={(correct, questionId) =>
               dispatch({ type: 'answer-mcq', correct, questionId })

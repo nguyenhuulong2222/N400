@@ -21,6 +21,20 @@ export type RouteKey =
 export type OfficialField = 'president' | 'vp' | 'speaker' | 'chiefJustice';
 export type StateField = 'senators' | 'governor' | 'capital';
 
+// State code keyed into `data.stateData` (e.g. "CA", "DC"). The data uses
+// `Record<string, ...>` so we keep this as `string` rather than hardcoding
+// a 50-element union — the runtime list is sourced from
+// `Object.keys(data.stateData)`.
+export type USStateCode = string;
+
+export type StateDataEntry = {
+  name: string;
+  capital: string | string[];
+  senators?: string | string[];
+  governor?: string | string[];
+  [extra: string]: unknown;
+};
+
 export type Question = {
   id: number;
   q: string;
@@ -55,7 +69,7 @@ export type LangMetaEntry = {
 
 export type LangMeta = Record<LangCode, LangMetaEntry>;
 
-export type StateData = Record<string, Record<string, string | string[]>>;
+export type StateData = Record<USStateCode, StateDataEntry>;
 
 export type AppData = {
   schemaVersion: number;

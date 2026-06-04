@@ -5,31 +5,45 @@ import {
   Text,
   View,
 } from 'react-native';
-import { getLanguages, getRouteConfig } from '../data/load.ts';
+import { loadAppData, getLanguages, getRouteConfig } from '../data/load.ts';
 import type {
   LangCode,
   LangMetaEntry,
   RouteConfig,
   RouteKey,
+  StateDataEntry,
+  USStateCode,
 } from '../types/quiz.ts';
 
 type Props = {
   selectedRoute: RouteKey;
   selectedLang: LangCode;
+  selectedState: USStateCode | undefined;
   onSelectRoute: (route: RouteKey) => void;
   onSelectLang: (lang: LangCode) => void;
+  onSelectState: (state: USStateCode | undefined) => void;
   onStart: () => void;
 };
 
 export function OnboardScreen({
   selectedRoute,
   selectedLang,
+  selectedState,
   onSelectRoute,
   onSelectLang,
+  onSelectState,
   onStart,
 }: Props) {
   const routes = Object.entries(getRouteConfig()) as [RouteKey, RouteConfig][];
   const langs = Object.entries(getLanguages()) as [LangCode, LangMetaEntry][];
+  // Source the state list directly from data — never hardcode it.
+  const states = (
+    Object.entries(loadAppData().stateData) as [USStateCode, StateDataEntry][]
+  ).sort(([, a], [, b]) => {
+    const an = typeof a.name === 'string' ? a.name : '';
+    const bn = typeof b.name === 'string' ? b.name : '';
+    return an.localeCompare(bn);
+  });
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -79,6 +93,49 @@ export function OnboardScreen({
               >
                 {meta.flag ? `${meta.flag} ` : ''}
                 {meta.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Text style={styles.sectionLabel}>Your state (optional)</Text>
+      <Text style={styles.helper}>
+        Used only for state-specific questions like "What is the capital of
+        your state?". Skip to keep those questions as study cards.
+      </Text>
+      <View style={styles.stateGrid}>
+        <Pressable
+          onPress={() => onSelectState(undefined)}
+          style={[
+            styles.stateBtn,
+            selectedState === undefined && styles.stateBtnSelected,
+          ]}
+        >
+          <Text
+            style={[
+              styles.stateBtnText,
+              selectedState === undefined && styles.stateBtnTextSelected,
+            ]}
+          >
+            Skip
+          </Text>
+        </Pressable>
+        {states.map(([code, entry]) => {
+          const isSelected = selectedState === code;
+          return (
+            <Pressable
+              key={code}
+              onPress={() => onSelectState(code)}
+              style={[styles.stateBtn, isSelected && styles.stateBtnSelected]}
+            >
+              <Text
+                style={[
+                  styles.stateBtnText,
+                  isSelected && styles.stateBtnTextSelected,
+                ]}
+              >
+                {typeof entry.name === 'string' ? entry.name : code}
               </Text>
             </Pressable>
           );
@@ -167,6 +224,37 @@ const styles = StyleSheet.create({
   langBtnText: {
     fontSize: 13,
     color: '#222',
+  },
+  helper: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 8,
+    marginTop: -6,
+  },
+  stateGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  stateBtn: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 14,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+  },
+  stateBtnSelected: {
+    borderColor: '#0b2447',
+    backgroundColor: '#0b2447',
+  },
+  stateBtnText: {
+    fontSize: 12,
+    color: '#222',
+  },
+  stateBtnTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
   },
   langBtnTextSelected: {
     color: '#fff',

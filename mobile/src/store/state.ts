@@ -4,7 +4,12 @@
 // exercise transitions without a React tree.
 
 import { useReducer } from 'react';
-import type { LangCode, Question, RouteKey } from '../types/quiz.ts';
+import type {
+  LangCode,
+  Question,
+  RouteKey,
+  USStateCode,
+} from '../types/quiz.ts';
 
 export type Screen = 'onboard' | 'quiz' | 'result';
 
@@ -20,6 +25,9 @@ export type QuizState = {
   screen: Screen;
   route: RouteKey;
   lang: LangCode;
+  // Optional U.S. state for state-resolved MCQ questions (e.g. Q62 capital).
+  // `undefined` means user has not picked a state — Q62 stays as a Study Card.
+  userState?: USStateCode;
   sequence: Question[];
   index: number;
   // MCQ-only counters
@@ -32,6 +40,7 @@ export type QuizState = {
 export type QuizAction =
   | { type: 'set-route'; route: RouteKey }
   | { type: 'set-lang'; lang: LangCode }
+  | { type: 'set-state'; userState: USStateCode | undefined }
   | { type: 'start'; sequence: Question[] }
   | { type: 'answer-mcq'; correct: boolean; questionId: number }
   | { type: 'acknowledge-study-card'; questionId: number }
@@ -43,6 +52,7 @@ export const initialState: QuizState = {
   screen: 'onboard',
   route: '2025',
   lang: 'en',
+  userState: undefined,
   sequence: [],
   index: 0,
   correct: 0,
@@ -57,6 +67,8 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, route: action.route };
     case 'set-lang':
       return { ...state, lang: action.lang };
+    case 'set-state':
+      return { ...state, userState: action.userState };
     case 'start':
       return {
         ...state,
@@ -105,8 +117,13 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, index: nextIndex, lastResult: 'pending' };
     }
     case 'reset':
-      // Keep last route/lang choices so the user can try again quickly.
-      return { ...initialState, route: state.route, lang: state.lang };
+      // Keep last route/lang/state choices so the user can try again quickly.
+      return {
+        ...initialState,
+        route: state.route,
+        lang: state.lang,
+        userState: state.userState,
+      };
   }
 }
 

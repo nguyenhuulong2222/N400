@@ -10,7 +10,13 @@ import { buildQuizViewModel } from '../store/buildViewModel.ts';
 import type { LastResult } from '../store/state.ts';
 import { gradeAnswer } from '../quiz/grade.ts';
 import { resolveQuestion } from '../quiz/resolve.ts';
-import type { DisplayText, LangCode, Question } from '../types/quiz.ts';
+import { loadAppData } from '../data/load.ts';
+import type {
+  DisplayText,
+  LangCode,
+  Question,
+  USStateCode,
+} from '../types/quiz.ts';
 
 type Props = {
   question: Question;
@@ -19,6 +25,7 @@ type Props = {
   correct: number;
   wrong: number;
   lang: LangCode;
+  userState: USStateCode | undefined;
   lastResult: LastResult;
   onAnswerMcq: (correct: boolean, questionId: number) => void;
   onAcknowledgeStudyCard: (questionId: number) => void;
@@ -33,13 +40,18 @@ export function QuizScreen({
   correct,
   wrong,
   lang,
+  userState,
   lastResult,
   onAnswerMcq,
   onAcknowledgeStudyCard,
   onLogUnsupported,
   onNext,
 }: Props) {
-  const resolved = useMemo(() => resolveQuestion(question), [question]);
+  const appData = loadAppData();
+  const resolved = useMemo(
+    () => resolveQuestion(question, { userState, appData }),
+    [question, userState, appData],
+  );
   const viewModel = useMemo(() => {
     if (resolved.kind !== 'mcq') return null;
     return buildQuizViewModel(resolved, { lang });
