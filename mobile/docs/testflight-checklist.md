@@ -119,6 +119,20 @@ bugs that the iOS bundle smoke can't surface.
 - [ ] Tap "Practice" tab again → returns to the exact screen + question
       the user left (mid-quiz state preserved).
 
+## App Store / TestFlight URL endpoints (smoke before submission)
+
+- [ ] Confirm Privacy URL loads in a desktop browser:
+      `https://formn400.org/privacy.html` — should show the standalone
+      privacy page (navy heading, "no account / no login / no ads /
+      no analytics / no tracking / no personal data collection" list).
+- [ ] Confirm Support URL loads in a desktop browser:
+      `https://formn400.org/support.html` — should show the standalone
+      support page with `long@formn400.org` mailto link and the
+      "not affiliated" disclaimer.
+- [ ] Both pages link back to `/` and to each other; both work in
+      private/incognito mode (no cookies required).
+- [ ] HTTP status 200, no 404, no redirect chains.
+
 ## Negative checks
 
 - [ ] No WebView is rendered anywhere (Invariant: no in-app webview).

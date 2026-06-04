@@ -1,8 +1,9 @@
 # App Store / Play Store metadata draft
 
 Draft copy and configuration values for the first TestFlight / Internal Testing
-submission. Not yet final — every URL marked `TBD` must be filled in by the
-owner before submission.
+submission. URLs point at the standalone HTML pages served by Cloudflare Pages
+from the repo root (`support.html`, `privacy.html`); confirm they resolve
+before submission.
 
 ## Identity
 
@@ -58,29 +59,39 @@ civics,citizenship,N400,naturalization,USCIS,test,practice,immigration,interview
 
 **Data collected:** *None.*
 
-The app does not collect, transmit, store, or log any personal data.
-Selections made in the app (route, language, state, in-progress quiz
-answers) exist only in JavaScript memory for the current session and
-are discarded when the app is closed. There is no account, no sign-in,
-no analytics, no telemetry, no third-party SDKs, and no network
-requests carrying user input. The only outbound network traffic is
-when the user taps a link in the Resources tab, which opens the system
-browser to a public `uscis.gov` page.
+Form N-400 Civics Practice does not collect, sell, or share personal
+data. There is no account, no login, no ads, no analytics, no
+tracking, no payment, and no personal data collection. Quiz answers
+and selections (route, language, state) live only in device memory
+for the current session and are discarded when the app is closed —
+no background sync, no cloud save, no server upload, no third-party
+SDKs. The only outbound network traffic is when the user taps a link
+in the Resources tab, which opens the system browser to a public
+`uscis.gov` page.
+
+This summary mirrors the full public privacy policy at
+`https://formn400.org/privacy.html`.
 
 For the App Store Privacy Nutrition Label / Google Play Data Safety
 form, every category should be marked **"Data not collected."**
 
-## URLs (TBD — fill in before submission)
+## URLs
 
 | Field | Value |
 |---|---|
-| Support URL | **TBD** (e.g. `https://formn400.org/support`) |
-| Marketing URL | **TBD** (optional, e.g. `https://formn400.org`) |
-| Privacy policy URL | **TBD** (required — Apple and Google both require this even for "no data collected" apps) |
+| Support URL | `https://formn400.org/support.html` |
+| Marketing URL | `https://formn400.org` |
+| Privacy policy URL | `https://formn400.org/privacy.html` |
 
-A minimal privacy policy page is sufficient. It should state plainly:
-"This app does not collect any personal data. Selections are kept only
-in device memory and discarded when the app is closed."
+All three pages live at the repo root and are served by Cloudflare Pages
+once the GitHub `main` branch is pushed. `support.html` and
+`privacy.html` are standalone HTML pages (no SPA dependency) so direct
+URLs always resolve — required by both Apple and Google.
+
+The privacy page content matches the in-app behavior verbatim: no
+account, no login, no ads, no analytics, no tracking, no payment, no
+personal data collection. Quiz answers and selections live only in
+device memory for the current session and are discarded on close.
 
 ## App Review notes (App Store Connect → App Review Information)
 
