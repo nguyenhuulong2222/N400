@@ -36,6 +36,7 @@ export default function App() {
             total={state.sequence.length}
             correct={state.correct}
             wrong={state.wrong}
+            lang={state.lang}
             lastResult={state.lastResult}
             onAnswerMcq={(correct, questionId) =>
               dispatch({ type: 'answer-mcq', correct, questionId })

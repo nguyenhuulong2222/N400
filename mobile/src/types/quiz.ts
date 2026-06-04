@@ -100,12 +100,21 @@ export type ResolvedQuestion =
       reason: string;
     };
 
-// Smoke-test view model — exact shape a future UI would consume per question.
+// View model the QuizScreen consumes. Each option carries both the English
+// string (used for grading) and an optional localized string (used for
+// display when lang !== 'en'). See `i18n/localize.ts` LocalizedText.
+export type DisplayText = {
+  english: string;
+  localized?: string;
+  suggested?: boolean;
+};
+
 export type QuizQuestionViewModel = {
   id: number;
-  prompt: string;
-  options: string[];
+  prompt: DisplayText;
+  options: DisplayText[];
   correctIndex: number;
+  // English accepted answers (full list — used as `gradeAnswer` reference).
   acceptedAnswers: string[];
 };
 

@@ -1,13 +1,25 @@
 // buildQuizViewModel — turns a resolved MCQ question into the shape the
 // UI consumes: 4 options (1 accepted + 3 distractors) shuffled into a
-// stable order with a `correctIndex`. Returns `null` when the source
-// question fails preconditions (no accepted answers, <3 distractors, or
-// any field is missing / non-string). UI must render a safe error card
-// when null is returned — never silently advance.
+// stable order with a `correctIndex`. Each option carries the English
+// string (used by the grader) and an optional localized string (used for
+// display). Returns `null` when the source question fails preconditions
+// (no accepted answers, <3 distractors, missing fields) — UI must render
+// a safe error card when null is returned.
 //
-// Pass an `rng` for deterministic ordering (smoke runner uses this).
+// Index alignment is the load-bearing contract: when we randomly pick
+// `accepted[i]` or `distractors[j]`, we look up the localized parallel
+// array at the same index. Web parity.
+//
+// Pass `lang` to localize displayed text. Grading is always English.
 
+import {
+  getAccepted,
+  getDistractors,
+  getPrompt,
+} from '../i18n/localize.ts';
 import type {
+  DisplayText,
+  LangCode,
   Question,
   QuizQuestionViewModel,
   Rng,
@@ -21,6 +33,7 @@ export type ResolvedMcqInput = {
 
 export type BuildViewModelOptions = {
   rng?: Rng;
+  lang?: LangCode;
 };
 
 function shuffleInPlace<T>(arr: T[], rng: Rng): T[] {
@@ -34,17 +47,18 @@ function shuffleInPlace<T>(arr: T[], rng: Rng): T[] {
   return arr;
 }
 
-function pickN<T>(arr: readonly T[], n: number, rng: Rng): T[] {
-  const copy = arr.slice();
-  shuffleInPlace(copy, rng);
-  return copy.slice(0, n);
-}
+type Descriptor = {
+  english: string;
+  source: 'accepted' | 'distractor';
+  index: number;
+};
 
 export function buildQuizViewModel(
   resolved: ResolvedMcqInput,
   options: BuildViewModelOptions = {},
 ): QuizQuestionViewModel | null {
   const rng = options.rng ?? Math.random;
+  const lang: LangCode = options.lang ?? 'en';
   if (
     !resolved ||
     !resolved.question ||
@@ -59,32 +73,80 @@ export function buildQuizViewModel(
   ) {
     return null;
   }
-  const accepted = resolved.accepted.filter(
-    (s) => typeof s === 'string' && s.length > 0,
-  );
-  const distractors = resolved.distractors.filter(
-    (s) => typeof s === 'string' && s.length > 0,
-  );
-  if (accepted.length === 0 || distractors.length < 3) return null;
 
-  const chosenAccepted = pickN(accepted, 1, rng)[0] as string;
-  const chosenDistractors = pickN(distractors, 3, rng);
-  const opts = shuffleInPlace(
-    [chosenAccepted, ...chosenDistractors],
-    rng,
-  );
+  // Identify usable English source-array indices (skip empty / non-string).
+  const acceptedIdxs: number[] = [];
+  for (let i = 0; i < resolved.accepted.length; i++) {
+    const s = resolved.accepted[i];
+    if (typeof s === 'string' && s.length > 0) acceptedIdxs.push(i);
+  }
+  const distractorIdxs: number[] = [];
+  for (let i = 0; i < resolved.distractors.length; i++) {
+    const s = resolved.distractors[i];
+    if (typeof s === 'string' && s.length > 0) distractorIdxs.push(i);
+  }
+  if (acceptedIdxs.length === 0 || distractorIdxs.length < 3) return null;
+
+  // Pick 1 accepted + 3 distractor indices.
+  const shuffledAccepted = acceptedIdxs.slice();
+  shuffleInPlace(shuffledAccepted, rng);
+  const chosenAcceptedIdx = shuffledAccepted[0] as number;
+
+  const shuffledDistractors = distractorIdxs.slice();
+  shuffleInPlace(shuffledDistractors, rng);
+  const chosenDistractorIdxs = shuffledDistractors.slice(0, 3);
+
+  // Localized parallel arrays — index-aligned with English.
+  const localizedAccepted = getAccepted(resolved.question, lang);
+  const localizedDistractors = getDistractors(resolved.question, lang);
+
+  const descriptors: Descriptor[] = [
+    {
+      english: resolved.accepted[chosenAcceptedIdx] as string,
+      source: 'accepted',
+      index: chosenAcceptedIdx,
+    },
+    ...chosenDistractorIdxs.map<Descriptor>((i) => ({
+      english: resolved.distractors[i] as string,
+      source: 'distractor',
+      index: i,
+    })),
+  ];
+
+  shuffleInPlace(descriptors, rng);
+
+  const opts: DisplayText[] = descriptors.map((d) => {
+    const parallel =
+      d.source === 'accepted' ? localizedAccepted : localizedDistractors;
+    const lookup = parallel[d.index];
+    if (!lookup) {
+      return { english: d.english };
+    }
+    const out: DisplayText = { english: lookup.english };
+    if (lookup.localized !== undefined) out.localized = lookup.localized;
+    if (lookup.suggested === true) out.suggested = true;
+    return out;
+  });
+
   if (opts.length !== 4) return null;
   for (const o of opts) {
-    if (typeof o !== 'string' || o.length === 0) return null;
+    if (typeof o.english !== 'string' || o.english.length === 0) return null;
   }
-  const correctIndex = opts.indexOf(chosenAccepted);
+  const correctIndex = descriptors.findIndex((d) => d.source === 'accepted');
   if (correctIndex < 0 || correctIndex > 3) return null;
+
+  const promptLocalized = getPrompt(resolved.question, lang);
+  const prompt: DisplayText = { english: promptLocalized.english };
+  if (promptLocalized.localized !== undefined) {
+    prompt.localized = promptLocalized.localized;
+  }
+  if (promptLocalized.suggested === true) prompt.suggested = true;
 
   return {
     id: resolved.question.id,
-    prompt: resolved.question.q,
+    prompt,
     options: opts,
     correctIndex,
-    acceptedAnswers: accepted,
+    acceptedAnswers: resolved.accepted,
   };
 }

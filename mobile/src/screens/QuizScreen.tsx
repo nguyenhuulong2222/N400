@@ -10,7 +10,7 @@ import { buildQuizViewModel } from '../store/buildViewModel.ts';
 import type { LastResult } from '../store/state.ts';
 import { gradeAnswer } from '../quiz/grade.ts';
 import { resolveQuestion } from '../quiz/resolve.ts';
-import type { Question } from '../types/quiz.ts';
+import type { DisplayText, LangCode, Question } from '../types/quiz.ts';
 
 type Props = {
   question: Question;
@@ -18,6 +18,7 @@ type Props = {
   total: number;
   correct: number;
   wrong: number;
+  lang: LangCode;
   lastResult: LastResult;
   onAnswerMcq: (correct: boolean, questionId: number) => void;
   onAcknowledgeStudyCard: (questionId: number) => void;
@@ -31,6 +32,7 @@ export function QuizScreen({
   total,
   correct,
   wrong,
+  lang,
   lastResult,
   onAnswerMcq,
   onAcknowledgeStudyCard,
@@ -40,8 +42,8 @@ export function QuizScreen({
   const resolved = useMemo(() => resolveQuestion(question), [question]);
   const viewModel = useMemo(() => {
     if (resolved.kind !== 'mcq') return null;
-    return buildQuizViewModel(resolved);
-  }, [resolved]);
+    return buildQuizViewModel(resolved, { lang });
+  }, [resolved, lang]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -54,7 +56,7 @@ export function QuizScreen({
         </Text>
       </View>
 
-      <Text style={styles.prompt}>{question.q}</Text>
+      <Prompt prompt={viewModel?.prompt ?? { english: question.q }} />
 
       {resolved.kind === 'mcq' && viewModel !== null && (
         <McqOptions
@@ -158,31 +160,19 @@ function McqOptions({
     <View style={styles.options}>
       {viewModel.options.map((opt, i) => {
         const isCorrectChoice = i === viewModel.correctIndex;
-        let style = styles.option;
-        let textStyle = styles.optionText;
-        if (answered) {
-          if (isCorrectChoice) {
-            style = StyleSheet.flatten([
-              styles.option,
-              styles.optionCorrect,
-            ]) as typeof style;
-            textStyle = StyleSheet.flatten([
-              styles.optionText,
-              styles.optionTextOnDark,
-            ]) as typeof textStyle;
-          }
-        }
+        const showAsCorrect = answered && isCorrectChoice;
         return (
           <Pressable
             key={i}
             disabled={answered}
             onPress={() => {
-              const isCorrect = gradeAnswer(opt, question);
+              // Grade ALWAYS uses the English option value (web parity).
+              const isCorrect = gradeAnswer(opt.english, question);
               onAnswerMcq(isCorrect, question.id);
             }}
-            style={style}
+            style={[styles.option, showAsCorrect && styles.optionCorrect]}
           >
-            <Text style={textStyle}>{opt}</Text>
+            <OptionText opt={opt} onDark={showAsCorrect} />
           </Pressable>
         );
       })}
@@ -204,6 +194,56 @@ function McqOptions({
         </View>
       )}
     </View>
+  );
+}
+
+function Prompt({ prompt }: { prompt: DisplayText }) {
+  if (prompt.localized !== undefined) {
+    return (
+      <View style={styles.promptBlock}>
+        <Text style={styles.promptLocalized}>{prompt.localized}</Text>
+        <Text style={styles.promptEnglish}>{prompt.english}</Text>
+        {prompt.suggested === true && (
+          <Text style={styles.suggestedBadge}>Suggested translation</Text>
+        )}
+      </View>
+    );
+  }
+  return (
+    <View style={styles.promptBlock}>
+      <Text style={styles.prompt}>{prompt.english}</Text>
+    </View>
+  );
+}
+
+function OptionText({
+  opt,
+  onDark,
+}: {
+  opt: DisplayText;
+  onDark: boolean;
+}) {
+  if (opt.localized !== undefined) {
+    return (
+      <View>
+        <Text style={[styles.optionLocalized, onDark && styles.optionTextOnDark]}>
+          {opt.localized}
+        </Text>
+        <Text style={[styles.optionEnglish, onDark && styles.optionSubtextOnDark]}>
+          {opt.english}
+        </Text>
+        {opt.suggested === true && (
+          <Text style={[styles.optionSuggested, onDark && styles.optionSubtextOnDark]}>
+            Suggested translation
+          </Text>
+        )}
+      </View>
+    );
+  }
+  return (
+    <Text style={[styles.optionText, onDark && styles.optionTextOnDark]}>
+      {opt.english}
+    </Text>
   );
 }
 
@@ -293,11 +333,30 @@ const styles = StyleSheet.create({
     color: '#0b2447',
     fontWeight: '600',
   },
+  promptBlock: {
+    marginBottom: 16,
+  },
   prompt: {
     fontSize: 18,
     color: '#0b2447',
     lineHeight: 26,
-    marginBottom: 16,
+  },
+  promptLocalized: {
+    fontSize: 18,
+    color: '#0b2447',
+    lineHeight: 26,
+  },
+  promptEnglish: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  suggestedBadge: {
+    fontSize: 11,
+    color: '#7a6300',
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   options: {
     gap: 10,
@@ -318,9 +377,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
   },
+  optionLocalized: {
+    fontSize: 15,
+    color: '#222',
+  },
+  optionEnglish: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  optionSuggested: {
+    fontSize: 11,
+    color: '#7a6300',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
   optionTextOnDark: {
     color: '#fff',
     fontWeight: '600',
+  },
+  optionSubtextOnDark: {
+    color: 'rgba(255,255,255,0.85)',
   },
   feedbackRow: {
     flexDirection: 'row',

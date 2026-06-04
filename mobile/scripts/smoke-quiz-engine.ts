@@ -16,7 +16,17 @@ import { resolveQuestion, isInfoCardQuestion } from '../src/quiz/resolve.ts';
 import { pickQuestions, getQuestionBankFromData } from '../src/quiz/pick.ts';
 import { buildQuizViewModel } from '../src/store/buildViewModel.ts';
 import { quizReducer, initialState } from '../src/store/state.ts';
-import type { AppData, Question, RouteKey } from '../src/types/quiz.ts';
+import {
+  getPrompt,
+  getAccepted,
+  getDistractors,
+} from '../src/i18n/localize.ts';
+import type {
+  AppData,
+  LangCode,
+  Question,
+  RouteKey,
+} from '../src/types/quiz.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dataPath = path.resolve(here, '..', 'data.json');
@@ -255,7 +265,7 @@ for (const q of bank2025) {
 assert(ivHits.length === 0, `Invariant IV — 0 officeholder names in MCQ output (got ${ivHits.length})`);
 for (const h of ivHits.slice(0, 5)) console.log(`     #${h.id} matched /${h.label}/ in "${h.text}"`);
 
-section('buildQuizViewModel — every MCQ produces a valid 4-option VM');
+section('buildQuizViewModel — every MCQ produces a valid 4-option VM (en)');
 let vmsBuilt = 0;
 let vmBadFields = 0;
 let vmCorrectGrades = 0;
@@ -271,19 +281,19 @@ for (const q of bank2025) {
   vmsBuilt++;
   if (vm.options.length !== 4) vmBadFields++;
   if (vm.correctIndex < 0 || vm.correctIndex > 3) vmBadFields++;
-  if (typeof vm.prompt !== 'string' || vm.prompt.length === 0) vmBadFields++;
+  if (typeof vm.prompt.english !== 'string' || vm.prompt.english.length === 0) vmBadFields++;
   if (typeof vm.id !== 'number' || Number.isNaN(vm.id)) vmBadFields++;
   for (const opt of vm.options) {
-    if (typeof opt !== 'string' || opt.length === 0) vmBadFields++;
+    if (typeof opt.english !== 'string' || opt.english.length === 0) vmBadFields++;
   }
   const correctOpt = vm.options[vm.correctIndex];
-  if (typeof correctOpt === 'string' && gradeAnswer(correctOpt, q)) {
+  if (correctOpt && gradeAnswer(correctOpt.english, q)) {
     vmCorrectGrades++;
   }
 }
 assert(vmsBuilt > 0, `buildQuizViewModel produced ${vmsBuilt} valid VMs from 2025 bank`);
 assert(vmBadFields === 0, `0 VMs with bad fields (got ${vmBadFields})`);
-assert(vmCorrectGrades === vmsBuilt, `every VM's correctIndex option grades true (got ${vmCorrectGrades}/${vmsBuilt})`);
+assert(vmCorrectGrades === vmsBuilt, `every VM's correctIndex.english grades true (got ${vmCorrectGrades}/${vmsBuilt})`);
 if (vmNullCount > 0) {
   console.log(`  ℹ ${vmNullCount} mcq question(s) returned null VM (data shape issue — show error card in UI)`);
 }
@@ -295,6 +305,152 @@ const fakeMissingAccepted = buildQuizViewModel({
   distractors: ['a', 'b', 'c'],
 });
 assert(fakeMissingAccepted === null, 'returns null when accepted is empty');
+
+section('localize.getPrompt — returns localized when present, English otherwise');
+{
+  const q1 = data.questions2025[0] as Question; // "What is the form of government..."
+  const en = getPrompt(q1, 'en');
+  assert(en.localized === undefined, 'getPrompt(q, "en") has no localized field');
+  assert(en.english === q1.q, 'getPrompt(q, "en") english matches q.q');
+
+  const vi = getPrompt(q1, 'vi');
+  assert(typeof vi.localized === 'string' && vi.localized.length > 0, 'getPrompt(q1, "vi") returns vi prompt');
+  assert(vi.english === q1.q, 'getPrompt(q1, "vi") preserves English');
+  assert(vi.localized === (q1 as unknown as Record<string, unknown>)['vi'], 'vi prompt is verbatim from data.json (not invented)');
+}
+
+section('localize fallback — missing language field returns English only');
+{
+  // Manufacture a question lacking a localized field
+  const synthetic: Question = {
+    id: 9999,
+    q: 'Test prompt',
+    a: ['x'],
+    distractors: ['a', 'b', 'c'],
+  };
+  const vi = getPrompt(synthetic, 'vi');
+  assert(vi.localized === undefined, 'missing vi field → no localized');
+  assert(vi.english === 'Test prompt', 'falls back to English');
+  assert(vi.suggested === undefined, 'no suggested flag when no localized text');
+}
+
+section('localize — vi/es/zh/tl/ko all return localized for 5 sample questions');
+{
+  const sampleIds = [1, 2, 3, 4, 5];
+  const langsToCheck: LangCode[] = ['vi', 'es', 'zh', 'tl', 'ko'];
+  for (const id of sampleIds) {
+    const q = data.questions2025.find((x) => x.id === id);
+    assert(q !== undefined, `2025 Q#${id} found`);
+    if (!q) continue;
+    for (const lang of langsToCheck) {
+      const p = getPrompt(q, lang);
+      assert(typeof p.localized === 'string' && p.localized.length > 0, `Q#${id} prompt has ${lang}`);
+      const a = getAccepted(q, lang);
+      assert(a.length === (q.a?.length ?? 0), `Q#${id} accepted ${lang} length matches English`);
+      // At least one accepted has a localized variant
+      const hasAnyLocalized = a.some((x) => typeof x.localized === 'string' && x.localized.length > 0);
+      assert(hasAnyLocalized, `Q#${id} accepted ${lang} has ≥1 localized entry`);
+      const dArr = getDistractors(q, lang);
+      assert(dArr.length === (q.distractors?.length ?? 0), `Q#${id} distractors ${lang} length matches English`);
+    }
+  }
+}
+
+section('localize — no auto-translation or invented field');
+// Every `localized` string returned by the helpers MUST appear verbatim
+// in the source data.json (either q[lang] / q[lang+'_a'] /
+// q['distractors_'+lang]). Compare by identity-or-equality.
+{
+  const langsToCheck: LangCode[] = ['vi', 'es', 'zh', 'tl', 'ko'];
+  let inventedHits = 0;
+  for (const q of bank2025.slice(0, 30)) {
+    for (const lang of langsToCheck) {
+      const rec = q as unknown as Record<string, unknown>;
+      const sourcePrompt = rec[lang];
+      const sourceAcceptedArr = rec[`${lang}_a`];
+      const sourceDistractorArr = rec[`distractors_${lang}`];
+
+      const pr = getPrompt(q, lang);
+      if (pr.localized !== undefined && pr.localized !== sourcePrompt) inventedHits++;
+
+      const accArr = getAccepted(q, lang);
+      for (let i = 0; i < accArr.length; i++) {
+        const item = accArr[i];
+        if (item?.localized === undefined) continue;
+        const src = Array.isArray(sourceAcceptedArr) ? sourceAcceptedArr[i] : undefined;
+        if (item.localized !== src) inventedHits++;
+      }
+
+      const dArr = getDistractors(q, lang);
+      for (let i = 0; i < dArr.length; i++) {
+        const item = dArr[i];
+        if (item?.localized === undefined) continue;
+        const src = Array.isArray(sourceDistractorArr) ? sourceDistractorArr[i] : undefined;
+        if (item.localized !== src) inventedHits++;
+      }
+    }
+  }
+  assert(inventedHits === 0, `0 invented/auto-translated strings in 30×5 sample (got ${inventedHits})`);
+}
+
+section('buildQuizViewModel with lang="vi" still grades with English');
+{
+  let viVmsBuilt = 0;
+  let viCorrectGradedByEn = 0;
+  let viBadFields = 0;
+  let viHasLocalized = 0;
+  for (const q of bank2025) {
+    const r = resolveQuestion(q);
+    if (r.kind !== 'mcq') continue;
+    const vm = buildQuizViewModel(r, { rng: mulberry32(q.id), lang: 'vi' });
+    if (vm === null) continue;
+    viVmsBuilt++;
+    if (vm.options.length !== 4) viBadFields++;
+    for (const opt of vm.options) {
+      if (typeof opt.english !== 'string' || opt.english.length === 0) viBadFields++;
+      if (opt.localized !== undefined && (typeof opt.localized !== 'string' || opt.localized.length === 0)) {
+        viBadFields++;
+      }
+    }
+    const correctOpt = vm.options[vm.correctIndex];
+    // gradeAnswer must use English value; whether opt.localized exists or not.
+    if (correctOpt && gradeAnswer(correctOpt.english, q)) viCorrectGradedByEn++;
+    if (vm.options.some((o) => typeof o.localized === 'string')) viHasLocalized++;
+  }
+  assert(viVmsBuilt > 0, `vi VMs built (${viVmsBuilt})`);
+  assert(viBadFields === 0, `0 vi VMs with bad fields (got ${viBadFields})`);
+  assert(viCorrectGradedByEn === viVmsBuilt, `every vi VM grades correctly via .english (got ${viCorrectGradedByEn}/${viVmsBuilt})`);
+  assert(viHasLocalized > 0, `≥1 vi VM has localized option text (got ${viHasLocalized})`);
+}
+
+section('buildQuizViewModel — no null/undefined/NaN in localized view models');
+{
+  const langsToCheck: LangCode[] = ['vi', 'es', 'zh', 'tl', 'ko'];
+  let bad = 0;
+  for (const lang of langsToCheck) {
+    for (const q of bank2025) {
+      const r = resolveQuestion(q);
+      if (r.kind !== 'mcq') continue;
+      const vm = buildQuizViewModel(r, { rng: mulberry32(q.id), lang });
+      if (vm === null) continue;
+      // id
+      if (typeof vm.id !== 'number' || Number.isNaN(vm.id)) bad++;
+      // prompt
+      if (typeof vm.prompt.english !== 'string' || vm.prompt.english.length === 0) bad++;
+      if (vm.prompt.localized !== undefined &&
+          (typeof vm.prompt.localized !== 'string' || vm.prompt.localized.length === 0)) bad++;
+      // correctIndex
+      if (vm.correctIndex < 0 || vm.correctIndex > 3) bad++;
+      // options
+      for (const opt of vm.options) {
+        if (typeof opt.english !== 'string' || opt.english.length === 0) bad++;
+        if (opt.localized !== undefined &&
+            (typeof opt.localized !== 'string' || opt.localized.length === 0)) bad++;
+      }
+    }
+  }
+  assert(bad === 0, `0 null/undefined/NaN/empty fields across 5 langs × 120 mcq (got ${bad})`);
+}
 
 section('buildQuizViewModel — null when <3 distractors');
 const fakeFewDistractors = buildQuizViewModel({
