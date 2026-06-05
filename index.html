@@ -2038,6 +2038,54 @@
     padding-left: 22px;
   }
   .page-list li { margin: 6px 0; }
+
+  /* ── N-400 Case Status Helper (Phase WEB-2) — minimal input/message styles. */
+  .cs-label {
+    display: block;
+    font-weight: 600;
+    color: var(--navy);
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  .cs-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    margin: 8px 0 4px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .cs-input:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(13, 32, 82, 0.12);
+  }
+  .cs-hint {
+    margin: 4px 0 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .cs-msg {
+    margin: 0 0 14px;
+    font-size: 14px;
+    min-height: 20px;
+    color: var(--text-mid);
+  }
+  .cs-msg.cs-valid   { color: var(--correct); }
+  .cs-msg.cs-invalid { color: var(--wrong); }
+  .cs-msg.cs-warn    { color: #a16207; }
+  .cs-btn-full {
+    display: block;
+    width: 100%;
+    margin: 8px 0 6px;
+  }
   .page-section ul.page-bullets {
     margin: 8px 0 12px;
     padding-left: 22px;
@@ -2856,6 +2904,81 @@
     </section>
   </div>
 
+  <!-- ══ SCREEN 9: N-400 CASE STATUS HELPER ══════════════════════════════
+       Independent navigation tool. Validates the FORMAT of a USCIS
+       receipt number in the user's browser only (no network, no storage)
+       and routes the user to the official USCIS Case Status Online page.
+       The receipt number is NEVER stored, transmitted, logged, or echoed
+       — including not being appended to the official URL. -->
+  <div id="screen-case-status" class="screen">
+    <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
+    <h1 class="page-title" data-i18n="cs.title">N-400 Case Status Helper</h1>
+
+    <section class="page-section">
+      <p data-i18n="cs.intro">Use this helper to check whether your USCIS receipt number looks valid, then open the official USCIS Case Status Online page.</p>
+
+      <label for="cs-receipt-input" class="cs-label" data-i18n="cs.label">USCIS Receipt Number</label>
+      <input
+        id="cs-receipt-input"
+        type="text"
+        class="cs-input"
+        autocapitalize="characters"
+        autocomplete="off"
+        spellcheck="false"
+        maxlength="20"
+        placeholder="IOE1234567890"
+        oninput="csValidateReceipt(this)"
+        aria-describedby="cs-hint cs-msg">
+      <p id="cs-hint" class="cs-hint" data-i18n="cs.hint">A USCIS receipt number usually has 3 letters followed by 10 numbers, such as IOE1234567890.</p>
+      <p id="cs-msg" class="cs-msg" role="status" aria-live="polite"></p>
+
+      <button type="button" class="btn-primary cs-btn-full" onclick="csOpenOfficial()" data-i18n="cs.btn.open">Open USCIS Case Status Online</button>
+      <p><a href="https://www.uscis.gov/tools/checking-your-case-status-online" target="_blank" rel="noopener noreferrer" data-i18n="cs.link.learn">Learn how to check your case status</a></p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="cs.where.title">Where to find your receipt number</h2>
+      <p data-i18n="cs.where.body">Look for the receipt number on your USCIS receipt notice, such as Form I-797C, Notice of Action.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="cs.does.title">What this helper does</h2>
+      <ul class="page-list">
+        <li data-i18n="cs.does.li1">Checks the format only.</li>
+        <li data-i18n="cs.does.li2">Helps you open the official USCIS case status page.</li>
+        <li data-i18n="cs.does.li3">Does not retrieve, store, or submit your case information.</li>
+      </ul>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="cs.doesnot.title">What this helper does NOT do</h2>
+      <ul class="page-list">
+        <li data-i18n="cs.doesnot.li1">Does not check your case status inside this site.</li>
+        <li data-i18n="cs.doesnot.li2">Does not replace your USCIS online account.</li>
+        <li data-i18n="cs.doesnot.li3">Does not provide legal advice.</li>
+        <li data-i18n="cs.doesnot.li4">Does not store your receipt number.</li>
+      </ul>
+    </section>
+
+    <section class="page-section page-section-summary">
+      <p data-i18n="cs.privacy">Your receipt number is processed only in your browser for format checking. It is not saved, logged, or sent to FormN400.org.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="cs.resources.title">Official resources</h2>
+      <ul class="page-list">
+        <li><a href="https://egov.uscis.gov/casestatus/landing.do" target="_blank" rel="noopener noreferrer" data-i18n="cs.resources.link1">USCIS Case Status Online</a></li>
+        <li><a href="https://www.uscis.gov/tools/checking-your-case-status-online" target="_blank" rel="noopener noreferrer" data-i18n="cs.resources.link2">Checking Your Case Status Online</a></li>
+        <li><a href="https://my.uscis.gov/" target="_blank" rel="noopener noreferrer" data-i18n="cs.resources.link3">USCIS Online Account</a></li>
+        <li><a href="https://egov.uscis.gov/processing-times/" target="_blank" rel="noopener noreferrer" data-i18n="cs.resources.link4">USCIS Processing Times</a></li>
+      </ul>
+    </section>
+
+    <section class="page-section page-section-emphasis">
+      <p data-i18n="cs.disclaimer">This is an independent study and navigation tool. It is not affiliated with USCIS or any government agency and does not provide legal advice.</p>
+    </section>
+  </div>
+
   <!-- SEO: Vietnamese-language search keywords for organic Google indexing.
        aria-hidden so screen readers skip; .sr-only hides from sighted users
        (Google still indexes the text content). -->
@@ -2872,6 +2995,8 @@
       <a href="#" onclick="goPrivacy(); return false;" data-i18n="footer.privacy">Privacy Policy</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="/support.html">Support</a>
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a href="#" onclick="goCaseStatus(); return false;" data-i18n="footer.casestatus">Case Status</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="#" onclick="goPolicyNotice(); return false;" data-i18n="footer.policy">USCIS Policy Update</a>
     </div>
@@ -3819,7 +3944,7 @@ function showScreen(id) {
   const tabBar = document.getElementById('tab-bar');
   if (tabBar) tabBar.classList.toggle('hidden',
     id === 'quiz' || id === 'result' ||
-    id === 'about' || id === 'privacy' || id === 'policy-notice');
+    id === 'about' || id === 'privacy' || id === 'policy-notice' || id === 'case-status');
 }
 
 // Footer page navigation. About / Privacy / Policy-Notice all return to the
@@ -3828,6 +3953,69 @@ function goAbout()        { showScreen('about');          window.scrollTo({top:0
 function goPrivacy()      { showScreen('privacy');        window.scrollTo({top:0,behavior:'smooth'}); }
 function goPolicyNotice() { showScreen('policy-notice');  window.scrollTo({top:0,behavior:'smooth'}); }
 function goBack()         { showScreen('onboard');        window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ── N-400 Case Status Helper (Phase WEB-2) ────────────────────────────
+// Browser-only USCIS receipt-number format check + deep link to the
+// official USCIS Case Status Online page. The receipt number stays in
+// DOM/memory only — never stored, transmitted, logged, or echoed.
+
+function goCaseStatus() {
+  showScreen('case-status');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// USCIS receipt-number format: 3 letters + 10 digits (e.g., IOE1234567890).
+const CS_RECEIPT_RE = /^[A-Z]{3}[0-9]{10}$/;
+// Common service-center prefixes USCIS publishes as examples. Not exhaustive
+// — applicants may have a less common but still valid prefix.
+const CS_KNOWN_PREFIXES = new Set(['EAC', 'WAC', 'LIN', 'SRC', 'NBC', 'MSC', 'IOE']);
+
+// Pure classifier — no side effects, no storage, no network, no logging.
+// Portable for future mobile reuse.
+function csClassifyReceipt(raw) {
+  if (typeof raw !== 'string') return { state: 'empty' };
+  const cleaned = raw.replace(/[\s-]/g, '').toUpperCase();
+  if (cleaned.length === 0) return { state: 'empty' };
+  if (!CS_RECEIPT_RE.test(cleaned)) return { state: 'invalid' };
+  const prefix = cleaned.slice(0, 3);
+  if (!CS_KNOWN_PREFIXES.has(prefix)) return { state: 'warn' };
+  return { state: 'valid' };
+}
+
+function csValidateReceipt(el) {
+  if (!el) return;
+  // Normalize visually so the user sees a clean canonical form. Receipt
+  // number stays only on this DOM element; never written elsewhere.
+  const cleaned = el.value.replace(/[\s-]/g, '').toUpperCase();
+  if (cleaned !== el.value) el.value = cleaned;
+  const result = csClassifyReceipt(cleaned);
+  const msgEl = document.getElementById('cs-msg');
+  if (!msgEl) return;
+  msgEl.classList.remove('cs-valid', 'cs-invalid', 'cs-warn');
+  switch (result.state) {
+    case 'empty':
+      msgEl.textContent = '';
+      break;
+    case 'invalid':
+      msgEl.textContent = t('cs.msg.invalid');
+      msgEl.classList.add('cs-invalid');
+      break;
+    case 'warn':
+      msgEl.textContent = t('cs.msg.warn');
+      msgEl.classList.add('cs-warn');
+      break;
+    case 'valid':
+      msgEl.textContent = t('cs.msg.valid');
+      msgEl.classList.add('cs-valid');
+      break;
+  }
+}
+
+function csOpenOfficial() {
+  // Open the OFFICIAL USCIS Case Status Online page. Receipt number is
+  // intentionally NOT appended to the URL or sent anywhere.
+  window.open('https://egov.uscis.gov/casestatus/landing.do', '_blank', 'noopener,noreferrer');
+}
 
 function selectRoute(el) {
   const route = el.dataset.route;
@@ -4702,6 +4890,38 @@ const UI_TEXT = {
   // ─── Footer + back nav ───────────────────────────────────────────────
   "footer.about":               { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" , hi:"परिचय", ht:"Sou nou", th:"เกี่ยวกับ", lo:"ກ່ຽວກັບ", hmn:"Hais Txog", my:"အကြောင်း", pt:"Sobre", ru:"О проекте" },
   "footer.privacy":             { en:"Privacy Policy",                       vi:"Chính sách bảo mật",                                  es:"Política de privacidad",                              zh:"隐私政策",                                       tl:"Patakaran sa Privacy",                                ko:"개인정보 보호정책" , hi:"गोपनीयता नीति", ht:"Règleman konfidansyalite", th:"นโยบายความเป็นส่วนตัว", lo:"ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", hmn:"Txoj Cai Tswj Tsis Pub Lwm Tus Paub", my:"ကိုယ်ရေးအချက်အလက် မူဝါဒ", pt:"Política de Privacidade", ru:"Конфиденциальность" },
+  // ─── Footer: N-400 Case Status Helper (Phase WEB-2) ─────────────────
+  "footer.casestatus":          { en: "Case Status" },
+
+  // ─── N-400 Case Status Helper screen — English-only by design (Phase WEB-2)
+  "cs.title":            { en: "N-400 Case Status Helper" },
+  "cs.intro":            { en: "Use this helper to check whether your USCIS receipt number looks valid, then open the official USCIS Case Status Online page." },
+  "cs.label":            { en: "USCIS Receipt Number" },
+  "cs.hint":             { en: "A USCIS receipt number usually has 3 letters followed by 10 numbers, such as IOE1234567890." },
+  "cs.msg.invalid":      { en: "This does not look like a valid receipt number yet. It should be 3 letters followed by 10 numbers." },
+  "cs.msg.warn":         { en: "This format looks valid, but the prefix is not one of the common USCIS examples. Check your notice carefully." },
+  "cs.msg.valid":        { en: "This receipt number format looks valid. Open USCIS Case Status Online to check the official status." },
+  "cs.btn.open":         { en: "Open USCIS Case Status Online" },
+  "cs.link.learn":       { en: "Learn how to check your case status" },
+  "cs.where.title":      { en: "Where to find your receipt number" },
+  "cs.where.body":       { en: "Look for the receipt number on your USCIS receipt notice, such as Form I-797C, Notice of Action." },
+  "cs.does.title":       { en: "What this helper does" },
+  "cs.does.li1":         { en: "Checks the format only." },
+  "cs.does.li2":         { en: "Helps you open the official USCIS case status page." },
+  "cs.does.li3":         { en: "Does not retrieve, store, or submit your case information." },
+  "cs.doesnot.title":    { en: "What this helper does NOT do" },
+  "cs.doesnot.li1":      { en: "Does not check your case status inside this site." },
+  "cs.doesnot.li2":      { en: "Does not replace your USCIS online account." },
+  "cs.doesnot.li3":      { en: "Does not provide legal advice." },
+  "cs.doesnot.li4":      { en: "Does not store your receipt number." },
+  "cs.privacy":          { en: "Your receipt number is processed only in your browser for format checking. It is not saved, logged, or sent to FormN400.org." },
+  "cs.resources.title":  { en: "Official resources" },
+  "cs.resources.link1":  { en: "USCIS Case Status Online" },
+  "cs.resources.link2":  { en: "Checking Your Case Status Online" },
+  "cs.resources.link3":  { en: "USCIS Online Account" },
+  "cs.resources.link4":  { en: "USCIS Processing Times" },
+  "cs.disclaimer":       { en: "This is an independent study and navigation tool. It is not affiliated with USCIS or any government agency and does not provide legal advice." },
+
   // ─── Footer: USCIS Policy Update link (added 2026-05-21) ───────────
   "footer.policy":              { en:"USCIS Policy Update",
                                   vi:"Cập nhật chính sách USCIS",
@@ -5489,6 +5709,15 @@ function checkStartEnabled() {
     state.langExplicit = true;
   }
   updateUILanguage(initial);
+  // Phase WEB-2 deep-link: only `?screen=case-status` is honored. Any
+  // other value is ignored — we intentionally do NOT ship a generic
+  // screen-routing param.
+  try {
+    const screenParam = new URL(window.location.href).searchParams.get('screen');
+    if (screenParam === 'case-status') {
+      showScreen('case-status');
+    }
+  } catch (e) { /* older browser without URL ctor — ignore */ }
   // Show the PM-602-0194 banner if the user landed with one of the
   // triggering languages already in the URL.
   if (typeof updatePolicyBanner === 'function') updatePolicyBanner();
