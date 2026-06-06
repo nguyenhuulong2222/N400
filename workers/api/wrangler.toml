@@ -1,0 +1,13 @@
+name = "formn400-api"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+
+# Secrets (USCIS_CLIENT_ID / USCIS_CLIENT_SECRET) are NEVER set here.
+# Local dev:   workers/api/.dev.vars (gitignored)
+# Production:  npx wrangler secret put USCIS_CLIENT_ID
+#              npx wrangler secret put USCIS_CLIENT_SECRET
+
+# account_id and zone_id are intentionally NOT committed here.
+
+# Future deploy route after Long confirms the formn400.org Cloudflare zone:
+# route = "api.formn400.org/*"
