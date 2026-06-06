@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "check": "tsc --noEmit",
-    "test": "node test/receipt.test.mjs && node test/worker.test.mjs"
+    "test": "node test/receipt.test.mjs && node test/worker.test.mjs",
+    "test:uscis-sandbox": "node scripts/test-uscis-sandbox.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250601.0",
