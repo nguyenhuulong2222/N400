@@ -1969,6 +1969,55 @@
     .policy-banner-dismiss { align-self: flex-end; }
   }
 
+  /* ── Community-tier language treatment ─────────────────────────────────
+     Languages whose translations are community (self/assisted) rather than
+     official USCIS material get an amber tint + a small "Community" badge so
+     the user can tell at a glance before picking. Amber — NOT red — because
+     a community translation is usable for study, just not authoritative. */
+  .lang-btn { position: relative; }            /* anchor for the corner badge */
+  .lang-btn.community { border-color: #f0c674; background: #fffdf6; }
+  .lang-btn.community:hover, .lang-btn.community.selected {
+    border-color: #d4a017; background: #fdf6e3; color: var(--navy);
+  }
+  .lang-badge {
+    position: absolute; top: 4px; right: 4px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 8.5px; font-weight: 700; line-height: 1;
+    letter-spacing: .02em; text-transform: uppercase;
+    color: #92400e; background: #fde9b8; border: 1px solid #ecc869;
+    border-radius: 6px; padding: 2px 4px; pointer-events: none;
+  }
+
+  /* Persistent community-translation disclaimer banner (app-level, shown on
+     every screen while a community-tier language is active). Lighter amber
+     than the policy banner so the two read as distinct notices. */
+  .community-banner {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: #fffbeb; color: #92400e;
+    border: 1.5px solid #fcd34d; border-radius: 10px;
+    padding: 11px 14px; margin: 0 0 16px;
+    font-size: 13.5px; line-height: 1.5;
+  }
+  .community-banner[hidden] { display: none; }
+  .community-banner .cb-icon {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: #f0c674; color: #713f12;
+    font-size: 12px; font-weight: 700; font-style: normal;
+  }
+  .community-banner .cb-text { margin: 0; flex: 1; min-width: 0; }
+  .community-banner-dismiss {
+    flex-shrink: 0; background: transparent;
+    border: 1.5px solid #d4a017; border-radius: 999px;
+    color: #713f12; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 5px 13px; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .community-banner-dismiss:hover { background: rgba(255,255,255,.5); border-color: #92400e; }
+  @media (max-width: 480px) {
+    .community-banner { flex-direction: column; gap: 10px; }
+    .community-banner-dismiss { align-self: flex-end; }
+  }
+
   /* About + Privacy screens — shared layout. */
   .page-back-btn {
     background: transparent;
@@ -2161,6 +2210,17 @@
     <button class="tab-btn" id="tab-btn-interview" data-tab="interview" type="button" data-i18n="tab.interview">Interview Practice</button>
     <button class="tab-btn" id="tab-btn-resources" data-tab="resources" type="button" data-i18n="tab.resources">Resources</button>
   </nav>
+
+  <!-- ══ Community-translation notice ══════════════════════════════════════
+       App-level (outside the screens) so it stays visible while a community-
+       tier language is active, across onboarding / quiz / result / interview.
+       Dismissible per session in memory (no storage — Invariant VIII); it
+       re-appears when the user switches to a different community language. -->
+  <div id="community-banner" class="community-banner" role="status" aria-live="polite" hidden>
+    <span class="cb-icon" aria-hidden="true">i</span>
+    <p class="cb-text" data-i18n="community.notice">Community translation — for study reference only, not an official USCIS translation. Always compare with the English answer.</p>
+    <button type="button" class="community-banner-dismiss" onclick="dismissCommunityBanner()" data-i18n="policy.banner.dismiss" aria-label="Dismiss notice">Dismiss</button>
+  </div>
 
   <!-- ══ SCREEN 1: ONBOARDING ══ -->
   <div id="screen-onboard" class="screen active">
@@ -4113,6 +4173,8 @@ function selectLang(el) {
   syncLangToURL(state.lang);
   // Show / hide the PM-602-0194 policy banner depending on the new language.
   updatePolicyBanner();
+  // Show / hide the community-translation notice for community-tier languages.
+  updateCommunityBanner();
 }
 
 // PM-602-0194 informational banner. Visible on the onboarding screen when
@@ -4137,6 +4199,24 @@ function updatePolicyBanner() {
 function dismissPolicyBanner() {
   try { sessionStorage.setItem(POLICY_BANNER_DISMISS_KEY, '1'); } catch (e) { /* private mode — accept the transient state */ }
   const el = document.getElementById('policy-banner');
+  if (el) el.hidden = true;
+}
+
+// Community-translation disclaimer banner. Shown app-wide whenever the active
+// language is community tier (LANG_META[lang].tier === 'community'). Dismissal
+// is in-memory only — no storage, per Invariant VIII — and is tracked per
+// language so switching to a DIFFERENT community language re-shows the notice.
+let communityNoticeDismissedFor = null;
+function updateCommunityBanner() {
+  const el = document.getElementById('community-banner');
+  if (!el) return;
+  const meta = (state && LANG_META[state.lang]) || null;
+  const isCommunity = !!(meta && meta.tier === 'community');
+  el.hidden = !(isCommunity && communityNoticeDismissedFor !== state.lang);
+}
+function dismissCommunityBanner() {
+  communityNoticeDismissedFor = state ? state.lang : null;
+  const el = document.getElementById('community-banner');
   if (el) el.hidden = true;
 }
 
@@ -4318,6 +4398,14 @@ const UI_TEXT = {
   "route.5515.stat_pass":       { en:"12 to Pass",                             vi:"12 Để Đậu",                                          es:"12 para Aprobar" , zh:"答对 12 题及格", tl:"12 para Pumasa", ko:"12개 정답 합격" , hi:"12 पास के लिए", ht:"12 pou Pase", th:"ผ่าน 12 ข้อ", lo:"ຜ່ານ 12", hmn:"12 thiaj Dhau", my:"အောင်ရန် ၁၂", pt:"12 para Passar", ru:"12 для прохождения" },
 
   "lang.label":                 { en:"Display language",                       vi:"Ngôn ngữ hiển thị",                                   es:"Idioma de visualización" , zh:"显示语言", tl:"Wikang ipapakita", ko:"표시 언어" , hi:"प्रदर्शन भाषा", ht:"Lang afichaj", th:"ภาษาที่แสดง", lo:"ພາສາສະແດງ", hmn:"Lus Tso Saib", my:"ပြသမည့်ဘာသာ", pt:"Idioma de exibição", ru:"Язык интерфейса" },
+  // Per-language provenance badge shown on community-tier language buttons.
+  "lang.badge_community":       { en:"Community", vi:"Cộng đồng", es:"Comunidad", zh:"社区", tl:"Komunidad", ko:"커뮤니티", hi:"समुदाय", ht:"Kominote", th:"ชุมชน", lo:"ຊຸມຊົນ", hmn:"Zej Zog", my:"အသိုက်အဝန်း", pt:"Comunidade", ru:"Сообщество" },
+  // Persistent community-translation disclaimer banner. en/vi/es provided;
+  // the other 11 covered langs fall back to English until reviewed (see
+  // docs/TRANSLATION_TODO.md — these are NEW UI strings needing native review).
+  "community.notice":           { en:"Community translation — for study reference only, not an official USCIS translation. Always compare with the English answer.",
+                                  vi:"Bản dịch cộng đồng — chỉ để tham khảo khi học, không phải bản dịch chính thức của USCIS. Luôn đối chiếu với đáp án tiếng Anh.",
+                                  es:"Traducción comunitaria — solo como referencia de estudio, no es una traducción oficial de USCIS. Compare siempre con la respuesta en inglés." },
   "lang.required_note":         { en:"<strong>Required:</strong> select your native language for this exemption.",
                                   vi:"<strong>Bắt buộc:</strong> chọn tiếng mẹ đẻ của bạn cho diện miễn trừ này.",
                                   es:"<strong>Obligatorio:</strong> seleccione su idioma nativo para esta exención." ,
@@ -5727,6 +5815,23 @@ function checkStartEnabled() {
   }
 })();
 
+// Tag community-tier language buttons (amber class + "Community" badge) so the
+// provenance is visible before the user picks. Official langs stay clean. Runs
+// after the grid is fully built (static + self-healed); the badge carries a
+// data-i18n attribute so the subsequent updateUILanguage() localizes its text.
+(function decorateLangTiers() {
+  document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
+    const meta = LANG_META[btn.dataset.lang];
+    if (!meta || meta.tier !== 'community' || btn.querySelector('.lang-badge')) return;
+    btn.classList.add('community');
+    const badge = document.createElement('span');
+    badge.className = 'lang-badge';
+    badge.setAttribute('data-i18n', 'lang.badge_community');
+    badge.textContent = 'Community';
+    btn.appendChild(badge);
+  });
+})();
+
 // Apply the initial UI language. Honors a `?lang=` URL param when present
 // (used by hreflang links and direct sharing of language-specific URLs);
 // falls back to English otherwise.
@@ -5758,6 +5863,8 @@ function checkStartEnabled() {
   // Show the PM-602-0194 banner if the user landed with one of the
   // triggering languages already in the URL.
   if (typeof updatePolicyBanner === 'function') updatePolicyBanner();
+  // Show the community-translation notice if the initial language is community tier.
+  if (typeof updateCommunityBanner === 'function') updateCommunityBanner();
 })();
 
 // Wire the top-level tab bar (Practice Test ↔ Interview Practice).
