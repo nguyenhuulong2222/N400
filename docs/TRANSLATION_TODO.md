@@ -67,6 +67,27 @@ shipped translations. `tools/build-app-data.js` and
 `tools/sync-lang-count.js` derive the count from `LANG_META.length` (now
 20) and would overclaim if run now.
 
+### Phase 1 bump checklist (when the gate opens)
+
+The public count bumps ONLY after a language has (1) a native-speaker skim of
+its question banks + UI, (2) its `_suggested` flags removed in a separate task,
+and (3) explicit owner sign-off. Until then the public count stays **14**.
+Audit of every count surface is in this file's history; when bumping:
+
+1. **og-image is cheap.** The "N Languages" line is generated from
+   `og-image.svg` and rendered to `og-image.png` by `sips`. Running
+   `tools/sync-lang-count.js --apply` regenerates the PNG — no separate design
+   task needed.
+2. **Partial bump = set the number MANUALLY.** If only some langs are reviewed
+   (e.g. fr + uk → "16"), do NOT let `sync-lang-count.js` use
+   `LANG_META.length` (=20) — it overshoots. Only run the tool's auto-`.length`
+   path once the reviewed count actually equals `LANG_META.length` (all 20).
+   Otherwise edit the count surfaces by hand to the reviewed number.
+3. **Sync the App Store copy.** `mobile/docs/app-store-metadata.md` and
+   `mobile/docs/testflight-checklist.md` also state "14 languages" — update
+   them to match whenever the web count changes. (Mobile is a separate app;
+   coordinate, don't assume the web bump touches it.)
+
 ---
 
 ## 0b. UI-string gap — `community.notice` banner (added 2026-06-13)
