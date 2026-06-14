@@ -18,12 +18,23 @@ while these gaps remain unfilled.
 
 ## 0. Whole-language scaffolds — `ar`, `ur`, `gu`, `fr`, `bn`, `uk` (added 2026-06-13)
 
-These six languages were added to `LANG_META` as **community tier** with
-**zero translated content** — no UI strings and no question banks. They
-currently fall back to **English UI + English-only quiz** (honest
-placeholder; see `updateUILanguage` and `getT`). Each needs a full
-native-speaker review pass before any real content ships. Per Invariant I,
-untranslated > machine-translated > guessed.
+These six languages were added to `LANG_META` as **community tier**. Five
+(`ar`/`ur`/`gu`/`bn`/`uk`) still have **zero translated content** — no UI
+strings and no question banks — and fall back to **English UI + English-only
+quiz** (honest placeholder; see `updateUILanguage` and `getT`). **`fr` now
+carries DRAFT machine-assisted question-bank translations** (see its row
+below). Each language needs a full native-speaker review pass before any
+content is treated as final. Per Invariant I, untranslated > machine-
+translated > guessed.
+
+> **⚠️ Invariant I exception (logged 2026-06-13).** CLAUDE.md Invariant I
+> states "KHÔNG máy dịch" (no machine translation). The owner explicitly
+> **overrode** Invariant I for the French draft-translation task on
+> 2026-06-13, on the condition that every record stays flagged `_suggested`
+> and is presented as draft (never "official") until a native speaker
+> reviews. The remaining five languages have NOT been overridden — they stay
+> untranslated until a real source or reviewer is available. This exception
+> is task-scoped and does not amend Invariant I for the project generally.
 
 Scope per language: **228 questions** to translate (128 in the 2025 bank +
 100 in the 2008 bank), each with its accepted-answer array and distractors,
@@ -46,7 +57,7 @@ the question text and answer options on all **5 test routes** + **native-
 language mode** + **info-card questions** (dynamic/state). The app chrome
 stays LTR by design (no `<html dir>` flip in this phase).
 | gu   | ગુજરાતી | community | LTR | NOT STARTED | No official source. |
-| fr   | français | community | LTR | NOT STARTED | No official source. |
+| fr   | français | community | LTR | **DRAFT (suggested, machine-assisted, pending native review)** | All 228 question records (128 + 100) translated 2026-06-13: `fr`/`fr_a`/`distractors_fr`, every record flagged `fr_suggested:true`. NOT official, NOT native-reviewed. Dynamic/boilerplate answers kept as `uscis.gov/citizenship/testupdates` URL-text (no names/party). `_suggested` flag stays until a French native speaker reviews. UI strings still English-fallback. |
 | bn   | বাংলা   | community | LTR | NOT STARTED | No official source. |
 | uk   | українська | community | LTR | NOT STARTED | No official source. |
 
@@ -75,6 +86,27 @@ This is UI chrome (not civics content), but per project policy it was **not**
 machine-translated — each language needs a reviewer to supply the sentence.
 The companion badge label `lang.badge_community` ("Community") IS already
 translated in all 14 covered languages; only the banner sentence is pending.
+
+---
+
+## 0c. Native + syntax review of the 14 existing languages (NOT STARTED)
+
+The 14 pre-existing languages (en + vi/es/zh/tl/ko official; hi/ht/th/lo/hmn/
+my/pt/ru community) have **never had a full native-speaker + syntax audit**.
+Evidence this is overdue: the **Q1 "Chinese" bug** (fixed 2026-06-13) — Q1's
+question-text translation for all 8 expansion langs was the bare word
+"Chinese", a data-entry artifact that sat live and unnoticed. If a wrong
+*question text* survived in 8 languages at once, other latent errors are
+plausible across the Expansion-2026-05-21 batch.
+
+Needed, per language:
+- **Native-speaker pass** over question text, `{lang}_a`, and `distractors_{lang}`
+  for accuracy (the Chinese bug was content, not syntax).
+- **Syntax/structure pass** — run a bank-wide object-parse audit (every record
+  must parse cleanly, no glued/missing fields) after any bulk data edit.
+
+This is distinct from the per-question gaps in sections 1–3, which are about
+*missing* translations; this is about *verifying* the ones already shipped.
 
 ---
 
