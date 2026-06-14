@@ -49,6 +49,26 @@ shipped translations. `tools/build-app-data.js` and
 
 ---
 
+## 0b. UI-string gap — `community.notice` banner (added 2026-06-13)
+
+The Phase 2 community-translation disclaimer banner (`community.notice` in
+`UI_TEXT`) is provided in **en / vi / es** only. These 11 languages — which
+otherwise have full UI coverage — currently fall back to **English** for this
+one sentence:
+
+`zh, tl, ko, hi, ht, th, lo, hmn, my, pt, ru`
+
+English source string:
+> Community translation — for study reference only, not an official USCIS
+> translation. Always compare with the English answer.
+
+This is UI chrome (not civics content), but per project policy it was **not**
+machine-translated — each language needs a reviewer to supply the sentence.
+The companion badge label `lang.badge_community` ("Community") IS already
+translated in all 14 covered languages; only the banner sentence is pending.
+
+---
+
 ## 1. 2025 #1 — "What is the form of government of the United States?"
 
 `q.a` = `["Republic", "Constitution-based federal republic", "Representative democracy"]`
