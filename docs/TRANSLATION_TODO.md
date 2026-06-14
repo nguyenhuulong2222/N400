@@ -16,6 +16,39 @@ while these gaps remain unfilled.
 
 ---
 
+## 0. Whole-language scaffolds — `ar`, `ur`, `gu`, `fr`, `bn`, `uk` (added 2026-06-13)
+
+These six languages were added to `LANG_META` as **community tier** with
+**zero translated content** — no UI strings and no question banks. They
+currently fall back to **English UI + English-only quiz** (honest
+placeholder; see `updateUILanguage` and `getT`). Each needs a full
+native-speaker review pass before any real content ships. Per Invariant I,
+untranslated > machine-translated > guessed.
+
+Scope per language: **228 questions** to translate (128 in the 2025 bank +
+100 in the 2008 bank), each with its accepted-answer array and distractors,
+plus the UI string set. Dynamic-officeholder questions (President, VP,
+Speaker, Chief Justice, Senators, Governor) must follow the
+`uscis.gov/citizenship/testupdates` URL-boilerplate pattern — **never**
+hardcode an officeholder name in any language (Invariant IV).
+
+| Lang | Native | Tier | Dir | Status | Notes |
+|------|--------|------|-----|--------|-------|
+| ar   | العربية | community | RTL | NOT STARTED | No CLINIC Arabic source confirmed. Bump to `official` later only if a CLINIC/USCIS source is verified. RTL rendering wired in Phase 3. |
+| ur   | اردو    | community | RTL | NOT STARTED | No official source. RTL rendering wired in Phase 3. |
+| gu   | ગુજરાતી | community | LTR | NOT STARTED | No official source. |
+| fr   | français | community | LTR | NOT STARTED | No official source. |
+| bn   | বাংলা   | community | LTR | NOT STARTED | No official source. |
+| uk   | українська | community | LTR | NOT STARTED | No official source. |
+
+**Do NOT bump the public "14 languages" marketing count** (meta tags,
+JSON-LD) for these until real translations land — they are scaffolds, not
+shipped translations. `tools/build-app-data.js` and
+`tools/sync-lang-count.js` derive the count from `LANG_META.length` (now
+20) and would overclaim if run now.
+
+---
+
 ## 1. 2025 #1 — "What is the form of government of the United States?"
 
 `q.a` = `["Republic", "Constitution-based federal republic", "Representative democracy"]`
