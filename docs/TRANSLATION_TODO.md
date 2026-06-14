@@ -36,6 +36,15 @@ hardcode an officeholder name in any language (Invariant IV).
 |------|--------|------|-----|--------|-------|
 | ar   | العربية | community | RTL | NOT STARTED | No CLINIC Arabic source confirmed. Bump to `official` later only if a CLINIC/USCIS source is verified. RTL rendering wired in Phase 3. |
 | ur   | اردو    | community | RTL | NOT STARTED | No official source. RTL rendering wired in Phase 3. |
+
+**RTL visual QA (ar/ur) — NOT YET POSSIBLE.** The Phase 3 RTL wiring
+(`dir="rtl"` on `.q-text-native` / `.q-text-translated` / `.opt-native`) is
+inert until the first **reviewed** Arabic/Urdu strings are entered — the
+native-text elements only render when translation content exists. When those
+strings land, run the visual pass: verify `text-align` + bidi reordering of
+the question text and answer options on all **5 test routes** + **native-
+language mode** + **info-card questions** (dynamic/state). The app chrome
+stays LTR by design (no `<html dir>` flip in this phase).
 | gu   | ગુજરાતી | community | LTR | NOT STARTED | No official source. |
 | fr   | français | community | LTR | NOT STARTED | No official source. |
 | bn   | বাংলা   | community | LTR | NOT STARTED | No official source. |
