@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Single-page app: all screens (quiz / interview / resources / about /
+       privacy / case-status) live at the root URL, so one <url> entry with
+       per-language hreflang alternates. The alternate set MUST match the
+       hreflang block in index.html exactly. -->
+  <!-- Languages listed = the 14 translated AND native-reviewed languages.
+       ar/ur/gu/fr/bn/uk: community machine-assisted draft (every question
+       flagged _suggested) — DO NOT add here until native review is complete;
+       this is the plug-in point. Public count stays 14. -->
   <url>
     <loc>https://formn400.org/</loc>
-    <lastmod>2026-05-20</lastmod>
+    <lastmod>2026-06-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://formn400.org/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://formn400.org"/>
     <xhtml:link rel="alternate" hreflang="vi" href="https://formn400.org/?lang=vi"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://formn400.org/?lang=es"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://formn400.org/?lang=zh"/>
     <xhtml:link rel="alternate" hreflang="tl" href="https://formn400.org/?lang=tl"/>
     <xhtml:link rel="alternate" hreflang="ko" href="https://formn400.org/?lang=ko"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://formn400.org/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://formn400.org/?lang=hi"/>
+    <xhtml:link rel="alternate" hreflang="ht" href="https://formn400.org/?lang=ht"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://formn400.org/?lang=th"/>
+    <xhtml:link rel="alternate" hreflang="lo" href="https://formn400.org/?lang=lo"/>
+    <xhtml:link rel="alternate" hreflang="hmn" href="https://formn400.org/?lang=hmn"/>
+    <xhtml:link rel="alternate" hreflang="my" href="https://formn400.org/?lang=my"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://formn400.org/?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://formn400.org/?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://formn400.org"/>
   </url>
 </urlset>
