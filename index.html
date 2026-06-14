@@ -4020,6 +4020,12 @@ const LANG_META = {
   uk:  { name:"українська",  tts:"uk-UA",   flag:"🇺🇦", tier:"community" },
 };
 const SUPPORTED_LANGS = new Set(Object.keys(LANG_META));
+// Languages that are translated AND native-reviewed — the only ones we expose
+// to search engines (self-referential canonical, hreflang, sitemap). The 6
+// community drafts (ar/ur/gu/fr/bn/uk) are NOT here: their ?lang= URLs
+// canonicalize to the English root so search engines don't index unreviewed
+// machine-assisted content. Add a lang here only after native review.
+const SEO_INDEXED_LANGS = new Set(['en','vi','es','zh','tl','ko','hi','ht','th','lo','hmn','my','pt','ru']);
 // Every supported language other than English carries native-language quiz
 // content (question/answer/distractor `{lang}` / `{lang}_a` / `distractors_{lang}`
 // fields). Derived from LANG_META so adding a new lang only requires one edit.
@@ -5743,6 +5749,18 @@ function updateUILanguage(lang) {
   // tag uses "fil" per BCP-47.
   const htmlLang = useLang === 'tl' ? 'fil' : useLang;
   document.documentElement.setAttribute('lang', htmlLang);
+  // Self-referential canonical (+ og:url) per language: each reviewed ?lang=
+  // URL canonicalizes to ITSELF, not to the English root — otherwise Google
+  // treats every non-English variant as a duplicate of English and won't index
+  // it. English uses the bare root to match the hreflang block + sitemap.xml.
+  // Community-draft langs (not in SEO_INDEXED_LANGS) canonicalize to the
+  // English root so their unreviewed content is NOT indexed separately.
+  const seoLang = SEO_INDEXED_LANGS.has(useLang) ? useLang : 'en';
+  const langUrl = seoLang === 'en' ? 'https://formn400.org' : 'https://formn400.org/?lang=' + seoLang;
+  const canon = document.querySelector('link[rel="canonical"]');
+  if (canon) canon.setAttribute('href', langUrl);
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', langUrl);
   // Update document.title so search engines, browser tabs, and history
   // entries reflect the active language.
   const titleEntry = UI_TEXT['meta.title'];
