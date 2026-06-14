@@ -840,6 +840,14 @@
     line-height: 1.5;
   }
 
+  /* RTL content (Arabic/Urdu): right-align the native question + answer text.
+     Only elements explicitly marked dir="rtl" by the renderers match — the app
+     chrome carries no dir attribute and stays LTR. Bidi reordering of the text
+     itself is handled by the browser from the dir attribute. */
+  .q-text-native[dir="rtl"],
+  .q-text-translated[dir="rtl"],
+  .opt-native[dir="rtl"] { text-align: right; }
+
   /* Native-language-primary rendering (exemption routes + non-en lang) */
   .q-text-native {
     font-family: 'Playfair Display', serif;
@@ -4025,6 +4033,14 @@ const SUPPORTED_LANGS = new Set(Object.keys(LANG_META));
 // fields). Derived from LANG_META so adding a new lang only requires one edit.
 const NATIVE_LANGS = Object.keys(LANG_META).filter(l => l !== 'en');
 
+// RTL languages (Arabic, Urdu) flip the *content* text direction — the
+// question text and answer-option text — to right-to-left. The app chrome
+// (tab bar, nav, language badges, banners) intentionally stays LTR so the
+// layout doesn't mirror; only the reading direction of the native-language
+// strings changes. Reads `dir` from LANG_META; inert until RTL-language
+// question content exists (until then these langs render English-only LTR).
+function isRTL(lang) { return (LANG_META[lang] || {}).dir === 'rtl'; }
+
 // ══ UI ══
 function showScreen(id) {
   // Cancel any in-flight speech recognition / synthesis on screen change so
@@ -6352,11 +6368,13 @@ function renderQuestion() {
   const suggested = state.lang !== 'en' && q[state.lang + '_suggested'];
   const hintPill = suggested
     ? `<span class="trans-hint">${escapeHtml(t('pill.suggested'))}</span>` : '';
+  // RTL languages flip only the native-text reading direction (content, not chrome).
+  const rtlAttr = isRTL(state.lang) ? ' dir="rtl"' : '';
   let questionTextBlock;
   if (nativeMode) {
     if (tq) {
       questionTextBlock = `
-        <div class="q-text-native">${escapeHtml(tq)}${hintPill}</div>
+        <div class="q-text-native"${rtlAttr}>${escapeHtml(tq)}${hintPill}</div>
         <div class="q-text-en-secondary"><span class="en-label">EN</span>${escapeHtml(q.q)}</div>`;
     } else {
       // No translation available at all — we should not hit this often now that
@@ -6368,7 +6386,7 @@ function renderQuestion() {
   } else {
     questionTextBlock = `
       <div class="q-text">${escapeHtml(q.q)}</div>
-      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}${hintPill}</div>` : ''}`;
+      ${tq ? `<div class="q-text-translated"${rtlAttr}>${escapeHtml(tq)}${hintPill}</div>` : ''}`;
   }
 
   // Branch: speak mode runs through its own renderer (mic UI + transcript +
@@ -6403,7 +6421,7 @@ function renderQuestion() {
           return opts.map((opt,i) => {
           const translated = bilingualReady ? opt[state.lang] : null;
           const inner = translated
-            ? `<span class="opt-text"><span class="opt-native">${escapeHtml(translated)}</span><span class="opt-en">${escapeHtml(opt.en)}</span></span>`
+            ? `<span class="opt-text"><span class="opt-native"${rtlAttr}>${escapeHtml(translated)}</span><span class="opt-en">${escapeHtml(opt.en)}</span></span>`
             : `<span>${escapeHtml(opt.en)}</span>`;
           return `
           <button class="answer-opt" type="button" data-opt="${escapeHtml(opt.en)}">
@@ -6515,11 +6533,12 @@ function renderInfoCard(q) {
   const hintPill   = suggested
     ? `<span class="trans-hint">${escapeHtml(t('pill.suggested'))}</span>` : '';
 
+  const rtlAttr = isRTL(state.lang) ? ' dir="rtl"' : '';
   let questionTextBlock;
   if (nativeMode) {
     if (tq) {
       questionTextBlock = `
-        <div class="q-text-native">${escapeHtml(tq)}${hintPill}</div>
+        <div class="q-text-native"${rtlAttr}>${escapeHtml(tq)}${hintPill}</div>
         <div class="q-text-en-secondary"><span class="en-label">EN</span>${escapeHtml(q.q)}</div>`;
     } else {
       questionTextBlock = `
@@ -6529,7 +6548,7 @@ function renderInfoCard(q) {
   } else {
     questionTextBlock = `
       <div class="q-text">${escapeHtml(q.q)}</div>
-      ${tq ? `<div class="q-text-translated">${escapeHtml(tq)}${hintPill}</div>` : ''}`;
+      ${tq ? `<div class="q-text-translated"${rtlAttr}>${escapeHtml(tq)}${hintPill}</div>` : ''}`;
   }
 
   const noteText = q.dynamic_note || q.helpNote || '';
