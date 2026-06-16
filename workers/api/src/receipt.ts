@@ -46,3 +46,19 @@ export function classifyReceipt(raw: unknown): ReceiptClassification {
   // Deliberately do not include `cleaned` in the returned object.
   return { state: prefixKnown ? 'valid' : 'warn', prefixKnown };
 }
+
+/**
+ * Return the normalized (uppercased, whitespace/hyphen-stripped) receipt number
+ * IFF it is structurally valid, otherwise null.
+ *
+ * UNLIKE `classifyReceipt`, this intentionally returns the full receipt — it is
+ * needed transiently to build the upstream USCIS request path. API Invariant II:
+ * the caller MUST use the result only in-memory for the outbound USCIS call and
+ * MUST NEVER log it, store it, cache it, or place it in any response/error/URL
+ * we return to our own clients. Discard immediately after the upstream fetch.
+ */
+export function normalizeReceipt(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const cleaned = raw.replace(/[\s-]/g, '').toUpperCase();
+  return RECEIPT_RE.test(cleaned) ? cleaned : null;
+}

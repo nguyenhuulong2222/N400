@@ -32,7 +32,7 @@ export function corsHeaders(origin: string | null): Headers {
   const headers = new Headers({
     'Content-Type': 'application/json',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
   });
   if (origin && ALLOWED_ORIGINS.has(origin)) {
     headers.set('Access-Control-Allow-Origin', origin);

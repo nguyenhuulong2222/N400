@@ -2,10 +2,22 @@ name = "formn400-api"
 main = "src/index.ts"
 compatibility_date = "2026-06-01"
 
-# Secrets (USCIS_CLIENT_ID / USCIS_CLIENT_SECRET) are NEVER set here.
-# Local dev:   workers/api/.dev.vars (gitignored)
-# Production:  npx wrangler secret put USCIS_CLIENT_ID
-#              npx wrangler secret put USCIS_CLIENT_SECRET
+# Non-secret config only. Secrets are NEVER set here (API Invariant I).
+#   Local dev:   workers/api/.dev.vars (gitignored)
+#   Production:  npx wrangler secret put USCIS_CLIENT_ID
+#                npx wrangler secret put USCIS_CLIENT_SECRET
+[vars]
+# Phase API-1 default: MOCK_MODE on so the Worker boots and serves canned
+# responses with ZERO credentials. Set to "0" once secrets are in place to use
+# the live USCIS path.
+MOCK_MODE = "1"
+# Official USCIS Case Status API — SANDBOX endpoints (from the developer portal
+# OpenAPI). Swap to the production base/token URLs when promoting to prod.
+USCIS_BASE_URL = "https://api-int.uscis.gov/case-status"
+USCIS_TOKEN_URL = "https://api-int.uscis.gov/oauth/accesstoken"
+
+# CORS origins are intentionally NOT configured here. The allowlist is hardcoded
+# in src/cors.ts (API Invariant V) so it cannot be widened by a config typo.
 
 # account_id and zone_id are intentionally NOT committed here.
 
