@@ -57,9 +57,9 @@ const MATRIX = [
   { klass: 'hist', label: 'with-history #1', receipt: 'EAC9999103403', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #2', receipt: 'LIN9999106498', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #3', receipt: 'SRC9999102777', expect: 200, history: 'non-empty' },
-  { klass: 'nohist', label: 'no-history #1', receipt: 'EAC9999103400', expect: 200, history: 'empty' },
-  { klass: 'nohist', label: 'no-history #2', receipt: 'LIN9999106501', expect: 200, history: 'empty' },
-  { klass: 'nohist', label: 'no-history #3', receipt: 'SRC9999132694', expect: 200, history: 'empty' },
+  { klass: 'nohist', label: 'no-history #1', receipt: 'EAC9999103400', expect: 200, history: 'none' },
+  { klass: 'nohist', label: 'no-history #2', receipt: 'LIN9999106501', expect: 200, history: 'none' },
+  { klass: 'nohist', label: 'no-history #3', receipt: 'SRC9999132694', expect: 200, history: 'none' },
   { klass: '404', label: 'unknown valid-format', receipt: 'EAC0000000000', expect: 404 },
   { klass: '422', label: 'malformed (short)', receipt: 'ABC123', expect: 422, localOnly: true },
   { klass: '422', label: 'malformed (empty)', receipt: '', expect: 422, localOnly: true },
@@ -160,19 +160,28 @@ async function main() {
         pass = false;
         notes.push('no case_status object');
       } else {
-        const hist = Array.isArray(cs.hist_case_status) ? cs.hist_case_status : null;
-        if (hist === null) {
-          pass = false;
-          notes.push('hist_case_status is not an array');
-        } else {
-          detail = `hist=${hist.length}`;
-          if (tc.history === 'non-empty' && hist.length === 0) {
+        // hist_case_status shape (verified live in API-2):
+        //   with-history → a populated array (Array.isArray && length > 0)
+        //   no-history   → null (NOT []). We accept null-or-empty-array as "no
+        //                  history" for forward-safety, but REPORT a [] because
+        //                  today the sandbox returns null — a [] would be a delta.
+        const raw = cs.hist_case_status;
+        const isArr = Array.isArray(raw);
+        detail = isArr ? `hist=${raw.length}` : `hist=${raw === null ? 'null' : typeof raw}`;
+        if (tc.history === 'non-empty') {
+          if (!isArr || raw.length === 0) {
             pass = false;
-            notes.push('expected non-empty history');
+            notes.push('expected non-empty history array');
           }
-          if (tc.history === 'empty' && hist.length > 0) {
+        } else if (tc.history === 'none') {
+          if (raw === null) {
+            // Expected: USCIS returns null for no-history cases.
+          } else if (isArr && raw.length === 0) {
+            // Tolerated as "no history", but flag it — today it should be null.
+            notes.push('SHAPE DELTA hist_case_status: [] (expected null for no-history)');
+          } else {
             pass = false;
-            notes.push('expected empty history');
+            notes.push('expected hist_case_status null (or empty array) for no-history');
           }
         }
         // Shape delta vs the API-1 mock — report, do not absorb.

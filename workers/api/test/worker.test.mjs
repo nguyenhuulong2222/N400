@@ -93,12 +93,15 @@ await check('MOCK: lowercase/hyphen normalized → 200 (eac-9999-103403)', async
   assert.ok((await res.json()).case_status.hist_case_status.length > 0);
 });
 
-await check('MOCK: EAC9999103400 → 200 case_status EMPTY history', async () => {
+await check('MOCK: EAC9999103400 → 200 case_status NO history (hist null)', async () => {
   const res = await call('POST', '/case-status', { body: { receiptNumber: 'EAC9999103400' } });
   assert.equal(res.status, 200);
   const json = await res.json();
   assert.ok(json.case_status);
-  assert.equal(json.case_status.hist_case_status.length, 0);
+  // Live USCIS returns null (not []) for no-history cases — verified in API-2.
+  assert.equal(json.case_status.hist_case_status, null);
+  // Success envelope carries a top-level `message` mirroring upstream.
+  assert.equal(typeof json.message, 'string');
 });
 
 await check('MOCK: valid format but not a known sandbox receipt → 404', async () => {
