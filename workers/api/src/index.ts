@@ -138,26 +138,34 @@ async function handleCaseStatus(
 async function mapUpstream(upstream: Response, origin: string | null): Promise<Response> {
   switch (upstream.status) {
     case 200: {
-      // Read the body as text first, then JSON.parse — do NOT use
-      // `upstream.json()` here. On the Workers runtime, `Response.json()`
-      // applies a strict UTF-8 decode and rejects bodies with non-UTF-8 bytes,
-      // which the USCIS sandbox emits in some EN/ES-swapped payloads (e.g.
-      // Latin-1 Spanish in the *_en fields). `text()` decodes tolerantly
-      // (invalid bytes → U+FFFD), so a valid-200 we can read is never turned
-      // into a 503. The EN/ES content is still passed through verbatim — we do
-      // not normalize or translate USCIS's data.
+      // Read the body as text, then JSON.parse — NOT `upstream.json()`, so we
+      // can catch a parse failure and map it to a distinct, accurate error.
+      //
+      // Why this matters: the USCIS sandbox returns syntactically INVALID JSON
+      // for a meaningful fraction of receipts (~38% of staging samples). The
+      // `current_case_status_desc_en` field embeds an HTML anchor whose
+      // attribute quotes are inconsistently escaped, so the JSON string
+      // terminates early and `JSON.parse` fails with
+      // "Expected ',' or '}' after property value". This is an UPSTREAM DATA
+      // DEFECT — not an encoding problem (the bytes are plain ASCII) and not a
+      // Worker bug. We do NOT attempt to repair malformed JSON: we cannot safely
+      // reconstruct legal status text, and a wrong guess shown to an anxious
+      // applicant is worse than a clean error.
       let text: string;
       try {
         text = await upstream.text();
       } catch {
+        // Transport/read failure mid-body → server-side, retryable.
         return serviceUnavailable(origin);
       }
       let json: unknown;
       try {
         json = JSON.parse(text);
       } catch {
-        // Body genuinely isn't JSON — forward a clean error, never the raw body.
-        return serviceUnavailable(origin);
+        // Upstream handed us an invalid 200 body → 502 (Bad Gateway), distinct
+        // from 503 (token/transport). Never forward the raw body; never log the
+        // body or receipt — only a non-identifying marker.
+        return upstreamUnparseable(origin);
       }
       return jsonResponse(json, 200, origin);
     }
@@ -189,6 +197,24 @@ function invalidReceipt(origin: string | null): Response {
       message: 'Receipt number must be 3 letters followed by 10 numbers.',
     },
     422,
+    origin,
+  );
+}
+
+// Upstream returned an invalid (unparseable) 200 body — an upstream data defect,
+// distinct from a server-side outage. 502 Bad Gateway. We emit only a
+// non-identifying marker (NO receipt, NO body, NO PII) so logs can show how often
+// USCIS is malformed vs. unavailable without ever recording sensitive data.
+function upstreamUnparseable(origin: string | null): Response {
+  console.warn('upstream_unparseable');
+  return jsonResponse(
+    {
+      ok: false,
+      error: 'upstream_unparseable',
+      message:
+        "The case status service returned a response we couldn't read. Please try again later or check your status directly at egov.uscis.gov.",
+    },
+    502,
     origin,
   );
 }

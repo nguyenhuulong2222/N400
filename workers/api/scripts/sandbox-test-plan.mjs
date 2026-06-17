@@ -50,19 +50,51 @@ const EXPECTED_CASE_FIELDS = [
   'hist_case_status',
 ];
 
-// Representative matrix (NOT the full staging list — quota-aware). Every receipt
-// here is in BOTH the live staging lists AND the API-1 mock sets, so the MOCK
-// dry run passes identically to a healthy LIVE run.
+// Receipts the LIVE USCIS sandbox returns as HTTP 200 with SYNTACTICALLY INVALID
+// JSON — an upstream USCIS data defect (an unescaped `"` in an HTML anchor inside
+// current_case_status_desc_en breaks the JSON string mid-value). This is NOT an
+// encoding issue (bytes are plain ASCII) and NOT a Worker bug. The Worker maps
+// these to 502 upstream_unparseable (never 200, never 503).
+//
+// SCORING (Long's decision): a malformed receipt PASSES only when the Worker
+// returns 502 upstream_unparseable. If one ever returns a valid 200, that is a
+// deliberate FAIL — it signals USCIS FIXED the upstream data and the receipt must
+// be reclassified out of this list (into nohist/hist). We never score a defect as
+// healthy data.
+//
+// COVERAGE: only the 2 receipts PROVEN malformed by API-2 isolation are listed.
+// The confirmed defect set is 19/50 staging receipts; the remaining 17 numbers
+// were never provided to this session and are NOT fabricated (API Invariant III).
+// Paste the remaining 17 confirmed receipts below (one per line) to complete live
+// coverage. These are LIVE-ONLY: the API-1 mock serves only healthy shapes, so
+// the malformed class is skipped in MOCK_MODE.
+const MALFORMED_RECEIPTS = [
+  'EAC9999103400', // confirmed malformed (API-2 isolation)
+  'LIN9999106501', // confirmed malformed (API-2 isolation)
+  // TODO(Long): add the remaining 17 confirmed-malformed staging receipts here.
+];
+
+// Representative matrix (NOT the full staging list — quota-aware). Every healthy
+// receipt here is in BOTH the live staging lists AND the API-1 mock sets, so the
+// MOCK dry run passes identically to a healthy LIVE run. The malformed class is
+// LIVE-ONLY (mock can't reproduce the upstream defect) and is skipped in MOCK.
 const MATRIX = [
   { klass: 'hist', label: 'with-history #1', receipt: 'EAC9999103403', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #2', receipt: 'LIN9999106498', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #3', receipt: 'SRC9999102777', expect: 200, history: 'non-empty' },
-  { klass: 'nohist', label: 'no-history #1', receipt: 'EAC9999103400', expect: 200, history: 'none' },
-  { klass: 'nohist', label: 'no-history #2', receipt: 'LIN9999106501', expect: 200, history: 'none' },
-  { klass: 'nohist', label: 'no-history #3', receipt: 'SRC9999132694', expect: 200, history: 'none' },
+  // EAC9999103400 / LIN9999106501 moved to the malformed class (they return 502,
+  // not valid no-history data). SRC9999132694 is the healthy no-history sample.
+  { klass: 'nohist', label: 'no-history', receipt: 'SRC9999132694', expect: 200, history: 'none' },
   { klass: '404', label: 'unknown valid-format', receipt: 'EAC0000000000', expect: 404 },
-  { klass: '422', label: 'malformed (short)', receipt: 'ABC123', expect: 422, localOnly: true },
-  { klass: '422', label: 'malformed (empty)', receipt: '', expect: 422, localOnly: true },
+  { klass: '422', label: 'bad-format (short)', receipt: 'ABC123', expect: 422, localOnly: true },
+  { klass: '422', label: 'bad-format (empty)', receipt: '', expect: 422, localOnly: true },
+  ...MALFORMED_RECEIPTS.map((receipt, i) => ({
+    klass: 'malformed',
+    label: `upstream-malformed #${i + 1}`,
+    receipt,
+    expect: 502,
+    liveOnly: true,
+  })),
 ];
 
 function displayReceipt(r) {
@@ -86,14 +118,14 @@ function pad(s, n) {
 
 function printTable(rows) {
   console.log(
-    `${pad('RESULT', 7)}${pad('CLASS', 8)}${pad('LABEL', 22)}${pad('RECEIPT', 16)}${pad('EXP', 5)}${pad('GOT', 5)}DETAIL/NOTES`,
+    `${pad('RESULT', 7)}${pad('CLASS', 11)}${pad('LABEL', 22)}${pad('RECEIPT', 16)}${pad('EXP', 5)}${pad('GOT', 5)}DETAIL/NOTES`,
   );
   console.log('-'.repeat(96));
   for (const r of rows) {
     const result = r.pass ? 'PASS' : 'FAIL';
     const detail = [r.detail, ...r.notes].filter(Boolean).join(' | ');
     console.log(
-      `${pad(result, 7)}${pad(r.klass, 8)}${pad(r.label, 22)}${pad(displayReceipt(r.receipt), 16)}${pad(r.expect, 5)}${pad(r.got, 5)}${detail}`,
+      `${pad(result, 7)}${pad(r.klass, 11)}${pad(r.label, 22)}${pad(displayReceipt(r.receipt), 16)}${pad(r.expect, 5)}${pad(r.got, 5)}${detail}`,
     );
   }
 }
@@ -137,6 +169,14 @@ async function main() {
   const rows = [];
   let first = true;
   for (const tc of MATRIX) {
+    // Live-only classes (the malformed upstream defect) can't be reproduced by
+    // the API-1 mock, which serves only healthy shapes. Skip them in MOCK_MODE so
+    // the dry run stays green; they're exercised on the LIVE sandbox only.
+    if (mock && tc.liveOnly) {
+      rows.push({ ...tc, got: 'SKIP', pass: true, skipped: true, detail: 'live-only (mock has no malformed simulation)', notes: [] });
+      continue;
+    }
+
     if (!first) await delay(THROTTLE_MS);
     first = false;
 
@@ -153,7 +193,28 @@ async function main() {
     let detail = '';
     const notes = [];
 
-    if (got === 200 && tc.expect === 200) {
+    if (tc.klass === 'malformed') {
+      // PASS iff the Worker returned 502 upstream_unparseable.
+      if (got === 502) {
+        const json = await res.json().catch(() => null);
+        if (json && json.error === 'upstream_unparseable') {
+          detail = '502 upstream_unparseable (USCIS defect, handled cleanly)';
+        } else {
+          pass = false;
+          notes.push(`expected error=upstream_unparseable, got error=${json?.error ?? '(unreadable)'}`);
+        }
+      } else if (got === 200) {
+        // Deliberate FAIL: a valid 200 means USCIS likely FIXED the upstream data.
+        // Reclassify this receipt out of MALFORMED_RECEIPTS (into nohist/hist).
+        pass = false;
+        notes.push('GOT VALID 200 — USCIS may have FIXED this receipt; reclassify out of malformed');
+      } else if (got === 503) {
+        // Token/transport problem, not the malformed path — diagnose separately.
+        notes.push('UPSTREAM 503 (token/transport), not the malformed path — run scripts/test-uscis-sandbox.mjs');
+      } else {
+        notes.push('expected 502 upstream_unparseable');
+      }
+    } else if (got === 200 && tc.expect === 200) {
       const json = await res.json().catch(() => null);
       const cs = json?.case_status;
       if (!cs) {
@@ -217,15 +278,44 @@ async function main() {
   }
 
   // Coverage: the production-access gate requires BOTH 200 and 4xx demonstrably
-  // tested. Confirm at least one PASS in each class.
+  // tested. Confirm at least one PASS in each class. The malformed class is an
+  // upstream DEFECT, not a healthy data path — deliberately kept OUT of this
+  // tally so a 502 can never masquerade as 200/4xx coverage.
   const classesNeeded = ['hist', 'nohist', '404', '422'];
   const covered = classesNeeded.filter((k) => rows.some((r) => r.klass === k && r.pass));
   const missingClasses = classesNeeded.filter((k) => !covered.includes(k));
   console.log(`\nClass coverage (passing): ${covered.join(', ') || '(none)'}`);
   if (missingClasses.length) console.log(`Missing class coverage: ${missingClasses.join(', ')}`);
 
-  const failures = rows.filter((r) => !r.pass);
-  console.log(`\n${rows.length - failures.length}/${rows.length} checks passed.`);
+  // Upstream-malformed reporting — a SEPARATE line, outside the coverage tally.
+  // "Handled" = Worker returned 502 upstream_unparseable for an upstream defect.
+  const malformedRows = rows.filter((r) => r.klass === 'malformed');
+  if (malformedRows.length) {
+    if (mock) {
+      console.log(`\nupstream malformed (USCIS defect): ${malformedRows.length} receipts SKIPPED in mock mode (live-only).`);
+    } else {
+      const handled = malformedRows.filter((r) => r.pass).length;
+      console.log(
+        `\nupstream malformed (USCIS defect): ${handled}/${malformedRows.length} receipts → 502 upstream_unparseable handled.`,
+      );
+      const fixed = malformedRows.filter((r) => !r.pass && r.got === 200);
+      if (fixed.length) {
+        console.log(
+          `  ⚠ ${fixed.length} now return VALID 200 — USCIS may have FIXED the data; reclassify out of MALFORMED_RECEIPTS: ${fixed
+            .map((r) => r.receipt)
+            .join(', ')}`,
+        );
+      }
+    }
+  }
+
+  // Skipped rows (live-only classes in mock mode) are not scored either way.
+  const scored = rows.filter((r) => !r.skipped);
+  const skippedCount = rows.length - scored.length;
+  const failures = scored.filter((r) => !r.pass);
+  console.log(
+    `\n${scored.length - failures.length}/${scored.length} checks passed.${skippedCount ? ` (${skippedCount} skipped)` : ''}`,
+  );
 
   const tokenProblem = !mock && tokenFetches !== 1;
   if (failures.length || missingClasses.length || tokenProblem) {

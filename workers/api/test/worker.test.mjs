@@ -156,64 +156,96 @@ await check('unknown route → 404 not_found', async () => {
   assert.equal((await res.json()).error, 'not_found');
 });
 
-// --- Live-path regression: upstream 200 whose .json() throws must NOT 503 ---
-// Mirrors the API-2 live bug: the USCIS sandbox returned valid HTTP 200 for two
-// no-history receipts, but their bodies (EN/ES swapped — Spanish text in the
-// *_en fields, pretty-printed Jackson style) made the Workers runtime's
-// `Response.json()` reject on a strict UTF-8 decode → caught → 503. The fix
-// reads text() (tolerant decode) then JSON.parse, so a readable 200 stays 200.
-//
-// We stub a Response-like object whose .json() throws but whose .text() returns
-// the valid pretty-printed body, exactly modeling the runtime delta.
-await check('LIVE: upstream 200 with throwing json()/EN-ES swap → Worker 200 passthrough', async () => {
-  const FAILING_BODY = `{
-  "message" : "Successfully retrieved case status",
-  "case_status" : {
-    "receiptNumber" : "EAC9999103400",
-    "formType" : "N400",
-    "submittedDate" : "09-05-2023 14:28:46",
-    "modifiedDate" : "10-01-2023 09:10:11",
-    "current_case_status_text_en" : "Documento Fue Destruido",
-    "current_case_status_desc_en" : "El documento fue destruido.",
-    "current_case_status_text_es" : "Document Was Destroyed",
-    "current_case_status_desc_es" : "Your document was destroyed.",
-    "hist_case_status" : null
-  }
-}`;
+// --- Live-path: drive worker.fetch through the real upstream call with a
+// stubbed global fetch (token + case-status). LIVE_ENV has dummy creds; the
+// stub returns canned upstream Responses so no network/credential is touched.
+const LIVE_ENV = {
+  MOCK_MODE: '0',
+  USCIS_CLIENT_ID: 'id',
+  USCIS_CLIENT_SECRET: 'secret',
+  USCIS_BASE_URL: 'https://api-int.uscis.gov/case-status',
+  USCIS_TOKEN_URL: 'https://api-int.uscis.gov/oauth/accesstoken',
+};
+
+// Run worker.fetch with a stubbed global fetch: token endpoint → access token,
+// case-status endpoint → the provided upstream Response-like object.
+async function withStubbedUpstream(caseResponse, fn) {
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (input) => {
     const url = typeof input === 'string' ? input : input.url;
     if (url.includes('/oauth/')) {
       return { ok: true, status: 200, async json() { return { access_token: 'T', expires_in: 3600 }; } };
     }
-    // .json() throws (mimics workerd strict decode); .text() returns valid JSON.
-    return { status: 200, json() { throw new SyntaxError('bad decode'); }, async text() { return FAILING_BODY; } };
+    return caseResponse;
   };
   __resetTokenCache();
   try {
-    const res = await worker.fetch(
-      new Request('https://api.local/case-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiptNumber: 'EAC9999103400' }),
-      }),
-      {
-        MOCK_MODE: '0',
-        USCIS_CLIENT_ID: 'id',
-        USCIS_CLIENT_SECRET: 'secret',
-        USCIS_BASE_URL: 'https://api-int.uscis.gov/case-status',
-        USCIS_TOKEN_URL: 'https://api-int.uscis.gov/oauth/accesstoken',
-      },
-    );
-    assert.equal(res.status, 200, 'valid upstream 200 must pass through, not become 503');
-    const json = await res.json();
-    // EN/ES content passed through verbatim — we do NOT normalize the sandbox swap.
-    assert.equal(json.case_status.current_case_status_text_en, 'Documento Fue Destruido');
-    assert.equal(json.case_status.hist_case_status, null);
+    return await fn();
   } finally {
     globalThis.fetch = realFetch;
     __resetTokenCache();
   }
+}
+
+function liveCaseStatusCall(receipt = 'EAC9999103400') {
+  return worker.fetch(
+    new Request('https://api.local/case-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiptNumber: receipt }),
+    }),
+    LIVE_ENV,
+  );
+}
+
+// Regression for the REAL API-2 defect: USCIS sandbox returns HTTP 200 with a
+// body that is syntactically INVALID JSON (~38% of staging receipts). Here the
+// `current_case_status_desc_en` anchor has an unescaped `"` mid-string, so the
+// string terminates early and JSON.parse fails — modeling the real upstream
+// defect. The bytes are plain ASCII (NOT an encoding problem). The Worker must
+// return a distinct 502 upstream_unparseable, never 503, never 200, and must
+// never echo the raw malformed body.
+await check('LIVE: malformed upstream 200 (invalid JSON) → 502 upstream_unparseable, no raw body', async () => {
+  // Unescaped inner quotes in the href break the JSON string mid-value.
+  const MALFORMED_BODY =
+    '{"message":"Successfully retrieved case status","case_status":{' +
+    '"receiptNumber":"EAC9999103400","formType":"N400",' +
+    '"current_case_status_text_en":"Case Was Received",' +
+    '"current_case_status_desc_en":"See <a href="https://egov.uscis.gov">status</a> for details.",' +
+    '"hist_case_status":null}}';
+  const caseResponse = { status: 200, async text() { return MALFORMED_BODY; } };
+  await withStubbedUpstream(caseResponse, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 502, 'malformed upstream 200 must map to 502, not 503/200');
+    const text = await res.text();
+    const json = JSON.parse(text);
+    assert.equal(json.error, 'upstream_unparseable');
+    assert.equal(json.ok, false);
+    // The raw malformed body must NOT leak into our response.
+    assert.ok(!text.includes('egov.uscis.gov/status'), 'raw upstream fragment leaked');
+    assert.ok(!text.includes('current_case_status_desc_en'), 'raw upstream field leaked');
+  });
+});
+
+// A VALID upstream 200 still passes through as 200 (content forwarded verbatim).
+await check('LIVE: valid upstream 200 → 200 passthrough', async () => {
+  const VALID_BODY = JSON.stringify({
+    message: 'Successfully retrieved case status',
+    case_status: {
+      receiptNumber: 'EAC9999103400',
+      formType: 'N400',
+      current_case_status_text_en: 'Case Was Received',
+      hist_case_status: null,
+    },
+  });
+  const caseResponse = { status: 200, async text() { return VALID_BODY; } };
+  await withStubbedUpstream(caseResponse, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 200, 'valid upstream 200 must pass through');
+    const json = await res.json();
+    assert.equal(json.case_status.current_case_status_text_en, 'Case Was Received');
+    assert.equal(json.case_status.hist_case_status, null);
+  });
 });
 
 console.log(`\nworker.test.mjs: ${passed} passed`);
