@@ -83,3 +83,11 @@ the mock without sign-off).
 - Token fetches: 1 (reused)
 - Status codes observed: 200, 404, 422, 503
 - Notes: Partial upstream 503 (not full outage; 4/6 upstream calls returned 200). Diagnosing outage vs intermittent; re-run pending.
+
+## Upstream defect — malformed JSON (discovered Day 2, 2026-06-17)
+- Scope: 19/50 staging receipts return HTTP 200 with syntactically INVALID JSON.
+- Cause: unescaped `"` in an HTML <a href> inside current_case_status_desc_en terminates the JSON string early (JSON.parse: "Expected ',' or '}' after property value"). Bytes are plain ASCII — not an encoding issue, not a Worker bug.
+- Stable: identical 19 receipts across repeated scans.
+- Affected: EAC9999103400, EAC9999103402, EAC9999103406, EAC9999103407, EAC9999103408, EAC9999103409, EAC9999103414, EAC9999103415, EAC9999103420, EAC9999103421, EAC9999103424, EAC9999103425, EAC9999103426, EAC9999103428, EAC9999103429, EAC9999103431, EAC9999103432, LIN9999106501, LIN9999106507
+- Worker handling: returns 502 upstream_unparseable (clean error, no raw body, no PII). Commit 08725b2.
+- Action: reported to developersupport@uscis.dhs.gov 2026-06-17. Open question: does the same serialization defect affect PRODUCTION live receipts with HTML in descriptions? Blocking frontend wiring until answered.
