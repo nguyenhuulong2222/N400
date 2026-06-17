@@ -138,10 +138,25 @@ async function handleCaseStatus(
 async function mapUpstream(upstream: Response, origin: string | null): Promise<Response> {
   switch (upstream.status) {
     case 200: {
+      // Read the body as text first, then JSON.parse — do NOT use
+      // `upstream.json()` here. On the Workers runtime, `Response.json()`
+      // applies a strict UTF-8 decode and rejects bodies with non-UTF-8 bytes,
+      // which the USCIS sandbox emits in some EN/ES-swapped payloads (e.g.
+      // Latin-1 Spanish in the *_en fields). `text()` decodes tolerantly
+      // (invalid bytes → U+FFFD), so a valid-200 we can read is never turned
+      // into a 503. The EN/ES content is still passed through verbatim — we do
+      // not normalize or translate USCIS's data.
+      let text: string;
+      try {
+        text = await upstream.text();
+      } catch {
+        return serviceUnavailable(origin);
+      }
       let json: unknown;
       try {
-        json = await upstream.json();
+        json = JSON.parse(text);
       } catch {
+        // Body genuinely isn't JSON — forward a clean error, never the raw body.
         return serviceUnavailable(origin);
       }
       return jsonResponse(json, 200, origin);
