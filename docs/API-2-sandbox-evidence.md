@@ -74,3 +74,11 @@ the mock without sign-off).
 - Status codes observed: 200, 404, 422 (both 200 and 4xx ✓)
 - Shape delta: none
 - Notes: First valid run. Post hist_case_status null-fix (commit db988a2).
+
+## Day 2 — 2026-06-17 (HST)
+- Run: `npm run test:sandbox-plan` (LIVE sandbox, in-window)
+- Result: 9/9 ALL PASS
+- Classes: hist (200, hist=2), nohist (200, hist=null), 404, 422
+- Token fetches: 1 (reused)
+- Status codes observed: 200, 404, 422 (both 200 and 4xx ✓)
+- Shape delta: none
