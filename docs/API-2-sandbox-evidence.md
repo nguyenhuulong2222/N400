@@ -77,8 +77,9 @@ the mock without sign-off).
 
 ## Day 2 — 2026-06-17 (HST)
 - Run: `npm run test:sandbox-plan` (LIVE sandbox, in-window)
-- Result: 9/9 ALL PASS
-- Classes: hist (200, hist=2), nohist (200, hist=null), 404, 422
+- Result: 7/9 — 2 nohist receipts returned 503 (partial upstream failure)
+- PASS: hist x3 (hist=2), nohist #3 SRC9999132694 (hist=null), 404, 422 x2
+- FAIL: nohist #1 EAC9999103400 -> 503, nohist #2 LIN9999106501 -> 503
 - Token fetches: 1 (reused)
-- Status codes observed: 200, 404, 422 (both 200 and 4xx ✓)
-- Shape delta: none
+- Status codes observed: 200, 404, 422, 503
+- Notes: Partial upstream 503 (not full outage; 4/6 upstream calls returned 200). Diagnosing outage vs intermittent; re-run pending.
