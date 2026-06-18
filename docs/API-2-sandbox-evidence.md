@@ -91,3 +91,11 @@ the mock without sign-off).
 - Affected: EAC9999103400, EAC9999103402, EAC9999103406, EAC9999103407, EAC9999103408, EAC9999103409, EAC9999103414, EAC9999103415, EAC9999103420, EAC9999103421, EAC9999103424, EAC9999103425, EAC9999103426, EAC9999103428, EAC9999103429, EAC9999103431, EAC9999103432, LIN9999106501, LIN9999106507
 - Worker handling: returns 502 upstream_unparseable (clean error, no raw body, no PII). Commit 08725b2.
 - Action: reported to developersupport@uscis.dhs.gov 2026-06-17. Open question: does the same serialization defect affect PRODUCTION live receipts with HTML in descriptions? Blocking frontend wiring until answered.
+
+## Day 3 — 2026-06-18 (HST)
+- Run: `npm run test:sandbox-plan` (LIVE sandbox, in-window)
+- Result: 9/9 ALL PASS (incl. malformed class scored correctly)
+- Classes: hist (200), nohist (200, null), 404, 422
+- Upstream malformed: 2/2 → 502 handled (USCIS defect, reported 2026-06-17)
+- Token fetches: 1 (reused)
+- Status codes observed: 200, 404, 422, 502
