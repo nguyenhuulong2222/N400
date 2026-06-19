@@ -107,3 +107,9 @@ the mock without sign-off).
 - Upstream malformed: 2/2 → 502 handled (USCIS defect, reported 2026-06-17)
 - Token fetches: 1 (reused)
 - Status codes observed: 200, 404, 422, 502
+
+## USCIS response — 2026-06-19
+- Torch Developer Support acknowledged the malformed-JSON report.
+- Status: "team is currently looking into this and will follow up once more information is made available."
+- This is an acknowledgment only — does NOT yet answer whether production live receipts exhibit the same serialization defect.
+- Frontend wiring remains blocked pending a substantive answer on production behavior.
