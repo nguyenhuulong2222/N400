@@ -99,3 +99,11 @@ the mock without sign-off).
 - Upstream malformed: 2/2 → 502 handled (USCIS defect, reported 2026-06-17)
 - Token fetches: 1 (reused)
 - Status codes observed: 200, 404, 422, 502
+
+## Day 4 — 2026-06-19 (HST)
+- Run: `npm run test:sandbox-plan` (LIVE sandbox, in-window)
+- Result: 9/9 ALL PASS (incl. malformed class scored correctly)
+- Classes: hist (200), nohist (200, null), 404, 422
+- Upstream malformed: 2/2 → 502 handled (USCIS defect, reported 2026-06-17)
+- Token fetches: 1 (reused)
+- Status codes observed: 200, 404, 422, 502
