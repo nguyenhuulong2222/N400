@@ -113,3 +113,16 @@ the mock without sign-off).
 - Status: "team is currently looking into this and will follow up once more information is made available."
 - This is an acknowledgment only — does NOT yet answer whether production live receipts exhibit the same serialization defect.
 - Frontend wiring remains blocked pending a substantive answer on production behavior.
+
+## Day 5 — 2026-06-22 (HST)
+- Run: `npm run test:sandbox-plan` (LIVE sandbox, in-window)
+- Result: 9/9 ALL PASS (incl. malformed class scored correctly)
+- Classes: hist (200), nohist (200, null), 404, 422
+- Upstream malformed: 2/2 → 502 handled (USCIS defect, reported 2026-06-17)
+- Token fetches: 1 (reused)
+- Status codes observed: 200, 404, 422, 502
+
+## 5-day gate — COMPLETE
+- Days 1–5 (16/6, 17/6, 18/6, 19/6, 22/6) all run in-window with passing results.
+- Both 200 and 4xx exercised across all days; 502 upstream_unparseable handled cleanly.
+- Outstanding blocker: USCIS production behavior re: malformed JSON (acknowledged 2026-06-19, substantive answer pending).
