@@ -126,3 +126,9 @@ the mock without sign-off).
 - Days 1–5 (16/6, 17/6, 18/6, 19/6, 22/6) all run in-window with passing results.
 - Both 200 and 4xx exercised across all days; 502 upstream_unparseable handled cleanly.
 - Outstanding blocker: USCIS production behavior re: malformed JSON (acknowledged 2026-06-19, substantive answer pending).
+
+## Post-fix verification — 2026-06-23
+- Full 50-receipt scan: 50/50 HTTP 200, valid JSON, 0 malformed.
+- test:sandbox-plan: 9/9 ALL PASS (hist ×3, nohist ×3 all hist=null, 404, 422 ×2).
+- EAC9999103400 + LIN9999106501 reclassified to nohist (commit 992c709).
+- Worker 502 upstream_unparseable handling + tests retained for regression safety.
