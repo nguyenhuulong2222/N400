@@ -15,7 +15,7 @@
     --navy-light: #2a4a9e;
     --text: #0d1f3c;
     --text-mid: #334166;
-    --text-muted: #6b7a99;
+    --text-muted: #5b6783;
     --bg: #f7f8fc;
     --bg-card: #ffffff;
     --border: #dde2ef;
@@ -113,19 +113,29 @@
   .footer-note {
     text-align: center;
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: 14px;
     margin-top: 20px;
   }
+  .vn-summary {
+    background: #eef2f9;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 28px 0 8px;
+    font-size: 16px;
+    color: var(--text);
+  }
+  .vn-summary strong { color: var(--navy); }
+  .vn-summary h2 { margin-top: 0; }
 </style>
 </head>
 <body>
   <main class="container">
     <article class="card">
       <h1>Privacy Policy</h1>
-      <p class="updated">Last updated: June 4, 2026</p>
+      <p class="updated">Last updated: June 23, 2026</p>
 
       <div class="summary">
-        <strong>Form N-400 Civics Practice does not collect, sell, or share personal data.</strong> There is no account, no login, no payment, no advertising, no analytics, and no tracking. Everything you do in the app stays on your device.
+        <strong>Form N-400 Civics Practice does not collect, sell, or share personal data.</strong> There is no account, no login, no payment, no advertising, no analytics, and no tracking. Your study activity stays on your device. One optional feature we are adding — the Case Status Helper — will contact our servers, sending only the receipt number you type, using it once to look up your case with USCIS, and keeping no record of it.
       </div>
 
       <h2>What the app does NOT do</h2>
@@ -145,13 +155,48 @@
       <ul>
         <li>Quiz answers and scores are kept in app memory while you are using the app and are discarded when you close it.</li>
         <li>Optional choices such as your selected route, language, or U.S. state are kept only in memory for the current session.</li>
-        <li>No background sync, no cloud save, no server upload.</li>
+        <li>Interview-practice input (for example, a name or date you type into a sample-answer field) stays in memory for that session only and is never transmitted or saved.</li>
+        <li>For your study activity there is no background sync, no cloud save, and no server upload.</li>
+      </ul>
+      <p>The single exception will be the optional <strong>Case Status Helper</strong> we are adding, which will contact our backend only to perform a case lookup you request. It is described in its own section below.</p>
+
+      <h2>Case Status Helper (coming soon)</h2>
+      <p>The site will offer an optional <strong>Case Status Helper</strong> that will let you check the status of a USCIS case. This feature is not yet available. When you use it, you will type a USCIS receipt number. Here is exactly how that number will be handled:</p>
+      <ul>
+        <li>The receipt number is sent inside the request body — never in the page address (URL) or a query string on this site — to our backend service at <strong>api.formn400.org</strong>.</li>
+        <li>Our backend exists only to relay (proxy) the request to the official USCIS Case Status API and return the result to you. We keep credentials on the server so they are never exposed to your browser.</li>
+        <li>To perform the lookup, your receipt number is transmitted onward to the official USCIS Case Status API, which is operated by USCIS under its own privacy practices.</li>
+        <li>The receipt number is <strong>never logged, stored, cached, or retained</strong> by us. It exists in memory only for the brief moment needed to complete that one lookup, and is then discarded.</li>
+        <li>We do not associate the receipt number with any identity, and we keep <strong>no record that a lookup occurred</strong> — no history, no database, no analytics.</li>
+      </ul>
+      <p>The Case Status Helper will be provided for convenience only. It is <strong>not affiliated with, authorized, endorsed, or approved by USCIS or DHS</strong>. For official case information, always rely on your USCIS account at <a href="https://my.uscis.gov" target="_blank" rel="noopener noreferrer">my.uscis.gov</a>.</p>
+
+      <h2>No sale or sharing of data</h2>
+      <p>We do not sell user data for profit or for any other monetary transaction. We do not share de-identified, anonymized, or pseudonymized data with third parties for any reason without your active consent. Because we do not collect personal data in the first place, there is no user data available to sell, rent, trade, or share.</p>
+
+      <h2>Data retention and deletion</h2>
+      <p>We retain no user-entered data. Quiz answers, selections, and interview-practice input exist only in the browser session and are permanently gone when you close or refresh the page. Once the Case Status Helper is available, any receipt number you submit through it will exist only in transient server memory for that single request and will be gone as soon as the lookup completes. Because nothing is stored, there is nothing for you to request the deletion of — there is no profile, account, or record to delete.</p>
+      <p>The one form of data that does exist is the standard server access log generated by our hosting and delivery provider, <strong>Cloudflare</strong>, when any website is served. These are ordinary content-delivery-network (CDN) logs that typically include items such as an IP address, a timestamp, the requested path, the response status, and a browser user-agent string. They are generated and managed by Cloudflare as part of operating the service, are retained under Cloudflare's own standard log-retention practices, and are not linked by us to your identity or to any case lookup. We do not maintain our own separate application logs of user content, and we do not use these CDN logs for analytics, advertising, profiling, or tracking.</p>
+
+      <h2>Third-party services</h2>
+      <p>The site relies on a small number of infrastructure services. None of them receive personal data we collect (we collect none), and none are used for advertising or tracking:</p>
+      <ul>
+        <li><strong>Cloudflare</strong> — hosts the website (Cloudflare Pages) and will run the Case Status Helper backend (Cloudflare Workers) once that feature launches. Cloudflare processes standard server access logs as described above.</li>
+        <li><strong>Google Fonts</strong> — the page loads display fonts from Google's font service, which may receive your IP address as part of delivering the font files, subject to Google's own privacy policy. No other information is sent.</li>
+        <li><strong>Web Speech API</strong> — the practice "speak" and read-aloud features use your browser's built-in speech capability. Depending on your browser and operating system, speech recognition or synthesis may be processed by your browser vendor's service; this is a function of your browser, not something we operate, and we receive none of that audio.</li>
+        <li><strong>USCIS Case Status API</strong> — once the Case Status Helper launches, will receive only a receipt number you submit through it, as described above, and only when you use that feature.</li>
       </ul>
 
       <h2>U.S. State Privacy Notice</h2>
       <p>Some U.S. states provide residents with privacy rights such as the right to access, delete, correct, or opt out of the sale or sharing of personal information.</p>
       <p>Form N-400 Civics Practice does not collect, sell, share, or retain personal information. Because the app does not collect personal data, we do not maintain a consumer profile or have personal information to access, delete, correct, or opt out of sale/share.</p>
       <p>If you have a privacy question, contact <a href="mailto:long@formn400.org">long@formn400.org</a>.</p>
+
+      <h2>Data breach notification</h2>
+      <p>Because we do not collect or store personal data, there is no personal-data store that could be breached, and no collected records that could be exposed. If a security incident affects the service in any way, we will post a clear notice on this site. We hold no email addresses, phone numbers, or other contact details for users, so we cannot send individual notifications — site notice is the means available to us, and we will use it promptly.</p>
+
+      <h2>Transfer of ownership</h2>
+      <p>If ownership of this site is transferred, or if the project is discontinued, there is no collected user data to transfer, because none is collected or stored. Any successor operator would be required to honor a privacy policy at least as protective of users as this one.</p>
 
       <h2>External links</h2>
       <p>The Resources tab inside the app, and any other USCIS links on this site, open official <strong>USCIS</strong> pages in your device's default browser. We do not embed those pages or proxy any traffic. Once you tap an external link, the destination website's own privacy practices apply — see the USCIS site for their policy.</p>
@@ -160,7 +205,8 @@
       <p>The app is intended for adults preparing for the U.S. naturalization civics test. It does not knowingly collect any information from children.</p>
 
       <h2>Changes to this policy</h2>
-      <p>If this policy materially changes, the <em>Last updated</em> date at the top will reflect the new revision. Older versions are tracked in the repository history.</p>
+      <p>If we make a material change to this policy, we will tell you. Because the site has no user accounts and we hold no contact information, we provide that notice prominently on the site itself at the point of change — for example, a visible notice on this page and on the app's start screen — rather than by email.</p>
+      <p>Each material change will be accompanied by a short, plain-language summary of what changed and why, so you do not have to compare full versions to understand it. The <em>Last updated</em> date above will reflect the new revision, and older versions remain available in the public repository history. We ask for your active agreement to material changes; simply continuing to use the site is not treated as acceptance of a changed policy.</p>
 
       <h2>Contact</h2>
       <div class="contact">
@@ -183,6 +229,16 @@
         For the current civics test materials and verified answers to time-sensitive questions, see the official USCIS page:<br>
         <a href="https://www.uscis.gov/citizenship/testupdates" target="_blank" rel="noopener noreferrer">https://www.uscis.gov/citizenship/testupdates</a>
       </p>
+
+      <div class="vn-summary">
+        <h2>Tóm tắt (Tiếng Việt)</h2>
+        <p><strong>FormN400.org không thu thập, không bán, và không chia sẻ dữ liệu cá nhân.</strong> Không có tài khoản, đăng nhập, thanh toán, quảng cáo, phân tích (analytics) hay theo dõi. Câu trả lời luyện tập, lựa chọn ngôn ngữ/tiểu bang, và mọi thông tin bạn nhập chỉ tồn tại trong bộ nhớ trình duyệt trong phiên làm việc và sẽ mất khi bạn đóng hoặc tải lại trang.</p>
+        <p><strong>Công cụ Tra cứu Tình trạng Hồ sơ (Case Status Helper):</strong> đây là tính năng tùy chọn chúng tôi sắp bổ sung, hiện chưa có. Khi bạn dùng, bạn sẽ nhập số biên nhận (receipt number) của USCIS; số đó sẽ được gửi trong phần thân yêu cầu (không bao giờ nằm trong địa chỉ URL trên trang này) tới máy chủ của chúng tôi tại api.formn400.org. Máy chủ chỉ chuyển tiếp yêu cầu đến API Tình trạng Hồ sơ chính thức của USCIS rồi trả kết quả về cho bạn. Số biên nhận <strong>không bao giờ được ghi log, lưu trữ, lưu đệm (cache) hay giữ lại</strong> — nó chỉ tồn tại tạm thời để thực hiện đúng một lần tra cứu rồi bị loại bỏ. Chúng tôi không gắn nó với bất kỳ danh tính nào và không lưu lịch sử tra cứu.</p>
+        <p><strong>Lưu giữ &amp; xóa dữ liệu:</strong> chúng tôi không lưu giữ dữ liệu bạn nhập, nên không có gì để bạn yêu cầu xóa. Dữ liệu duy nhất tồn tại là nhật ký truy cập máy chủ tiêu chuẩn do Cloudflare (nhà cung cấp lưu trữ) tạo ra; đó là log CDN thông thường, không được chúng tôi liên kết với danh tính bạn.</p>
+        <p><strong>Sự cố bảo mật:</strong> vì chúng tôi không lưu dữ liệu cá nhân nên không có kho dữ liệu để bị xâm phạm; nếu có sự cố ảnh hưởng đến dịch vụ, chúng tôi sẽ đăng thông báo rõ ràng ngay trên trang web (chúng tôi không có thông tin liên hệ để gửi email riêng).</p>
+        <p><strong>Thay đổi chính sách:</strong> nếu có thay đổi quan trọng, chúng tôi sẽ thông báo nổi bật trên trang kèm bản tóm tắt ngắn gọn, dễ hiểu về nội dung thay đổi, và xin sự đồng ý chủ động của bạn — việc tiếp tục sử dụng trang KHÔNG được coi là chấp nhận chính sách mới.</p>
+        <p>Công cụ này chỉ nhằm hỗ trợ học tập, <strong>không liên kết hay được USCIS/DHS chứng thực</strong>, và không thay thế tư vấn pháp lý.</p>
+      </div>
 
       <div class="back-row">
         <a href="/">← Back to formn400.org</a>
