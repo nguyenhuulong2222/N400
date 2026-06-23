@@ -62,29 +62,33 @@ const EXPECTED_CASE_FIELDS = [
 // be reclassified out of this list (into nohist/hist). We never score a defect as
 // healthy data.
 //
-// COVERAGE: only the 2 receipts PROVEN malformed by API-2 isolation are listed.
-// The confirmed defect set is 19/50 staging receipts; the remaining 17 numbers
-// were never provided to this session and are NOT fabricated (API Invariant III).
-// Paste the remaining 17 confirmed receipts below (one per line) to complete live
-// coverage. These are LIVE-ONLY: the API-1 mock serves only healthy shapes, so
-// the malformed class is skipped in MOCK_MODE.
+// STATUS — RESOLVED 2026-06-23: USCIS Torch Developer Support fixed the defect.
+// A full live scan of all 50 staging receipts returned 50/50 valid JSON (0
+// malformed); the two formerly-affected receipts (EAC9999103400, LIN9999106501)
+// now return valid 200 with hist_case_status:null and were moved back to the
+// nohist class. The list is intentionally left EMPTY (not a commented-out dead
+// list): the scoring machinery below is retained at zero cost so any future
+// upstream regression is caught and surfaced again. The full historical record
+// (19/50 affected + raw evidence) lives in the API-2 evidence log, not here.
 const MALFORMED_RECEIPTS = [
-  'EAC9999103400', // confirmed malformed (API-2 isolation)
-  'LIN9999106501', // confirmed malformed (API-2 isolation)
-  // TODO(Long): add the remaining 17 confirmed-malformed staging receipts here.
+  // (empty) — upstream defect resolved 2026-06-23; see API-2 evidence log.
 ];
 
 // Representative matrix (NOT the full staging list — quota-aware). Every healthy
 // receipt here is in BOTH the live staging lists AND the API-1 mock sets, so the
 // MOCK dry run passes identically to a healthy LIVE run. The malformed class is
-// LIVE-ONLY (mock can't reproduce the upstream defect) and is skipped in MOCK.
+// LIVE-ONLY (mock can't reproduce the upstream defect) and is skipped in MOCK;
+// with MALFORMED_RECEIPTS empty it currently contributes no rows.
 const MATRIX = [
   { klass: 'hist', label: 'with-history #1', receipt: 'EAC9999103403', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #2', receipt: 'LIN9999106498', expect: 200, history: 'non-empty' },
   { klass: 'hist', label: 'with-history #3', receipt: 'SRC9999102777', expect: 200, history: 'non-empty' },
-  // EAC9999103400 / LIN9999106501 moved to the malformed class (they return 502,
-  // not valid no-history data). SRC9999132694 is the healthy no-history sample.
-  { klass: 'nohist', label: 'no-history', receipt: 'SRC9999132694', expect: 200, history: 'none' },
+  // All three are no-history cases (hist_case_status:null). EAC9999103400 and
+  // LIN9999106501 were temporarily in the malformed class during the upstream
+  // defect; restored here after USCIS fixed it (2026-06-23).
+  { klass: 'nohist', label: 'no-history #1', receipt: 'EAC9999103400', expect: 200, history: 'none' },
+  { klass: 'nohist', label: 'no-history #2', receipt: 'LIN9999106501', expect: 200, history: 'none' },
+  { klass: 'nohist', label: 'no-history #3', receipt: 'SRC9999132694', expect: 200, history: 'none' },
   { klass: '404', label: 'unknown valid-format', receipt: 'EAC0000000000', expect: 404 },
   { klass: '422', label: 'bad-format (short)', receipt: 'ABC123', expect: 422, localOnly: true },
   { klass: '422', label: 'bad-format (empty)', receipt: '', expect: 422, localOnly: true },
