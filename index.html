@@ -2909,6 +2909,11 @@
       <p data-i18n="privacy.overview.body">formN400.org is a free, non-commercial civic education resource. We are committed to your privacy. This policy explains what data we do and do not collect.</p>
     </section>
 
+    <section class="page-section">
+      <h2 data-i18n="privacy.operator.title">Operator</h2>
+      <p data-i18n-html="privacy.operator.body">FormN400.org is operated by Huu Long Nguyen, an individual (sole proprietor) based in the State of Hawaii, United States, who is the liable operating entity for this website. Contact: <a href="mailto:long@formn400.org">long@formn400.org</a>.</p>
+    </section>
+
     <section class="page-section page-section-emphasis">
       <h2 data-i18n="privacy.donot.title">Data we DO NOT collect</h2>
       <p data-i18n="privacy.donot.intro">We do not collect, store, transmit, or share:</p>
@@ -5741,6 +5746,12 @@ const UI_TEXT = {
   // sensitive; they are intentionally NOT machine-translated. Queue for native
   // legal translation. The Case Status wording matches the verified Worker
   // behavior (POST body, never logged/stored/cached, proxied to USCIS).
+  // Operator disclosure (USCIS Torch API compliance) — names the liable
+  // operating entity. Legally required text: English-only entry so EVERY
+  // language renders this identical English clause via the entry.en fallback.
+  // Do NOT translate, paraphrase, or machine-translate (Invariant I).
+  "privacy.operator.title":     { en:"Operator" },
+  "privacy.operator.body":      { en:'FormN400.org is operated by Huu Long Nguyen, an individual (sole proprietor) based in the State of Hawaii, United States, who is the liable operating entity for this website. Contact: <a href="mailto:long@formn400.org">long@formn400.org</a>.' },
   "privacy.donot.exception":    { en:"The single exception is the optional Case Status Helper (described below), which — once it is available — will contact our backend only to perform a case lookup you request." },
   "privacy.casestatus.title":   { en:"Case Status Helper (coming soon)" },
   "privacy.casestatus.intro":   { en:"The site will offer an optional Case Status Helper that will let you check the status of a USCIS case. This feature is not yet available. When you use it, you will type a USCIS receipt number. Here is exactly how that number will be handled:" },
