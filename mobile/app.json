@@ -1,16 +1,11 @@
 {
   "expo": {
-    "name": "Form N-400 Civics Practice",
+    "name": "N-400 Citizenship Test",
     "slug": "formn400-civics-practice",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0b2447"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.formn400.app",
@@ -21,7 +16,7 @@
     "android": {
       "package": "org.formn400.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0b2447",
+        "backgroundColor": "#0d2052",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -37,11 +32,19 @@
       }
     },
     "owner": "nguyenhuulong22",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
     "updates": {
-      "url": "https://u.expo.dev/44dcff55-ec62-4adb-a12e-cb4f26f51613"
-    }
+      "enabled": false
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0d2052"
+        }
+      ]
+    ]
   }
 }

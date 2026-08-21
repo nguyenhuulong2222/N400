@@ -12,7 +12,7 @@ import type {
 } from '../types/quiz.ts';
 
 export type Screen = 'onboard' | 'quiz' | 'result';
-export type Tab = 'practice' | 'resources';
+export type Tab = 'practice' | 'resources' | 'about';
 
 export type AnswerLog = {
   questionId: number;

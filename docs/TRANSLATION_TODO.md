@@ -189,3 +189,5 @@ to avoid anchoring to a specific political party (Invariant IV).
 Each entry above should be removed when an entry is filled, with the
 commit message linking back to this file and citing the reviewer who
 validated the strings.
+
+- a[] vs <lang>_a[] length mismatch on 112/228 questions (all 13 non-EN langs); harmless on web (index 0 pinned) — needs native review before any per-index use.

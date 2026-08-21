@@ -34,7 +34,26 @@ export function OnboardScreen({
   onSelectState,
   onStart,
 }: Props) {
-  const routes = Object.entries(getRouteConfig()) as [RouteKey, RouteConfig][];
+  // Explicit display order — data.json's routeConfig key order puts 2008
+  // first, but 2025 is the current test and belongs at the top. Any route
+  // present in data but missing from this list is appended, so adding a
+  // route to the data never silently hides it.
+  const ROUTE_ORDER: RouteKey[] = [
+    '2025',
+    '2008',
+    '6520_2025',
+    '6520_2008',
+    '5020',
+    '5515',
+  ];
+  const routeEntries = Object.entries(getRouteConfig()) as [RouteKey, RouteConfig][];
+  const routes = [
+    ...ROUTE_ORDER.flatMap((key) => {
+      const hit = routeEntries.find(([k]) => k === key);
+      return hit ? [hit] : [];
+    }),
+    ...routeEntries.filter(([k]) => !ROUTE_ORDER.includes(k)),
+  ];
   const langs = Object.entries(getLanguages()) as [LangCode, LangMetaEntry][];
   // Source the state list directly from data — never hardcode it.
   const states = (
@@ -47,7 +66,7 @@ export function OnboardScreen({
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Form N-400 Practice</Text>
+      <Text style={styles.title}>N-400 Citizenship Test</Text>
 
       <Text style={styles.sectionLabel}>Route</Text>
       <View style={styles.column}>
@@ -143,8 +162,8 @@ export function OnboardScreen({
       </View>
 
       <Text style={styles.note}>
-        UI is English-only in this preview build. Quiz prompts and choices
-        are also shown in English.
+        Menus and buttons are in English. Question prompts and answer choices
+        appear in your selected language with the English text below them.
       </Text>
 
       <Pressable onPress={onStart} style={styles.startBtn}>
@@ -162,7 +181,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#0b2447',
+    color: '#0d2052',
     textAlign: 'center',
     marginTop: 12,
     marginBottom: 20,
@@ -188,16 +207,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   routeBtnSelected: {
-    borderColor: '#0b2447',
+    borderColor: '#0d2052',
     backgroundColor: '#eef2f9',
   },
   routeBtnTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#0b2447',
+    color: '#0d2052',
   },
   routeBtnTitleSelected: {
-    color: '#0b2447',
+    color: '#0d2052',
   },
   routeBtnSubtext: {
     fontSize: 12,
@@ -218,8 +237,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   langBtnSelected: {
-    borderColor: '#0b2447',
-    backgroundColor: '#0b2447',
+    borderColor: '#0d2052',
+    backgroundColor: '#0d2052',
   },
   langBtnText: {
     fontSize: 13,
@@ -245,8 +264,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   stateBtnSelected: {
-    borderColor: '#0b2447',
-    backgroundColor: '#0b2447',
+    borderColor: '#0d2052',
+    backgroundColor: '#0d2052',
   },
   stateBtnText: {
     fontSize: 12,

@@ -14,7 +14,10 @@
 //   1.  All required top-level keys present.
 //   2.  QUESTIONS_2025 count = 128.
 //   3.  QUESTIONS_2008 count = 100.
-//   4.  LANG_META count = 14.
+//   4.  LANG_META count = 14 — measured on the SHIPPED_LANGS allowlist
+//       (see below). index.html's LANG_META is the web app's list and may be
+//       larger; languages outside the allowlist are stripped from this export
+//       rather than failing the build.
 //   5.  Every question has non-empty `q` (English text).
 //   6.  Every non-info-card question has non-empty `a` array with non-empty strings.
 //   7.  Every defined `<lang>_a` is an array of non-empty strings, no holes.
@@ -64,7 +67,57 @@ vm.runInNewContext(
   sb);
 const { QUESTIONS_2025, QUESTIONS_2008, LANG_META, UI_TEXT, STATE_DATA, ROUTE_CONFIG } = sb.module.exports;
 
-const NATIVE_LANGS = Object.keys(LANG_META).filter(l => l !== 'en');
+// ─── Shipped-language allowlist ─────────────────────────────────────────
+// index.html's LANG_META is the WEB app's language list and has grown past
+// the set the mobile app ships. The mobile bundle ships exactly these 14.
+// Everything else in LANG_META (currently ar, ur, gu, fr, bn, uk) is web-only
+// scaffold and is stripped from this export — from langMeta, from UI_TEXT
+// value objects, and from per-question `<lang>` / `<lang>_a` /
+// `distractors_<lang>` / `<lang>_suggested` fields.
+//
+// This is an EXPORT-SIDE FILTER ONLY. It does not modify index.html and does
+// not relax rule #4 — the assert below still requires the shipped set to be
+// exactly 14, it just measures the filtered set instead of the raw one.
+const SHIPPED_LANGS = ['en','vi','es','zh','tl','ko','hi','ht','th','lo','hmn','my','pt','ru'];
+const SHIPPED = new Set(SHIPPED_LANGS);
+
+// Preserve LANG_META's own key order, restricted to the shipped set.
+const LANG_META_SHIPPED = Object.fromEntries(
+  Object.entries(LANG_META).filter(([code]) => SHIPPED.has(code))
+);
+const DROPPED_LANGS = Object.keys(LANG_META).filter(code => !SHIPPED.has(code));
+
+const NATIVE_LANGS = Object.keys(LANG_META_SHIPPED).filter(l => l !== 'en');
+
+// Per-question field names belonging to a non-shipped language.
+function isDroppedLangField(key) {
+  for (const L of DROPPED_LANGS) {
+    if (key === L
+     || key === `${L}_a`
+     || key === `${L}_suggested`
+     || key === `distractors_${L}`
+     || key === `distractors_${L}_suggested`) return true;
+  }
+  return false;
+}
+
+// Strip non-shipped language fields, preserving the order of what remains.
+function stripQuestion(q) {
+  return Object.fromEntries(Object.entries(q).filter(([k]) => !isDroppedLangField(k)));
+}
+const Q2025_SHIPPED = QUESTIONS_2025.map(stripQuestion);
+const Q2008_SHIPPED = QUESTIONS_2008.map(stripQuestion);
+
+// UI_TEXT is Record<key, Record<lang, string>> — drop non-shipped languages
+// from each value object, preserving key order.
+const UI_TEXT_SHIPPED = Object.fromEntries(
+  Object.entries(UI_TEXT).map(([key, val]) => {
+    if (!val || typeof val !== 'object' || Array.isArray(val)) return [key, val];
+    return [key, Object.fromEntries(
+      Object.entries(val).filter(([code]) => SHIPPED.has(code))
+    )];
+  })
+);
 
 // ─── Helpers from index.html (re-implemented for export-side checks) ───
 function isInfoCardQuestion(q) {
@@ -104,7 +157,13 @@ function warn(msg) { warnings.push(msg); }
 // 2-4. Counts
 if (QUESTIONS_2025.length !== 128) fail(`QUESTIONS_2025 count = ${QUESTIONS_2025.length} (expected 128)`);
 if (QUESTIONS_2008.length !== 100) fail(`QUESTIONS_2008 count = ${QUESTIONS_2008.length} (expected 100)`);
-if (Object.keys(LANG_META).length !== 14) fail(`LANG_META count = ${Object.keys(LANG_META).length} (expected 14)`);
+if (Object.keys(LANG_META_SHIPPED).length !== 14) {
+  fail(`LANG_META (shipped subset) count = ${Object.keys(LANG_META_SHIPPED).length} (expected 14)`);
+}
+// Every allowlisted language must actually exist in the web source.
+for (const L of SHIPPED_LANGS) {
+  if (!(L in LANG_META)) fail(`SHIPPED_LANGS names "${L}" but it is absent from index.html LANG_META`);
+}
 
 // 12. ROUTE_CONFIG sanity
 const expectedRoutes = {
@@ -228,8 +287,8 @@ function invariantTokens(s) {
 }
 function intersect(a, b) { let c = 0; for (const x of a) if (b.has(x)) c++; return c; }
 
-checkBank(QUESTIONS_2025, '2025');
-checkBank(QUESTIONS_2008, '2008');
+checkBank(Q2025_SHIPPED, '2025');
+checkBank(Q2008_SHIPPED, '2008');
 
 // 11. NaN walker on the assembled JSON (catches any NaN/undefined that survived deep-copy)
 function walkForNaN(obj, breadcrumb) {
@@ -255,16 +314,16 @@ const output = {
   contentVersion,
   generatedAt: new Date().toISOString(),
   source: 'formn400.org web source',
-  questions2025: QUESTIONS_2025,
-  questions2008: QUESTIONS_2008,
-  langMeta: LANG_META,
-  uiText: UI_TEXT,
+  questions2025: Q2025_SHIPPED,
+  questions2008: Q2008_SHIPPED,
+  langMeta: LANG_META_SHIPPED,
+  uiText: UI_TEXT_SHIPPED,
   stateData: STATE_DATA,
   routeConfig: ROUTE_CONFIG,
   integrity: {
-    question2025Count: QUESTIONS_2025.length,
-    question2008Count: QUESTIONS_2008.length,
-    languageCount: Object.keys(LANG_META).length,
+    question2025Count: Q2025_SHIPPED.length,
+    question2008Count: Q2008_SHIPPED.length,
+    languageCount: Object.keys(LANG_META_SHIPPED).length,
   },
 };
 walkForNaN(output, 'output');
@@ -281,7 +340,9 @@ console.log(`generatedAt:       ${output.generatedAt}`);
 console.log(`question2025Count: ${output.integrity.question2025Count}`);
 console.log(`question2008Count: ${output.integrity.question2008Count}`);
 console.log(`languageCount:     ${output.integrity.languageCount}`);
-console.log(`uiText keys:       ${Object.keys(UI_TEXT).length}`);
+console.log(`uiText keys:       ${Object.keys(UI_TEXT_SHIPPED).length}`);
+console.log(`shipped langs:     ${Object.keys(LANG_META_SHIPPED).join(' ')}`);
+console.log(`dropped langs:     ${DROPPED_LANGS.length ? DROPPED_LANGS.join(' ') + ' (web-only scaffold)' : '(none)'}`);
 console.log(`stateData keys:    ${Object.keys(STATE_DATA).length}`);
 console.log(`routeConfig keys:  ${Object.keys(ROUTE_CONFIG).length}`);
 console.log('');

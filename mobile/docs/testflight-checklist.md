@@ -16,7 +16,8 @@ bugs that the iOS bundle smoke can't surface.
 
 ## Onboard — route selection
 
-- [ ] All 6 routes appear with their askCount + pass threshold label:
+- [ ] All 6 routes appear with their askCount + pass threshold label, in
+      this order (2025 first):
       `2025 Test · 128 Questions`, `2008 Test · 100 Questions`,
       `65/20 · 2025 Starred Subset`, `65/20 · 2008 Starred Subset`,
       `50/20 Practice · Native Language`, `55/15 Practice · Native
@@ -102,6 +103,17 @@ bugs that the iOS bundle smoke can't surface.
       "X cards seen including Y study cards" line.
 - [ ] Tap "Try again" → returns to Onboard with route/lang/state
       preserved.
+
+## About tab
+
+- [ ] Tap "About" in the top tab bar.
+- [ ] The independent-tool notice and the "We cannot provide legal advice."
+      notice both render, verbatim from support.html.
+- [ ] Tap "Privacy Policy" → system browser opens
+      `https://formn400.org/privacy.html`.
+- [ ] Tap "Support" → system browser opens
+      `https://formn400.org/support.html`.
+- [ ] Version line reads `N-400 Citizenship Test 1.0.0`.
 
 ## Resources tab
 

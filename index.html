@@ -2899,10 +2899,16 @@
   </div>
 
   <!-- ══ SCREEN 7: PRIVACY POLICY ══════════════════════════════════════ -->
+  <!-- KEEP IN SYNC — see docs/PRIVACY_SYNC.md
+       This screen and the standalone privacy.html are two surfaces of one
+       policy. privacy.html is the URL declared to the App Store; if the two
+       disagree, the declared URL is the one a reviewer reads. Sections listed
+       in PRIVACY_SYNC.md must match, and the ones marked English-verbatim must
+       not be translated on either surface. -->
   <div id="screen-privacy" class="screen">
     <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
     <h1 class="page-title" data-i18n="privacy.title">Privacy Policy</h1>
-    <p class="page-updated" data-i18n="privacy.updated">Last updated: July 21, 2026</p>
+    <p class="page-updated" data-i18n="privacy.updated">Last updated: August 21, 2026</p>
 
     <section class="page-section">
       <h2 data-i18n="privacy.overview.title">Overview</h2>
@@ -2926,6 +2932,20 @@
       </ul>
       <p data-i18n="privacy.donot.body">All information you enter stays in your browser's memory only and is permanently deleted when you close or refresh the page.</p>
       <p data-i18n="privacy.donot.exception">The single exception is the optional Case Status Helper (described below), which — once it is available — will contact our backend only to perform a case lookup you request.</p>
+    </section>
+
+    <!-- Mobile app disclosure. English-only by design on every language
+         surface: this is the declared App Store privacy disclosure and must
+         not drift in translation. Byte-identical to the "Mobile app (iOS)"
+         section in privacy.html. -->
+    <section class="page-section">
+      <h2 data-i18n="privacy.mobile.title">Mobile app (iOS)</h2>
+      <p data-i18n-html="privacy.mobile.intro">The iOS app <strong>N-400 Citizenship Test</strong> is covered by this same policy and collects no personal data. Two features of the app deserve their own explanation:</p>
+      <ul class="page-bullets">
+        <li data-i18n-html="privacy.mobile.tts"><strong>Read aloud (audio).</strong> When you tap to hear a question or answer, the audio is generated on your device by the system speech engine using the voices already installed on it. No audio, and no text, is transmitted anywhere.</li>
+        <li data-i18n-html="privacy.mobile.reminders"><strong>Study reminders.</strong> The optional daily reminder is a local notification scheduled on your device only. There is no push service, no push token, no account, and no server involved. Turning the reminder off cancels it on the device.</li>
+      </ul>
+      <p data-i18n="privacy.mobile.network">The app makes no network requests of its own. All question data is bundled inside the app, so it works with no connection at all; the only time the network is used is when you tap a link, which opens in your own browser.</p>
     </section>
 
     <section class="page-section">
@@ -2998,6 +3018,13 @@
     <section class="page-section">
       <h2 data-i18n="privacy.contact.title">Contact</h2>
       <p data-i18n-html="privacy.contact.body">Questions about this privacy policy? Email: <a href="mailto:long@formn400.org">long@formn400.org</a></p>
+    </section>
+
+    <!-- Pointer to the canonical standalone policy. English on every language
+         surface (see docs/PRIVACY_SYNC.md) — privacy.html is the URL declared
+         to the App Store and is English-only. -->
+    <section class="page-section">
+      <p data-i18n-html="privacy.fullpolicy">Full policy (English): <a href="https://formn400.org/privacy.html" target="_blank" rel="noopener">formn400.org/privacy.html</a></p>
     </section>
 
     <!-- Always-Vietnamese summary box per spec — does not switch on lang. -->
@@ -4065,6 +4092,54 @@ const LANG_META = {
   uk:  { name:"українська",  tts:"uk-UA",   flag:"🇺🇦", tier:"community" },
 };
 const SUPPORTED_LANGS = new Set(Object.keys(LANG_META));
+
+// ─── Privacy policy revision date ───────────────────────────────────────
+// SINGLE SOURCE OF TRUTH. Bump this one ISO string when the policy changes;
+// every language renders it from here via toLocaleDateString. Previously the
+// date was baked into all 20 translated `privacy.updated` strings, which meant
+// a date bump either needed 20 translations or left the site showing different
+// dates in different languages.
+//
+// `privacy.updated` in UI_TEXT now holds the translated LABEL ONLY (e.g.
+// "Last updated:", "Cập nhật gần nhất:"). Do not put a date back into it.
+//
+// The static privacy.html carries its own English date and is NOT driven by
+// this constant — keep the two in sync by hand when bumping.
+const PRIVACY_UPDATED = "2026-08-21";
+
+// Locale tag for date formatting, derived from LANG_META.tts (the only BCP-47
+// tag we carry per language), falling back to en-US.
+//
+// -u-ca-gregory  — th-TH defaults to the Buddhist calendar (2569 rather than
+//                  2026) and ar-SA's CLDR default is islamic-umalqura, which
+//                  browsers resolve inconsistently. This is a legal notice read
+//                  alongside the English page; the Gregorian year must match.
+// -nu-latn       — my/bn/ar otherwise render native numerals. Western digits
+//                  everywhere so the date is comparable at a glance.
+function privacyDateLocale(lang) {
+  const meta = LANG_META[lang];
+  const base = (meta && meta.tts) || 'en-US';
+  return base + '-u-ca-gregory-nu-latn';
+}
+
+// "<label> <date>" for the active language. CJK labels end in a full-width
+// colon, which already carries its own trailing space — adding another would
+// leave a visible gap.
+function formatPrivacyUpdated(label, lang) {
+  let dateStr;
+  try {
+    dateStr = new Date(PRIVACY_UPDATED + 'T00:00:00').toLocaleDateString(
+      privacyDateLocale(lang),
+      { year: 'numeric', month: 'long', day: 'numeric' },
+    );
+  } catch (e) {
+    // Unknown tag or missing ICU data — fall back to the raw ISO date rather
+    // than showing nothing on a legal notice.
+    dateStr = PRIVACY_UPDATED;
+  }
+  const sep = label.slice(-1) === '：' ? '' : ' ';
+  return label + sep + dateStr;
+}
 // Languages that are translated AND native-reviewed — the only ones we expose
 // to search engines (self-referential canonical, hreflang, sitemap). The 6
 // community drafts (ar/ur/gu/fr/bn/uk) are NOT here: their ?lang= URLs
@@ -5467,7 +5542,7 @@ const UI_TEXT = {
 
   // ─── Privacy page ────────────────────────────────────────────────────
   "privacy.title":              { en:"Privacy Policy — formN400.org",        vi:"Chính sách bảo mật — formN400.org",                   es:"Política de privacidad — formN400.org",                zh:"隐私政策 — formN400.org",                         tl:"Patakaran sa Privacy — formN400.org",                 ko:"개인정보 보호정책 — formN400.org" , hi:"गोपनीयता नीति — formN400.org", ht:"Règleman konfidansyalite — formN400.org", th:"นโยบายความเป็นส่วนตัว — formN400.org", lo:"ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ — formN400.org", hmn:"Txoj Cai Tswj Tsis Pub Lwm Tus Paub — formN400.org", my:"ကိုယ်ရေးအချက်အလက် မူဝါဒ — formN400.org", pt:"Política de Privacidade — formN400.org", ru:"Политика конфиденциальности — formN400.org" , fr:"Politique de confidentialité — formN400.org" , uk:"Політика конфіденційності — formN400.org" , gu:"ગોપનીયતા નીતિ — formN400.org" , bn:"গোপনীয়তা নীতি — formN400.org" , ar:"سياسة الخصوصية — formN400.org" , ur:"رازداری کی پالیسی — formN400.org" },
-  "privacy.updated":            { en:"Last updated: July 21, 2026",          vi:"Cập nhật gần nhất: 21 Tháng 7, 2026",                 es:"Última actualización: 21 de julio de 2026",            zh:"最近更新：2026 年 7 月 21 日",                    tl:"Huling na-update: Hulyo 21, 2026",                    ko:"최종 수정: 2026년 7월 21일" , hi:"Last updated: July 21, 2026", ht:"Last updated: July 21, 2026", th:"Last updated: July 21, 2026", lo:"Last updated: July 21, 2026", hmn:"Last updated: July 21, 2026", my:"Last updated: July 21, 2026", pt:"Last updated: July 21, 2026", ru:"Last updated: July 21, 2026" , fr:"Dernière mise à jour : 21 juillet 2026" , uk:"Останнє оновлення: 21 липня 2026 р." , gu:"છેલ્લે અપડેટ: 21 જુલાઈ 2026" , bn:"সর্বশেষ আপডেট: ২১ জুলাই ২০২৬" , ar:"آخر تحديث: 21 يوليو 2026" , ur:"آخری اپڈیٹ: 21 جولائی 2026" },
+  "privacy.updated":            { en:"Last updated:",          vi:"Cập nhật gần nhất:",                 es:"Última actualización:",            zh:"最近更新：",                    tl:"Huling na-update:",                    ko:"최종 수정:" , hi:"Last updated:", ht:"Last updated:", th:"Last updated:", lo:"Last updated:", hmn:"Last updated:", my:"Last updated:", pt:"Last updated:", ru:"Last updated:" , fr:"Dernière mise à jour :" , uk:"Останнє оновлення:" , gu:"છેલ્લે અપડેટ:" , bn:"সর্বশেষ আপডেট:" , ar:"آخر تحديث:" , ur:"آخری اپڈیٹ:" },
 
   "privacy.overview.title":     { en:"Overview",                             vi:"Tổng quan",                                            es:"Resumen",                                              zh:"概述",                                            tl:"Pangkalahatang-ideya",                                ko:"개요" , hi:"Overview", ht:"Overview", th:"Overview", lo:"Overview", hmn:"Overview", my:"Overview", pt:"Overview", ru:"Overview" , fr:"Aperçu" , uk:"Огляд" , gu:"ઝાંખી" , bn:"সারসংক্ষেপ" , ar:"نظرة عامة" , ur:"جائزہ" },
   "privacy.overview.body":      { en:"formN400.org is a free, non-commercial civic education resource. We are committed to your privacy. This policy explains what data we do and do not collect.",
@@ -5752,6 +5827,19 @@ const UI_TEXT = {
   // Do NOT translate, paraphrase, or machine-translate (Invariant I).
   "privacy.operator.title":     { en:"Operator" },
   "privacy.operator.body":      { en:'FormN400.org is operated by Huu Long Nguyen, an individual (sole proprietor) based in the State of Hawaii, United States, who is the liable operating entity for this website. Contact: <a href="mailto:long@formn400.org">long@formn400.org</a>.' },
+
+  // Mobile app disclosure + canonical-policy pointer. English-only on every
+  // language surface, exactly like privacy.operator.* above: only an `en` value
+  // is defined, so updateUILanguage's `pick` falls back to it for all 20
+  // languages. This is the declared App Store privacy disclosure — it must not
+  // drift in translation, and it must stay byte-identical to the "Mobile app
+  // (iOS)" section in privacy.html. See docs/PRIVACY_SYNC.md.
+  "privacy.mobile.title":       { en:"Mobile app (iOS)" },
+  "privacy.mobile.intro":       { en:'The iOS app <strong>N-400 Citizenship Test</strong> is covered by this same policy and collects no personal data. Two features of the app deserve their own explanation:' },
+  "privacy.mobile.tts":         { en:'<strong>Read aloud (audio).</strong> When you tap to hear a question or answer, the audio is generated on your device by the system speech engine using the voices already installed on it. No audio, and no text, is transmitted anywhere.' },
+  "privacy.mobile.reminders":   { en:'<strong>Study reminders.</strong> The optional daily reminder is a local notification scheduled on your device only. There is no push service, no push token, no account, and no server involved. Turning the reminder off cancels it on the device.' },
+  "privacy.mobile.network":     { en:"The app makes no network requests of its own. All question data is bundled inside the app, so it works with no connection at all; the only time the network is used is when you tap a link, which opens in your own browser." },
+  "privacy.fullpolicy":         { en:'Full policy (English): <a href="https://formn400.org/privacy.html" target="_blank" rel="noopener">formn400.org/privacy.html</a>' },
   "privacy.donot.exception":    { en:"The single exception is the optional Case Status Helper (described below), which — once it is available — will contact our backend only to perform a case lookup you request." },
   "privacy.casestatus.title":   { en:"Case Status Helper (coming soon)" },
   "privacy.casestatus.intro":   { en:"The site will offer an optional Case Status Helper that will let you check the status of a USCIS case. This feature is not yet available. When you use it, you will type a USCIS receipt number. Here is exactly how that number will be handled:" },
@@ -5805,8 +5893,14 @@ function updateUILanguage(lang) {
   const useLang = SUPPORTED_LANGS.has(lang) ? lang : 'en';
   const pick = entry => entry ? (entry[useLang] != null ? entry[useLang] : entry.en) : null;
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    const txt = pick(UI_TEXT[el.getAttribute('data-i18n')]);
-    if (txt != null) el.textContent = txt;
+    const key = el.getAttribute('data-i18n');
+    const txt = pick(UI_TEXT[key]);
+    if (txt == null) return;
+    // privacy.updated holds a translated LABEL only; the date comes from the
+    // PRIVACY_UPDATED constant, formatted in this language's locale.
+    el.textContent = key === 'privacy.updated'
+      ? formatPrivacyUpdated(txt, useLang)
+      : txt;
   });
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const html = pick(UI_TEXT[el.getAttribute('data-i18n-html')]);

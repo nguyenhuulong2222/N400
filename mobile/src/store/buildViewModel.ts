@@ -6,9 +6,27 @@
 // (no accepted answers, <3 distractors, missing fields) — UI must render
 // a safe error card when null is returned.
 //
-// Index alignment is the load-bearing contract: when we randomly pick
-// `accepted[i]` or `distractors[j]`, we look up the localized parallel
-// array at the same index. Web parity.
+// THE CORRECT OPTION IS ALWAYS INDEX 0 — exact parity with the web app
+// (`index.html:6417` `const correctEn = q.a[0]` and `:6426`
+// `correctOpt[L] = (q[L + '_a'] || [])[0]`).
+//
+// Do NOT pick a random index out of `accepted`. `a[]` and `<lang>_a[]` are
+// NOT reliably index-aligned in the source data: 112 of 228 questions have
+// differing lengths across the 13 non-English languages, and at indices > 0
+// the entries frequently describe different facts. 2025 Q85 (Benjamin
+// Franklin) is the canonical case — `a` has 9 entries, `vi_a` has 5, and
+// `vi_a[1]` ("oldest member of the Constitutional Convention") does not
+// correspond to `a[1]` ("Diplomat"). Picking index 3 there rendered a
+// Vietnamese string under an unrelated English subtitle; picking index 5+
+// rendered an English-only option among Vietnamese ones. Index 0 is the only
+// position the data guarantees to be aligned, so index 0 is what we display.
+//
+// Distractors ARE index-aligned (verified: 0 length mismatches across every
+// language), so they keep their random selection with parallel lookup.
+//
+// Localized fallback is ALL-OR-NOTHING per option: an option either shows
+// localized-primary + English-subtitle, or English only. It never mixes a
+// localized string with a non-corresponding English one.
 //
 // Pass `lang` to localize displayed text. Grading is always English.
 
@@ -74,23 +92,18 @@ export function buildQuizViewModel(
     return null;
   }
 
-  // Identify usable English source-array indices (skip empty / non-string).
-  const acceptedIdxs: number[] = [];
-  for (let i = 0; i < resolved.accepted.length; i++) {
-    const s = resolved.accepted[i];
-    if (typeof s === 'string' && s.length > 0) acceptedIdxs.push(i);
-  }
+  // The correct option is pinned to index 0 (see header). `a[0]` must be a
+  // usable string; if it is not, the question cannot be rendered safely.
+  const accepted0 = resolved.accepted[0];
+  if (typeof accepted0 !== 'string' || accepted0.length === 0) return null;
+  const chosenAcceptedIdx = 0;
+
   const distractorIdxs: number[] = [];
   for (let i = 0; i < resolved.distractors.length; i++) {
     const s = resolved.distractors[i];
     if (typeof s === 'string' && s.length > 0) distractorIdxs.push(i);
   }
-  if (acceptedIdxs.length === 0 || distractorIdxs.length < 3) return null;
-
-  // Pick 1 accepted + 3 distractor indices.
-  const shuffledAccepted = acceptedIdxs.slice();
-  shuffleInPlace(shuffledAccepted, rng);
-  const chosenAcceptedIdx = shuffledAccepted[0] as number;
+  if (distractorIdxs.length < 3) return null;
 
   const shuffledDistractors = distractorIdxs.slice();
   shuffleInPlace(shuffledDistractors, rng);
@@ -119,11 +132,15 @@ export function buildQuizViewModel(
     const parallel =
       d.source === 'accepted' ? localizedAccepted : localizedDistractors;
     const lookup = parallel[d.index];
-    if (!lookup) {
+    // `d.english` is authoritative — it comes from the RESOLVED arrays, which
+    // for state-substituted questions (capital) are built from STATE_DATA and
+    // have no localized counterpart. Only adopt the localized string when the
+    // parallel entry describes the same English text; otherwise fall back to
+    // English-only. All-or-nothing, never a mixed pair.
+    if (!lookup || lookup.english !== d.english || lookup.localized === undefined) {
       return { english: d.english };
     }
-    const out: DisplayText = { english: lookup.english };
-    if (lookup.localized !== undefined) out.localized = lookup.localized;
+    const out: DisplayText = { english: d.english, localized: lookup.localized };
     if (lookup.suggested === true) out.suggested = true;
     return out;
   });

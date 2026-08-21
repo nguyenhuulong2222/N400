@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import {
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+// react-native-safe-area-context replaces RN's deprecated SafeAreaView.
+// SafeAreaProvider must wrap the tree for the insets to resolve.
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { loadAppData } from './src/data/load.ts';
 import { pickQuestions } from './src/quiz/pick.ts';
 import { useQuizState } from './src/store/state.ts';
@@ -14,16 +16,28 @@ import { OnboardScreen } from './src/screens/OnboardScreen.tsx';
 import { QuizScreen } from './src/screens/QuizScreen.tsx';
 import { ResultScreen } from './src/screens/ResultScreen.tsx';
 import { ResourcesScreen } from './src/screens/ResourcesScreen.tsx';
+import { AboutScreen } from './src/screens/AboutScreen.tsx';
+import { useVoices } from './src/tts/useVoices.ts';
 
 const data = loadAppData();
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppShell />
+    </SafeAreaProvider>
+  );
+}
+
+function AppShell() {
   const [state, dispatch] = useQuizState();
+  // Probed once per launch; drives native-vs-English audio and its label.
+  const { voices } = useVoices();
   const currentQuestion =
     state.screen === 'quiz' ? state.sequence[state.index] : undefined;
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={styles.root} edges={['top', 'left', 'right', 'bottom']}>
       <TabBar
         tab={state.tab}
         onSetTab={(tab) => dispatch({ type: 'set-tab', tab })}
@@ -57,6 +71,7 @@ export default function App() {
                 lang={state.lang}
                 userState={state.userState}
                 lastResult={state.lastResult}
+                voices={voices}
                 onAnswerMcq={(correct, questionId) =>
                   dispatch({ type: 'answer-mcq', correct, questionId })
                 }
@@ -81,6 +96,7 @@ export default function App() {
           </>
         )}
         {state.tab === 'resources' && <ResourcesScreen />}
+        {state.tab === 'about' && <AboutScreen />}
       </View>
       <Text style={styles.disclaimer}>
         Not affiliated with USCIS. Educational use only.
@@ -95,6 +111,7 @@ function TabBar({ tab, onSetTab }: { tab: Tab; onSetTab: (t: Tab) => void }) {
     <View style={styles.tabBar}>
       <TabButton label="Practice" active={tab === 'practice'} onPress={() => onSetTab('practice')} />
       <TabButton label="Resources" active={tab === 'resources'} onPress={() => onSetTab('resources')} />
+      <TabButton label="About" active={tab === 'about'} onPress={() => onSetTab('about')} />
     </View>
   );
 }
@@ -139,7 +156,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabBtnActive: {
-    borderBottomColor: '#0b2447',
+    borderBottomColor: '#0d2052',
     backgroundColor: '#fff',
   },
   tabBtnText: {
@@ -148,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   tabBtnTextActive: {
-    color: '#0b2447',
+    color: '#0d2052',
     fontWeight: '700',
   },
   body: {

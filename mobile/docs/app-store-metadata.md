@@ -9,7 +9,7 @@ before submission.
 
 | Field | Value |
 |---|---|
-| App name | **Form N-400 Civics Practice** |
+| App name | **N-400 Citizenship Test** |
 | Subtitle (iOS) | Practice the U.S. naturalization civics test |
 | Short description (Android, ≤80 chars) | Practice the 100/128 USCIS civics questions in 14 languages. |
 | Bundle ID (iOS) | `org.formn400.app` |
@@ -22,7 +22,7 @@ before submission.
 
 ## Full description
 
-> Form N-400 Civics Practice is an independent study tool for the U.S.
+> N-400 Citizenship Test is an independent study tool for the U.S.
 > naturalization civics test (Form N-400). It drills the official USCIS
 > civics questions in multiple-choice format so applicants can review
 > answers offline before their interview.
@@ -59,7 +59,7 @@ civics,citizenship,N400,naturalization,USCIS,test,practice,immigration,interview
 
 **Data collected:** *None.*
 
-Form N-400 Civics Practice does not collect, sell, or share personal
+N-400 Citizenship Test does not collect, sell, or share personal
 data. There is no account, no login, no ads, no analytics, no
 tracking, no payment, and no personal data collection. Quiz answers
 and selections (route, language, state) live only in device memory
@@ -125,14 +125,14 @@ No demo account is needed.
 
 ## Open items before first submission
 
-- [ ] Replace placeholder `org.formn400.app` bundle ID + Android package
-      if you want a different identifier.
+- [x] Bundle ID + Android package confirmed as `org.formn400.app` — matches the existing App Store Connect record.
 - [ ] Register the bundle ID in Apple Developer + Google Play Console.
 - [ ] Fill in Support URL, Privacy Policy URL, optional Marketing URL.
-- [ ] Replace placeholder icon + splash assets in `mobile/assets/` with
-      final branded versions (current placeholders are navy + "N400"
-      text, sufficient for TestFlight Internal Testing but not for
-      App Store public release).
+- [x] Icon + splash regenerated in `mobile/assets/` from the site palette
+      (navy #0d2052 / white / red #b22234): a geometric checkmark over a red
+      rule, no text, no government insignia (Invariant VI). Source of truth
+      is `mobile/assets/icon-source.svg`. This is an in-house mark, not a
+      commissioned identity — replace if you want professional branding.
 - [ ] Capture screenshots: iPhone 6.7" + 6.1" + 5.5" + iPad 12.9" +
       Android phone + Android tablet. The app's screens to capture:
       Onboard (route + language + state picker), Quiz (MCQ), Quiz

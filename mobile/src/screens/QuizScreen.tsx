@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -11,6 +11,7 @@ import type { LastResult } from '../store/state.ts';
 import { gradeAnswer } from '../quiz/grade.ts';
 import { resolveQuestion } from '../quiz/resolve.ts';
 import { loadAppData } from '../data/load.ts';
+import { isEnglishAudioFallback, speak, stopSpeaking, type VoiceMap } from '../tts/speech.ts';
 import type {
   DisplayText,
   LangCode,
@@ -27,6 +28,7 @@ type Props = {
   lang: LangCode;
   userState: USStateCode | undefined;
   lastResult: LastResult;
+  voices: VoiceMap;
   onAnswerMcq: (correct: boolean, questionId: number) => void;
   onAcknowledgeStudyCard: (questionId: number) => void;
   onLogUnsupported: (questionId: number) => void;
@@ -42,6 +44,7 @@ export function QuizScreen({
   lang,
   userState,
   lastResult,
+  voices,
   onAnswerMcq,
   onAcknowledgeStudyCard,
   onLogUnsupported,
@@ -57,6 +60,12 @@ export function QuizScreen({
     return buildQuizViewModel(resolved, { lang });
   }, [resolved, lang]);
 
+  // Never let audio bleed from one question into the next.
+  useEffect(() => stopSpeaking, [question.id]);
+
+  const englishAudio = isEnglishAudioFallback(lang, voices);
+  const prompt = viewModel?.prompt ?? { english: question.q };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerRow}>
@@ -68,13 +77,20 @@ export function QuizScreen({
         </Text>
       </View>
 
-      <Prompt prompt={viewModel?.prompt ?? { english: question.q }} />
+      <Prompt
+        prompt={prompt}
+        onSpeak={() => speak(prompt, lang, voices)}
+        englishAudio={englishAudio}
+      />
 
       {resolved.kind === 'mcq' && viewModel !== null && (
         <McqOptions
           viewModel={viewModel}
           question={question}
           lastResult={lastResult}
+          lang={lang}
+          voices={voices}
+          englishAudio={englishAudio}
           onAnswerMcq={onAnswerMcq}
           onNext={onNext}
         />
@@ -156,6 +172,9 @@ type McqOptionsProps = {
   viewModel: NonNullable<ReturnType<typeof buildQuizViewModel>>;
   question: Question;
   lastResult: LastResult;
+  lang: LangCode;
+  voices: VoiceMap;
+  englishAudio: boolean;
   onAnswerMcq: (correct: boolean, questionId: number) => void;
   onNext: () => void;
 };
@@ -164,10 +183,14 @@ function McqOptions({
   viewModel,
   question,
   lastResult,
+  lang,
+  voices,
+  englishAudio,
   onAnswerMcq,
   onNext,
 }: McqOptionsProps) {
   const answered = lastResult === 'correct' || lastResult === 'wrong';
+  const correctOpt = viewModel.options[viewModel.correctIndex];
   return (
     <View style={styles.options}>
       {viewModel.options.map((opt, i) => {
@@ -189,6 +212,16 @@ function McqOptions({
         );
       })}
 
+      {answered && correctOpt && (
+        <View style={styles.answerAudioRow}>
+          <SpeakButton
+            label="Hear the answer"
+            onPress={() => speak(correctOpt, lang, voices)}
+          />
+          {englishAudio && <EnglishAudioNote />}
+        </View>
+      )}
+
       {answered && (
         <View style={styles.feedbackRow}>
           <Text
@@ -209,7 +242,15 @@ function McqOptions({
   );
 }
 
-function Prompt({ prompt }: { prompt: DisplayText }) {
+function Prompt({
+  prompt,
+  onSpeak,
+  englishAudio,
+}: {
+  prompt: DisplayText;
+  onSpeak: () => void;
+  englishAudio: boolean;
+}) {
   if (prompt.localized !== undefined) {
     return (
       <View style={styles.promptBlock}>
@@ -218,14 +259,45 @@ function Prompt({ prompt }: { prompt: DisplayText }) {
         {prompt.suggested === true && (
           <Text style={styles.suggestedBadge}>Suggested translation</Text>
         )}
+        <View style={styles.promptAudioRow}>
+          <SpeakButton label="Hear the question" onPress={onSpeak} />
+          {englishAudio && <EnglishAudioNote />}
+        </View>
       </View>
     );
   }
   return (
     <View style={styles.promptBlock}>
       <Text style={styles.prompt}>{prompt.english}</Text>
+      <View style={styles.promptAudioRow}>
+        <SpeakButton label="Hear the question" onPress={onSpeak} />
+        {englishAudio && <EnglishAudioNote />}
+      </View>
     </View>
   );
+}
+
+// Speaker affordance. Text label rather than a bare glyph so it reads for
+// screen readers and for users who do not recognise the icon.
+function SpeakButton({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={styles.speakBtn}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={8}
+    >
+      <Text style={styles.speakBtnIcon}>{'\u25B6'}</Text>
+      <Text style={styles.speakBtnText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+// Shown whenever the selected language will be read aloud by an English
+// voice. Never silent, never a surprise — see src/tts/speech.ts.
+function EnglishAudioNote() {
+  return <Text style={styles.englishAudioNote}>Audio in English</Text>;
 }
 
 function OptionText({
@@ -347,6 +419,45 @@ const styles = StyleSheet.create({
   },
   promptBlock: {
     marginBottom: 16,
+  },
+  promptAudioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 12,
+  },
+  answerAudioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 14,
+  },
+  speakBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    borderWidth: 1,
+    borderColor: '#c7d0e2',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#f3f5fa',
+  },
+  speakBtnIcon: {
+    fontSize: 11,
+    color: '#0d2052',
+  },
+  speakBtnText: {
+    fontSize: 13,
+    color: '#0d2052',
+    fontWeight: '600',
+  },
+  englishAudioNote: {
+    fontSize: 12,
+    color: '#7a6300',
+    fontStyle: 'italic',
   },
   prompt: {
     fontSize: 18,
