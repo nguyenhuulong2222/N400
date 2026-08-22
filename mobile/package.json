@@ -4,6 +4,7 @@
   "main": "index.ts",
   "dependencies": {
     "expo": "~56.0.20",
+    "expo-dev-client": "~56.0.25",
     "expo-notifications": "~56.0.24",
     "expo-speech": "~56.0.3",
     "expo-splash-screen": "~56.0.14",
