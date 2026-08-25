@@ -17,6 +17,13 @@ export interface Env {
   USCIS_BASE_URL?: string;
   USCIS_TOKEN_URL?: string;
   MOCK_MODE?: string;
+
+  // Temporary demo identifier for USCIS Torch API demo scheduling. When set to a
+  // non-empty value, the Case Status upstream call carries it as a `demo_id`
+  // request header so the USCIS team can confirm our traffic. Non-secret, carries
+  // no receipt/PII. Unset or empty (delete the wrangler.toml [vars] line) => the
+  // header is not sent at all — removal is config, not code.
+  DEMO_ID?: string;
 }
 
 /**
@@ -27,4 +34,13 @@ export interface Env {
 export function isMockMode(env: Env): boolean {
   const v = (env.MOCK_MODE ?? '').trim().toLowerCase();
   return v === '1' || v === 'true' || v === 'yes';
+}
+
+/**
+ * Trimmed DEMO_ID, or null when unset/blank. Callers attach the `demo_id`
+ * header only when this returns a value.
+ */
+export function demoId(env: Env): string | null {
+  const v = (env.DEMO_ID ?? '').trim();
+  return v === '' ? null : v;
 }

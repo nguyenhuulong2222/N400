@@ -8,7 +8,8 @@
     "check": "tsc --noEmit",
     "test": "node test/receipt.test.mjs && node test/worker.test.mjs && node test/auth.test.mjs",
     "test:uscis-sandbox": "node scripts/test-uscis-sandbox.mjs",
-    "test:sandbox-plan": "node scripts/sandbox-test-plan.mjs"
+    "test:sandbox-plan": "node scripts/sandbox-test-plan.mjs",
+    "test:demo-traffic": "node scripts/demo-traffic-check.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250601.0",

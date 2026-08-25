@@ -12,6 +12,7 @@
 // NEVER placed in a response/error we return to our own clients.
 
 import type { Env } from './env.ts';
+import { demoId } from './env.ts';
 
 // Thrown when the upstream call cannot complete (network/transport). Carries no
 // receipt, token, or body.
@@ -32,13 +33,24 @@ export async function fetchCaseStatus(env: Env, token: string, receipt: string):
   const base = env.USCIS_BASE_URL;
   if (!base) throw new UpstreamError();
   const url = `${base.replace(/\/+$/, '')}/${encodeURIComponent(receipt)}`;
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`, // token value never logged
+    Accept: 'application/json',
+  };
+
+  // USCIS Torch API demo scheduling: identify our traffic to the USCIS team.
+  // Env-gated (wrangler.toml [vars] DEMO_ID) and attached ONLY when non-empty,
+  // so removing it after the demo is a one-line config change, not a code change.
+  // Outbound-only: never added to any response we return, never logged, and it
+  // carries no receipt or credential.
+  const demo = demoId(env);
+  if (demo !== null) headers['demo_id'] = demo;
+
   try {
     return await fetch(url, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`, // token value never logged
-        Accept: 'application/json',
-      },
+      headers,
     });
   } catch {
     throw new UpstreamError();

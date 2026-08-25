@@ -2,6 +2,11 @@ name = "formn400-api"
 main = "src/index.ts"
 compatibility_date = "2026-06-01"
 
+# Custom domain — zone confirmed 2026-08-25
+routes = [
+  { pattern = "api.formn400.org", custom_domain = true }
+]
+
 # Non-secret config only. Secrets are NEVER set here (API Invariant I).
 #   Local dev:   workers/api/.dev.vars (gitignored)
 #   Production:  npx wrangler secret put USCIS_CLIENT_ID
@@ -10,16 +15,20 @@ compatibility_date = "2026-06-01"
 # Phase API-1 default: MOCK_MODE on so the Worker boots and serves canned
 # responses with ZERO credentials. Set to "0" once secrets are in place to use
 # the live USCIS path.
-MOCK_MODE = "1"
+MOCK_MODE = "0"
 # Official USCIS Case Status API — SANDBOX endpoints (from the developer portal
 # OpenAPI). Swap to the production base/token URLs when promoting to prod.
 USCIS_BASE_URL = "https://api-int.uscis.gov/case-status"
 USCIS_TOKEN_URL = "https://api-int.uscis.gov/oauth/accesstoken"
 
+# TEMPORARY — USCIS Torch API demo scheduling. Sent as a `demo_id` request header
+# on the outbound Case Status call only (never on the OAuth token call, never in
+# any response to our clients). Non-secret; contains no PII.
+# TO REMOVE AFTER THE DEMO: delete the line below (or set it to "") and redeploy.
+# An unset/empty value means the header is not sent at all.
+DEMO_ID = "4069"
+
 # CORS origins are intentionally NOT configured here. The allowlist is hardcoded
 # in src/cors.ts (API Invariant V) so it cannot be widened by a config typo.
 
 # account_id and zone_id are intentionally NOT committed here.
-
-# Future deploy route after Long confirms the formn400.org Cloudflare zone:
-# route = "api.formn400.org/*"
