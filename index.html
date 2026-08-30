@@ -2499,6 +2499,15 @@
     <button class="btn-primary" id="btn-start" disabled onclick="startQuiz()" data-i18n="start.button">
       Start Practice Session →
     </button>
+
+    <!-- Case Status Helper — public availability notice. TEXT ONLY: no link,
+         no button, no onclick, no href, and no path of any kind into
+         #screen-case-status. The ?screen=case-status deep link remains the
+         only way in. Delete this block when the feature goes public. -->
+    <div class="legal-box" id="cs-dev-notice">
+      <strong data-i18n="casestatus.ui.notice.label">CASE STATUS LOOKUP — IN DEVELOPMENT</strong>
+      <span data-i18n="casestatus.ui.notice.body">We are building a tool to look up USCIS case status by receipt number. It is not available yet: we are waiting on production access to the official USCIS Case Status API, and we will not release it while it can only reach a test environment — a real applicant deserves accurate information about their own case. This page will be updated when it goes live.</span>
+    </div>
   </div>
 
   <!-- ══ SCREEN 2: QUIZ ══ -->
@@ -5326,6 +5335,14 @@ const UI_TEXT = {
   "casestatus.ui.err.notfound.body":  { en: "USCIS has no case matching that receipt number. Double-check the number on your receipt notice. If it is correct, use your USCIS online account at my.uscis.gov." },
   "casestatus.ui.err.unavailable.title": { en: "Service temporarily unavailable" },
   "casestatus.ui.err.unavailable.body":  { en: "The case status service is temporarily unavailable. Please try again later, or check your status directly at my.uscis.gov." },
+
+  // Public availability notice shown on the onboarding screen. ENGLISH-ONLY,
+  // same rationale as the block above: this is a compliance / availability
+  // disclosure about an official USCIS integration, not UI chrome. Do NOT
+  // translate or machine-translate (Invariant I). Only an `en` value is
+  // defined, so `pick()` renders this identical English text in all 20 langs.
+  "casestatus.ui.notice.label": { en: "CASE STATUS LOOKUP — IN DEVELOPMENT" },
+  "casestatus.ui.notice.body":  { en: "We are building a tool to look up USCIS case status by receipt number. It is not available yet: we are waiting on production access to the official USCIS Case Status API, and we will not release it while it can only reach a test environment — a real applicant deserves accurate information about their own case. This page will be updated when it goes live." },
 
   // ─── Footer: USCIS Policy Update link (added 2026-05-21) ───────────
   "footer.policy":              { en:"USCIS Policy Update",
