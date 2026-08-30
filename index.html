@@ -2129,15 +2129,6 @@
     font-size: 13px;
     color: var(--text-muted);
   }
-  .cs-msg {
-    margin: 0 0 14px;
-    font-size: 14px;
-    min-height: 20px;
-    color: var(--text-mid);
-  }
-  .cs-msg.cs-valid   { color: var(--correct); }
-  .cs-msg.cs-invalid { color: var(--wrong); }
-  .cs-msg.cs-warn    { color: #a16207; }
   .cs-btn-full {
     display: block;
     width: 100%;
@@ -2508,12 +2499,6 @@
     <button class="btn-primary" id="btn-start" disabled onclick="startQuiz()" data-i18n="start.button">
       Start Practice Session →
     </button>
-
-    <div class="cs-onboard-card">
-      <div class="section-label" data-i18n="casestatus.ui.onboard.label">Already filed?</div>
-      <p data-i18n="casestatus.ui.onboard.body">Check the status of your USCIS case with your receipt number.</p>
-      <button type="button" class="cs-onboard-link" onclick="goCaseStatus()" data-i18n="casestatus.ui.onboard.cta">Check my case status →</button>
-    </div>
   </div>
 
   <!-- ══ SCREEN 2: QUIZ ══ -->
@@ -3217,8 +3202,6 @@
       <a href="#" onclick="goPrivacy(); return false;" data-i18n="footer.privacy">Privacy Policy</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="/support.html">Support</a>
-      <span class="footer-dot" aria-hidden="true">·</span>
-      <a href="#" onclick="goCaseStatus(); return false;" data-i18n="footer.casestatus">Case Status</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="#" onclick="goPolicyNotice(); return false;" data-i18n="footer.policy">USCIS Policy Update</a>
     </div>
@@ -4270,23 +4253,6 @@ function goCaseStatus() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// USCIS receipt-number format: 3 letters + 10 digits (e.g., IOE1234567890).
-const CS_RECEIPT_RE = /^[A-Z]{3}[0-9]{10}$/;
-// Common service-center prefixes USCIS publishes as examples. Not exhaustive
-// — applicants may have a less common but still valid prefix.
-const CS_KNOWN_PREFIXES = new Set(['EAC', 'WAC', 'LIN', 'SRC', 'NBC', 'MSC', 'IOE']);
-
-// Pure classifier — no side effects, no storage, no network, no logging.
-// Portable for future mobile reuse.
-function csClassifyReceipt(raw) {
-  if (typeof raw !== 'string') return { state: 'empty' };
-  const cleaned = raw.replace(/[\s-]/g, '').toUpperCase();
-  if (cleaned.length === 0) return { state: 'empty' };
-  if (!CS_RECEIPT_RE.test(cleaned)) return { state: 'invalid' };
-  const prefix = cleaned.slice(0, 3);
-  if (!CS_KNOWN_PREFIXES.has(prefix)) return { state: 'warn' };
-  return { state: 'valid' };
-}
 
 // Guard against double-submit while a lookup is in flight.
 let csInFlight = false;
@@ -5314,8 +5280,6 @@ const UI_TEXT = {
   // ─── Footer + back nav ───────────────────────────────────────────────
   "footer.about":               { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" , hi:"परिचय", ht:"Sou nou", th:"เกี่ยวกับ", lo:"ກ່ຽວກັບ", hmn:"Hais Txog", my:"အကြောင်း", pt:"Sobre", ru:"О проекте" , fr:"À propos" , uk:"Про нас" , gu:"વિશે" , bn:"সম্পর্কে" , ar:"من نحن" , ur:"تعارف" },
   "footer.privacy":             { en:"Privacy Policy",                       vi:"Chính sách bảo mật",                                  es:"Política de privacidad",                              zh:"隐私政策",                                       tl:"Patakaran sa Privacy",                                ko:"개인정보 보호정책" , hi:"गोपनीयता नीति", ht:"Règleman konfidansyalite", th:"นโยบายความเป็นส่วนตัว", lo:"ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", hmn:"Txoj Cai Tswj Tsis Pub Lwm Tus Paub", my:"ကိုယ်ရေးအချက်အလက် မူဝါဒ", pt:"Política de Privacidade", ru:"Конфиденциальность" , fr:"Politique de confidentialité" , uk:"Політика конфіденційності" , gu:"ગોપનીયતા નીતિ" , bn:"গোপনীয়তা নীতি" , ar:"سياسة الخصوصية" , ur:"رازداری کی پالیسی" },
-  // ─── Footer: N-400 Case Status Helper (Phase WEB-2) ─────────────────
-  "footer.casestatus":          { en: "Case Status" },
 
   // ─── N-400 Case Status Helper screen — English-only by design (Phase WEB-2)
   "cs.title":            { en: "N-400 Case Status Helper" },
