@@ -1,8 +1,10 @@
 // PURE receipt-number validation — the single source of truth for the Worker.
 //
-// Ported from `csClassifyReceipt` in the web app (index.html, WEB-2). Keep the
-// two in sync. This module is intentionally dependency-free and portable so the
-// mobile app can import the same logic later.
+// Originally ported from `csClassifyReceipt` in the web app (index.html,
+// WEB-2). That web-side copy was removed when the public Case Status entry
+// points were taken down, so there is no second copy to keep in sync — this
+// module is now the only implementation. It is intentionally dependency-free
+// and portable so the mobile app can import the same logic later.
 //
 // API Invariant II — RECEIPT NUMBERS ARE SENSITIVE PII:
 // This function is pure — no side effects, no storage, no network, no logging.
