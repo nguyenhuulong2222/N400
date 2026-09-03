@@ -4557,7 +4557,8 @@ function syncLangToURL(lang) {
 
 // ══ UI INTERNATIONALIZATION ══
 // Switches every onboarding string at once based on `data-i18n` keys.
-// All 14 langs in LANG_META have full UI_TEXT coverage (293/293 keys).
+// Every key declares an `en` string; a locale with no entry of its own for a
+// given key renders that English fallback via pick() in updateUILanguage.
 const UI_TEXT = {
   "tab.test":                   { en:"Practice Test",                        vi:"Luyện Thi",                                           es:"Examen de Práctica" , zh:"练习测试", tl:"Pagsasanay na Eksamen", ko:"연습 시험" , hi:"अभ्यास परीक्षा", ht:"Egzamen Antrenman", th:"แบบฝึก", lo:"ບົດຝຶກຫັດ", hmn:"Xeem Xyaum", my:"လေ့ကျင့်ခန်း", pt:"Teste de Prática", ru:"Практика" , fr:"Test d'entraînement" , uk:"Пробний тест" , gu:"અભ્યાસ કસોટી" , bn:"অনুশীলন পরীক্ষা" , ar:"اختبار تدريبي" , ur:"مشق ٹیسٹ" },
   "tab.interview":              { en:"Interview Practice",                   vi:"Luyện Phỏng Vấn",                                     es:"Práctica de Entrevista" , zh:"面试练习", tl:"Pagsasanay sa Panayam", ko:"인터뷰 연습" , hi:"साक्षात्कार अभ्यास", ht:"Antrenman Entèvyou", th:"ฝึกสัมภาษณ์", lo:"ຝຶກສຳພາດ", hmn:"Xyaum Kev Xam Xaj", my:"တွေ့ဆုံမေးမြန်းခြင်း", pt:"Prática de Entrevista", ru:"Практика интервью" , fr:"Entretien d'entraînement" , uk:"Тренування співбесіди" , gu:"ઇન્ટરવ્યૂ અભ્યાસ" , bn:"সাক্ষাৎকার অনুশীলন" , ar:"تدريب المقابلة" , ur:"انٹرویو کی مشق" },
@@ -6104,9 +6105,10 @@ function t(key, vars) {
 }
 
 function updateUILanguage(lang) {
-  // The 14 original langs have full UI_TEXT coverage (293/293 keys). Languages
-  // added 2026-06-13 (ar/ur/gu/fr/bn/uk) have NO UI_TEXT yet, so any key missing
-  // for the active lang falls back to English — honest placeholder behavior that
+  // Coverage varies by language: the 14 original langs translate nearly every
+  // key, while those added 2026-06-13 (ar/ur/gu/fr/bn/uk) have NO UI_TEXT yet.
+  // Any key missing for the active lang falls back to English via pick() —
+  // honest placeholder behavior that
   // shows the English UI rather than leaving stale text from a previous language.
   // SUPPORTED_LANGS gate is a defensive fallback against an unknown lang code.
   const useLang = SUPPORTED_LANGS.has(lang) ? lang : 'en';
