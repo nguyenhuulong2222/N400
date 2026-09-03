@@ -8,6 +8,7 @@ A free, single-page web app that drills the U.S. naturalization civics test (For
 
 - Repo: https://github.com/nguyenhuulong2222/N400
 - Cloudflare Pages project name: `n400`
+- iOS 1.0.1 live on App Store (approved 2026-09-02) — App Store ID 6776992239, listings localized in 9 locales (en/vi/es-MX/zh-Hans/ko/ru/pt-BR/hi/th)
 
 ## Project layout
 

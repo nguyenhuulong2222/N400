@@ -8,6 +8,9 @@
 <meta name="robots" content="index, follow">
 <link rel="icon" href="/icon-192.png" type="image/png">
 <link rel="canonical" href="https://formn400.org/support.html">
+
+<!-- ── iOS Smart App Banner ──────────────────────────────── -->
+<meta name="apple-itunes-app" content="app-id=6776992239">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -103,6 +106,12 @@
     font-size: 13px;
     margin-top: 20px;
   }
+  /* Apple "Download on the App Store" badge. Asset is used unaltered per
+     Apple marketing guidelines: min height 40px, clear space around it,
+     never recolored or restyled. Margin only — no filters, no transforms. */
+  .footer-appstore { margin: 18px 0 2px; text-align: center; }
+  .footer-appstore a { display: inline-block; line-height: 0; }
+  .footer-appstore img { display: block; height: 40px; width: auto; }
 </style>
 </head>
 <body>
@@ -146,6 +155,13 @@
         <span>Privacy Policy is available from the site footer.</span>
       </div>
     </article>
+    <div class="footer-appstore">
+      <a href="https://apps.apple.com/us/app/n-400-citizenship-test/id6776992239"
+         target="_blank" rel="noopener">
+        <img src="/assets/app-store-badge-en.svg"
+             alt="Download on the App Store" width="120" height="40">
+      </a>
+    </div>
     <p class="footer-note">© 2026 formN400.org — Free civic education resource</p>
   </main>
 </body>

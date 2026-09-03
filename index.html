@@ -12,6 +12,9 @@
 <meta name="language" content="en, vi, es, zh, tl, ko">
 <link rel="canonical" href="https://formn400.org">
 
+<!-- ── iOS Smart App Banner ──────────────────────────────── -->
+<meta name="apple-itunes-app" content="app-id=6776992239">
+
 <!-- ── Performance + PWA ───────────────────────────────────────────── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,7 +65,7 @@
   "name": "formN400 — Free U.S. Citizenship Civics Test",
   "url": "https://formn400.org",
   "description": "Free practice app for the U.S. naturalization civics test. Official USCIS questions available in 14 languages.",
-  "applicationCategory": "EducationApplication",
+  "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web",
   "offers": {
     "@type": "Offer",
@@ -96,6 +99,32 @@
     "65/20 exemption route with simplified question set",
     "Zero data collection"
   ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "N-400 Citizenship Test",
+  "operatingSystem": "iOS",
+  "applicationCategory": "EducationalApplication",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "installUrl": "https://apps.apple.com/us/app/n-400-citizenship-test/id6776992239",
+  "provider": {
+    "@type": "Organization",
+    "name": "formN400.org",
+    "url": "https://formn400.org"
+  },
+  "isRelatedTo": {
+    "@type": "WebSite",
+    "url": "https://formn400.org"
+  }
 }
 </script>
 
@@ -1920,6 +1949,12 @@
     color: var(--text-muted);
     margin-top: 6px;
   }
+  /* Apple "Download on the App Store" badge. Asset is used unaltered per
+     Apple marketing guidelines: min height 40px, clear space around it,
+     never recolored or restyled. Margin only — no filters, no transforms. */
+  .footer-appstore { margin: 18px 0 2px; }
+  .footer-appstore a { display: inline-block; line-height: 0; }
+  .footer-appstore img { display: block; height: 40px; width: auto; }
 
   /* Policy banner (PM-602-0194) — yellow, dismissible, shown on
      onboarding when state.lang ∈ ht/lo/my. Per safety rule the copy
@@ -3219,6 +3254,13 @@
       Verify current answers at <a href="https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates" target="_blank">uscis.gov/citizenship/testupdates</a>
     </div>
     <div class="footer-copyright" data-i18n="footer.copyright">© 2026 formN400.org — Free civic education resource</div>
+    <div class="footer-appstore">
+      <a href="https://apps.apple.com/us/app/n-400-citizenship-test/id6776992239"
+         target="_blank" rel="noopener">
+        <img src="/assets/app-store-badge-en.svg"
+             alt="Download on the App Store" width="120" height="40">
+      </a>
+    </div>
   </footer>
 
   <div class="legal-box">
