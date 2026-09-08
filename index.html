@@ -141,12 +141,41 @@
     --bg-card: #ffffff;
     --text: #0d1f3c;
     --text-mid: #334166;
-    --text-muted: #6b7a99;
+    /* WCAG AA. Every figure below is a measurement, not an estimate: a
+       DevTools-protocol probe walks each painted element in 45 app states
+       (onboard, quiz MCQ + both feedback boxes, info-card, the four
+       speak-mode verdicts, pass and fail results, all five interview
+       groups, the four case-status renders, resources, exemptions) at
+       390px and 1280px, with transitions disabled and :hover / :focus /
+       :focus-visible / :active forced on. It resolves the real background
+       by compositing up the ancestor chain and applies the real 4.5:1 /
+       3:1 threshold for the size and weight each string is actually
+       painted at. 231 text-on-background combinations in all.
+       Re-measured after the text-size control and read-aloud landed:
+       still 231 and still 2, because the A / A / A buttons reuse two
+       pairs the palette already had (--text-muted on --bg-card 5.36:1,
+       white on --navy 15.61:1) and add no new one.
+         --text-muted  4.06:1 on --bg and 4.31:1 on --bg-card, across 46
+                       rules, most of them 11-15px. Now 5.05 / 5.36.
+         --correct     3.15:1 on --correct-bg, and .fb-title (the word
+                       "Correct!") is 16px bold, which is NOT WCAG "large
+                       text" — that starts at 18.66px bold. It is also the
+                       background behind the white .opt-letter, at 3.30:1.
+                       Now 4.79 / 5.02.
+         --wrong       4.41:1, short of 4.5 by a hair. Now 5.15 on
+                       --wrong-bg, 5.63 behind the white .opt-letter.
+       Darkened just far enough to clear 4.5:1. Hues unchanged; the navy and
+       red of the patriotic palette above are untouched. Re-run the probe
+       before changing any of these three.
+       Audit result: 62 combinations below AA -> 2, and both survivors are
+       WCAG-exempt as inactive or decorative: the disabled Start button, and
+       an aria-hidden "·" separator. */
+    --text-muted: #5d6b87;
     --border: #dde2ef;
-    --correct: #16a34a;
+    --correct: #128040;
     --correct-bg: #f0fdf4;
     --correct-border: #bbf7d0;
-    --wrong: #dc2626;
+    --wrong: #ca1f1f;
     --wrong-bg: #fef2f2;
     --wrong-border: #fecaca;
     --radius: 14px;
@@ -183,6 +212,53 @@
     padding: 28px 20px 80px;
     padding-top: 36px;
   }
+
+  /* Text size. The A / A / A control in the header sets data-textsize on
+     this element. CSS zoom, not a root font-size: every size in this sheet
+     is in px and seven of them are clamp(..vw..), so moving a root em
+     would scale some strings and leave others behind. zoom scales the
+     resolved layout uniformly. Measured with the DevTools protocol across
+     all ten screens at a 390px viewport: no horizontal scroll at 115% or
+     130% (it needed the .tab-bar wrap landed just before this), and
+     getComputedStyle still reports the unzoomed px, so no contrast
+     threshold moves underneath the audit in :root. */
+  .app-wrapper[data-textsize="115"] { zoom: 1.15; }
+  .app-wrapper[data-textsize="130"] { zoom: 1.30; }
+
+  /* Modelled on .mode-toggle so it reads as the same family of control.
+     The three buttons are the same letter at three sizes — the glyph is
+     the specimen, which is why no translation is needed. Hidden until JS
+     confirms the browser can honour zoom (see initTextSize), so the
+     buttons are never dead.
+     Contrast: --text-muted on --bg-card 5.36:1, white on --navy 15.61:1. */
+  .textsize {
+    display: none;
+    margin: 14px auto 0;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    width: fit-content;
+    box-shadow: var(--shadow);
+  }
+  .textsize.visible { display: inline-flex; align-items: baseline; }
+
+  .ts-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-muted);
+    transition: all 0.18s ease;
+  }
+  .ts-btn[data-size="100"] { font-size: 13px; }
+  .ts-btn[data-size="115"] { font-size: 15px; }
+  .ts-btn[data-size="130"] { font-size: 17px; }
+  .ts-btn[aria-pressed="true"] { background: var(--navy); color: var(--white); }
 
   /* ── HEADER ── */
   .site-header {
@@ -853,6 +929,28 @@
     margin-bottom: 12px;
   }
 
+  /* ★ pill marking a question as part of the USCIS 20-question 65/20 subset.
+     It renders INSIDE .q-number, so it has to undo that rule's uppercase and
+     wide letter-spacing. A plain typographic star — not an agency emblem
+     (Invariant VI). Navy on white = 15.6:1 contrast. */
+  .q-star {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Source Serif 4', serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
   .q-text {
     font-family: 'Playfair Display', serif;
     font-size: clamp(18px, 3vw, 22px);
@@ -1050,8 +1148,20 @@
   .answer-options { display: grid; gap: 9px; }
 
   /* ── TAB BAR (Practice Test vs. Interview Practice) ── */
+  /* flex-wrap is not cosmetic. The three tab buttons cannot shrink below
+     their own min-content — roughly 110px each, ~349px with gaps and
+     padding — so on a 390px phone at browser zoom this bar is the one
+     thing in the app that pushes the page into a horizontal scroll, which
+     is a WCAG 1.4.10 (Reflow) failure. Measured with the DevTools
+     protocol at 390px: documentElement.scrollWidth 469 against a
+     clientWidth of 390 at 130%, and nav.tab-bar was the sole offender on
+     every screen that overflowed. Wrapping fixes it with no change at
+     100%, where all three still sit on one row. */
   .tab-bar {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
     gap: 4px;
     background: var(--bg-card);
     border: 1.5px solid var(--border);
@@ -2132,6 +2242,50 @@
   }
   .page-list li { margin: 6px 0; }
 
+  /* ── Exemptions & Accommodations page ──────────────────────────────
+     Rides on the shared .page-* classes. Only the pieces that page needs
+     and nothing else already has are defined here. */
+  .exempt-langnote {
+    display: inline-block;
+    margin: 0 0 16px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #eef1fa;
+    border: 1px solid #d8def0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-mid);
+  }
+  .exempt-cta {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .exempt-cta:hover { background: var(--navy-mid); }
+  .exempt-more {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy-light);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
   /* ── N-400 Case Status Helper (Phase WEB-2) — minimal input/message styles. */
   .cs-label {
     display: block;
@@ -2244,6 +2398,94 @@
     border: 0;
   }
 
+  /* Placeholder text was the one string on the page whose colour the app
+     never set, so it fell back to whatever grey the browser picked —
+     4.61:1 in Chrome, and far worse in Safari, which is the browser most
+     of these users are on. Inside a focused .iv-field input (background
+     #f7f9ff) Chrome's own default already measured 4.38:1, below AA. Set
+     it explicitly. opacity:1 is required: Firefox otherwise fades the
+     placeholder to 54%, which would undo the fix.
+     Measured: 5.36:1 on --bg-card, 5.09:1 on the focused #f7f9ff. */
+  input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  /* Keyboard focus ring. One visible indicator for every interactive
+     element, and only for keyboard focus — mouse users see nothing new.
+
+     CORRECTION. An earlier version of this comment claimed the rule adds
+     a ring ON TOP of the three :focus rules elsewhere in this sheet, and
+     that it is what finally makes keyboard focus distinguishable from
+     hover on .state-select. Both claims were wrong, and a Tab walk driven
+     through the DevTools protocol proved it: those three rules each carry
+     `outline: none` at a HIGHER specificity than the selector list below,
+     so they won, and six text inputs plus the state <select> showed no
+     ring at all under real keyboard focus.
+
+         .iv-field input:focus              0,2,1
+         .cs-input:focus                    0,2,0
+         .state-select:focus, :hover        0,2,0
+         input:focus-visible (below)        0,1,1   <- loses to all three
+
+     Source order could not fix that; only specificity can. The three are
+     restated at :focus-visible in the block after this one, at matching
+     specificity and later in the sheet, so they win the tie.
+
+     One consequence, verified with real dispatched mouse events rather
+     than assumed: buttons and links clicked with a mouse still get no
+     ring (:focus-visible does not match a click on them), but the six
+     text inputs and the state <select> DO show the ring on a plain
+     mouse click. That is the specification, not a bug — an element that
+     expects keyboard input always matches :focus-visible while focused.
+     The ring on the field you are about to type in is wanted; do not
+     "fix" it by reintroducing outline:none. */
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible,
+  input:focus-visible,
+  summary:focus-visible,
+  details:focus-visible {
+    outline: 3px solid var(--navy-light);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* The three exceptions named above. Each of these selectors sets
+     `outline: none` on :focus somewhere earlier in this sheet at a
+     specificity the generic rule cannot reach. Restating them here at
+     equal specificity, later in source order, is what actually puts the
+     ring on screen. Keep this block AFTER the generic one, and keep each
+     selector shaped exactly like its `outline: none` twin — weaken one of
+     these and that control silently loses its focus indicator again. */
+  .state-select:focus-visible,
+  .cs-input:focus-visible,
+  .iv-field input:focus-visible {
+    outline: 3px solid var(--navy-light);
+    outline-offset: 2px;
+  }
+
+  /* Screen containers take focus programmatically on navigation (see
+     showScreen). They are not interactive controls and are unreachable by
+     Tab, so a ring here would be visual noise. */
+  .screen:focus { outline: none; }
+
+  /* Users who asked their OS to reduce motion get no transitions and no
+     animations. Generalises the single .cs-spinner rule that already existed.
+     This is the ONE place in this stylesheet where !important is allowed: an
+     accessibility override has to beat every author rule, and that is exactly
+     what the mechanism is for. Do not copy the pattern elsewhere.
+     scroll-behavior is here for completeness, but this app scrolls from JS —
+     see smoothScroll(), which CSS cannot reach. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   .legal-box {
     background: white;
     border: 1.5px solid var(--border);
@@ -2293,11 +2535,34 @@
     <div class="badge-row">
       <span class="badge badge-disclaimer" data-i18n="header.disclaimer">Not affiliated with or endorsed by USCIS or the U.S. government</span>
     </div>
+
+    <!-- Text size. The visible content is the same letter at three sizes,
+         so there is nothing here to translate: the glyph IS the label.
+         KNOWN LIMITATION, the same backlog item as the tab bar below: the
+         aria-labels are English in every locale, because updateUILanguage
+         only rewrites textContent/innerHTML and we deliberately did not
+         build a data-i18n-aria mechanism. A screen-reader user in another
+         language hears English here. -->
+    <div class="textsize" id="textsize" role="group" aria-label="Text size">
+      <button class="ts-btn" type="button" data-size="100" aria-pressed="true"  aria-label="Default text size" onclick="setTextSize('100')">A</button>
+      <button class="ts-btn" type="button" data-size="115" aria-pressed="false" aria-label="Larger text size"  onclick="setTextSize('115')">A</button>
+      <button class="ts-btn" type="button" data-size="130" aria-pressed="false" aria-label="Largest text size" onclick="setTextSize('130')">A</button>
+    </div>
   </header>
 
   <!-- ══ TAB BAR ══ -->
-  <nav class="tab-bar" id="tab-bar" role="tablist">
-    <button class="tab-btn active" id="tab-btn-test" data-tab="test" type="button" data-i18n="tab.test">Practice Test</button>
+  <!-- Plain navigation, not an ARIA tablist. These buttons swap whole
+       screens; they are not tab panels inside one container, and the
+       pattern was never completed (no role="tab", no aria-selected, no
+       aria-controls, no tabpanel). A half-built tablist misleads a screen
+       reader worse than no role at all, so it is gone. aria-current="page"
+       carries which one is active — maintained in switchTab.
+       KNOWN LIMITATION: aria-label is English in every locale.
+       updateUILanguage only rewrites textContent/innerHTML; translating
+       attributes needs a data-i18n-aria mechanism we deliberately did not
+       build here. -->
+  <nav class="tab-bar" id="tab-bar" aria-label="Main">
+    <button class="tab-btn active" id="tab-btn-test" data-tab="test" type="button" aria-current="page" data-i18n="tab.test">Practice Test</button>
     <button class="tab-btn" id="tab-btn-interview" data-tab="interview" type="button" data-i18n="tab.interview">Interview Practice</button>
     <button class="tab-btn" id="tab-btn-resources" data-tab="resources" type="button" data-i18n="tab.resources">Resources</button>
   </nav>
@@ -2340,9 +2605,9 @@
 
     <details class="exemption-card">
       <summary class="exemption-summary">
-        <span class="exemption-icon">i</span>
+        <span class="exemption-icon" aria-hidden="true">i</span>
         <span class="exemption-title" data-i18n="exemption.summary">Do you qualify for an exemption?</span>
-        <span class="exemption-chevron">→</span>
+        <span class="exemption-chevron" aria-hidden="true">→</span>
       </summary>
       <div class="exemption-body">
         <p class="exemption-intro" data-i18n="exemption.intro">USCIS offers three age- and residency-based exemptions from the English-language and/or civics requirements. Eligibility is determined at the time of filing Form N-400.</p>
@@ -2378,6 +2643,11 @@
           <a href="https://www.uscis.gov/sites/default/files/document/fact-sheets/Fact-Sheet-Promoting-Citizenship-for-50-and-Older.pdf" target="_blank" rel="noopener" data-i18n-html="exemption.link_factsheet"><span class="el-label">Fact Sheet (PDF)</span> · Citizenship for Applicants 50 and Older →</a>
           <a href="https://www.uscis.gov/sites/default/files/document/crc/Civics%20Questions%20and%20Answers.pdf" target="_blank" rel="noopener" data-i18n-html="exemption.link_6520pdf"><span class="el-label">65/20 Questions (PDF)</span> · The 20 starred civics questions →</a>
         </div>
+
+        <!-- B1: this <details> block stays the quick summary — it is already
+             translated into 20 languages. The full reference page (English
+             only for now) hangs off it rather than replacing it. -->
+        <button type="button" class="exempt-more" onclick="goExemptions()"><span data-i18n="exempt_title">Exemptions &amp; Accommodations</span> →</button>
       </div>
     </details>
 
@@ -2459,64 +2729,64 @@
       <div class="section-label"><span data-i18n="lang.label">Display language</span><span class="req-marker" aria-hidden="true">*</span></div>
       <div class="lang-grid">
         <button class="lang-btn selected" data-lang="en" onclick="selectLang(this)">
-          <span class="flag">🇺🇸</span>English
+          <span class="flag" aria-hidden="true">🇺🇸</span>English
         </button>
         <button class="lang-btn" data-lang="vi" onclick="selectLang(this)">
-          <span class="flag">🇻🇳</span>Tiếng Việt
+          <span class="flag" aria-hidden="true">🇻🇳</span>Tiếng Việt
         </button>
         <button class="lang-btn" data-lang="es" onclick="selectLang(this)">
-          <span class="flag">🇲🇽</span>Español
+          <span class="flag" aria-hidden="true">🇲🇽</span>Español
         </button>
         <button class="lang-btn" data-lang="zh" onclick="selectLang(this)">
-          <span class="flag">🇨🇳</span>中文
+          <span class="flag" aria-hidden="true">🇨🇳</span>中文
         </button>
         <button class="lang-btn" data-lang="tl" onclick="selectLang(this)">
-          <span class="flag">🇵🇭</span>Filipino
+          <span class="flag" aria-hidden="true">🇵🇭</span>Filipino
         </button>
         <button class="lang-btn" data-lang="ko" onclick="selectLang(this)">
-          <span class="flag">🇰🇷</span>한국어
+          <span class="flag" aria-hidden="true">🇰🇷</span>한국어
         </button>
         <button class="lang-btn" data-lang="hi" onclick="selectLang(this)">
-          <span class="flag">🇮🇳</span>हिन्दी
+          <span class="flag" aria-hidden="true">🇮🇳</span>हिन्दी
         </button>
         <button class="lang-btn" data-lang="ht" onclick="selectLang(this)">
-          <span class="flag">🇭🇹</span>Kreyòl
+          <span class="flag" aria-hidden="true">🇭🇹</span>Kreyòl
         </button>
         <button class="lang-btn" data-lang="th" onclick="selectLang(this)">
-          <span class="flag">🇹🇭</span>ภาษาไทย
+          <span class="flag" aria-hidden="true">🇹🇭</span>ภาษาไทย
         </button>
         <button class="lang-btn" data-lang="lo" onclick="selectLang(this)">
-          <span class="flag">🇱🇦</span>ລາວ
+          <span class="flag" aria-hidden="true">🇱🇦</span>ລາວ
         </button>
         <button class="lang-btn" data-lang="hmn" onclick="selectLang(this)">
           <span class="flag" aria-hidden="true">🏳️</span>Hmoob
         </button>
         <button class="lang-btn" data-lang="my" onclick="selectLang(this)">
-          <span class="flag">🇲🇲</span>မြန်မာ
+          <span class="flag" aria-hidden="true">🇲🇲</span>မြန်မာ
         </button>
         <button class="lang-btn" data-lang="pt" onclick="selectLang(this)">
-          <span class="flag">🇧🇷</span>Português
+          <span class="flag" aria-hidden="true">🇧🇷</span>Português
         </button>
         <button class="lang-btn" data-lang="ru" onclick="selectLang(this)">
-          <span class="flag">🇷🇺</span>Русский
+          <span class="flag" aria-hidden="true">🇷🇺</span>Русский
         </button>
         <button class="lang-btn" data-lang="ar" onclick="selectLang(this)">
-          <span class="flag">🇸🇦</span>العربية
+          <span class="flag" aria-hidden="true">🇸🇦</span>العربية
         </button>
         <button class="lang-btn" data-lang="ur" onclick="selectLang(this)">
-          <span class="flag">🇵🇰</span>اردو
+          <span class="flag" aria-hidden="true">🇵🇰</span>اردو
         </button>
         <button class="lang-btn" data-lang="gu" onclick="selectLang(this)">
-          <span class="flag">🇮🇳</span>ગુજરાતી
+          <span class="flag" aria-hidden="true">🇮🇳</span>ગુજરાતી
         </button>
         <button class="lang-btn" data-lang="fr" onclick="selectLang(this)">
-          <span class="flag">🇫🇷</span>français
+          <span class="flag" aria-hidden="true">🇫🇷</span>français
         </button>
         <button class="lang-btn" data-lang="bn" onclick="selectLang(this)">
-          <span class="flag">🇧🇩</span>বাংলা
+          <span class="flag" aria-hidden="true">🇧🇩</span>বাংলা
         </button>
         <button class="lang-btn" data-lang="uk" onclick="selectLang(this)">
-          <span class="flag">🇺🇦</span>українська
+          <span class="flag" aria-hidden="true">🇺🇦</span>українська
         </button>
       </div>
       <div class="lang-required-note" data-i18n-html="lang.required_note"><strong>Required:</strong> select your native language for this exemption.</div>
@@ -2552,28 +2822,37 @@
     <div class="quiz-header">
       <span class="quiz-mode-label" id="quiz-mode-label">2025 Test</span>
       <div class="score-display">
-        <span class="score-pill correct">✓ <span id="score-correct">0</span></span>
-        <span class="score-pill wrong">✗ <span id="score-wrong">0</span></span>
+        <span class="score-pill correct"><span aria-hidden="true">✓ </span><span class="sr-only" data-i18n="result.correct">Correct</span><span id="score-correct">0</span></span>
+        <span class="score-pill wrong"><span aria-hidden="true">✗ </span><span class="sr-only" data-i18n="result.wrong">Wrong</span><span id="score-wrong">0</span></span>
       </div>
     </div>
-    <div class="mode-toggle" id="mode-toggle" role="tablist" aria-label="Practice mode">
-      <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button" data-i18n="quiz.modeMcq">Multiple choice</button>
-      <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button" data-i18n="quiz.modeSpeak">Speak answer</button>
+    <!-- Same reasoning as #tab-bar: this was a tablist with no tabs and no
+         panels. It is a two-state switch, so it is a group of toggle
+         buttons and aria-pressed carries the state (set in renderModeToggle). -->
+    <div class="mode-toggle" id="mode-toggle" role="group" aria-label="Practice mode">
+      <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button" aria-pressed="true" data-i18n="quiz.modeMcq">Multiple choice</button>
+      <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button" aria-pressed="false" data-i18n="quiz.modeSpeak">Speak answer</button>
     </div>
-    <div class="progress-track">
+    <div class="progress-track" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="progress-fill" id="progress-fill" style="width:0%"></div>
     </div>
     <div id="question-area"></div>
-    <div id="feedback-area"></div>
+    <!-- Live region: renderQuestion clears it, selectAnswer fills it, so a
+         screen reader announces the correct/incorrect verdict instead of the
+         user having to go hunting for it. polite, not assertive — they just
+         pressed a button, nothing needs interrupting. -->
+    <div id="feedback-area" role="status" aria-live="polite"></div>
     <div id="action-area"></div>
   </div>
 
   <!-- ══ SCREEN 3: RESULT ══ -->
   <div id="screen-result" class="screen">
     <div class="result-card">
-      <span class="result-icon" id="result-icon">🎉</span>
-      <div class="result-verdict" id="result-verdict">PASSED</div>
-      <p class="result-sub" id="result-sub"></p>
+      <span class="result-icon" id="result-icon" aria-hidden="true">🎉</span>
+      <div role="status" aria-live="polite">
+        <div class="result-verdict" id="result-verdict" tabindex="-1">PASSED</div>
+        <p class="result-sub" id="result-sub"></p>
+      </div>
       <div class="result-stats">
         <div class="result-stat">
           <span class="rs-num" id="res-correct">0</span>
@@ -2950,6 +3229,111 @@
     </ul>
   </div>
 
+  <!-- ══ SCREEN: EXEMPTIONS & ACCOMMODATIONS ═══════════════════════════
+       Reference page for disability accommodations, the age/residency
+       English exemptions, the 65/20 shorter civics test, Form N-648, and
+       the Oath of Allegiance waiver.
+
+       The English copy here and in the `exempt_*` UI_TEXT values is
+       sourced from official USCIS material and is treated as VERBATIM.
+       Do not reword it. Do not machine-translate it (Invariant I).
+
+       The disclaimer and the four official link labels are hardcoded in
+       English on purpose — they must read identically in every locale, so
+       they are deliberately NOT wired to UI_TEXT and cannot drift.
+
+       Invariant VII: this page describes published USCIS rules. It does
+       not assess anyone's eligibility and does not tell anyone how to
+       file. Every procedural question exits to uscis.gov. -->
+  <div id="screen-exemptions" class="screen">
+    <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
+    <h1 class="page-title" data-i18n="exempt_title">Exemptions &amp; Accommodations</h1>
+    <div class="exempt-langnote" data-i18n="exempt_langnote">This page is currently available in English only.</div>
+
+    <section class="page-section page-section-summary">
+      <p data-i18n="exempt_intro">A disability does not stop you from becoming a U.S. citizen. U.S. law gives you three kinds of help: accommodations (a different way to take the test), exemptions based on your age, and exemptions based on a medical condition. This page explains each one in simple English.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_accom_title">Test accommodations — deaf, blind, and other disabilities</h2>
+      <div data-i18n-html="exempt_accom_body">
+        <p>If you are deaf, hard of hearing, blind, or have another disability, USCIS can change the way you take the test. Examples:</p>
+        <ul class="page-bullets">
+          <li>A sign language interpreter at your interview</li>
+          <li>Extra time to answer questions</li>
+          <li>An interview at your home or another location, if you cannot travel to a USCIS office</li>
+        </ul>
+        <p>An accommodation changes HOW you take the test. You still take the English and civics tests, unless you also qualify for an exemption below.</p>
+        <p>How to request it: answer the accommodation questions on your Form N-400, or call USCIS at 800-375-5283 (TTY: 800-767-1833). Requesting an accommodation is free and does not hurt your application.</p>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_age_title">English test exemptions by age — the "50/20" and "55/15" rules</h2>
+      <div data-i18n-html="exempt_age_body">
+        <ul class="page-bullets">
+          <li>50/20: If you are age 50 or older AND have lived in the U.S. as a permanent resident (green card holder) for 20 years or more, you do not take the English test.</li>
+          <li>55/15: If you are age 55 or older AND have been a permanent resident for 15 years or more, you do not take the English test.</li>
+        </ul>
+        <p>You must still take the civics test, but you may take it in your own language. You will need to bring an interpreter to your interview.</p>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_6520_title">The "65/20" rule — a shorter civics test</h2>
+      <div data-i18n-html="exempt_6520_body">
+        <p>If you are age 65 or older AND have been a permanent resident for 20 years or more:</p>
+        <ul class="page-bullets">
+          <li>You study only 20 questions — the ones marked with a star (*) — instead of all 128.</li>
+          <li>The officer asks you 10 of those 20 questions. You pass by answering 6 correctly.</li>
+          <li>You may answer in your own language, with an interpreter.</li>
+        </ul>
+      </div>
+      <button type="button" class="exempt-cta" onclick="goExemptions65()" data-i18n="exempt_6520_cta">Practice the 20 questions now.</button>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_n648_title">Medical exemption — Form N-648</h2>
+      <div data-i18n-html="exempt_n648_body">
+        <p>If a physical or developmental disability, or a mental impairment, makes you unable to learn English or civics, you may not have to take one test — or both tests — at all.</p>
+        <ul class="page-bullets">
+          <li>A licensed medical doctor, doctor of osteopathy, or licensed clinical psychologist must examine you and complete Form N-648, Medical Certification for Disability Exceptions.</li>
+          <li>The disability must have lasted, or be expected to last, at least 12 months.</li>
+          <li>File Form N-648 together with your Form N-400. The doctor must certify the form no more than 180 days before you file.</li>
+          <li>Illiteracy or advanced age alone is not enough — there must be a medical condition.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_oath_title">Oath of Allegiance waiver</h2>
+      <p data-i18n="exempt_oath_body">If a disability prevents you from understanding the meaning of the Oath of Allegiance, USCIS may waive the oath. A legal guardian or a designated family member can help complete this part of the process.</p>
+    </section>
+
+    <section class="page-section">
+      <h2 data-i18n="exempt_note_title">Important</h2>
+      <p data-i18n="exempt_note_body">Every applicant must still meet the other requirements of Form N-400. An exemption from a test is not an exemption from the rest of the naturalization process.</p>
+    </section>
+
+    <!-- English-only in EVERY locale, by design. Deliberately not wired to
+         UI_TEXT so no future translation pass can touch it. -->
+    <section class="page-section page-section-emphasis">
+      <h2>Disclaimer</h2>
+      <p>This page is general information based on official USCIS sources. It is not legal advice. Rules can change at any time — always check the official USCIS pages below, or talk to an accredited representative or immigration attorney.</p>
+    </section>
+
+    <!-- English-only labels, same reason as the disclaimer above. -->
+    <section class="page-section">
+      <h2>Official links</h2>
+      <ul class="page-list">
+        <li><a href="https://www.uscis.gov/citizenship/exceptions-and-accommodations" target="_blank" rel="noopener noreferrer">USCIS — Exceptions and Accommodations</a></li>
+        <li><a href="https://www.uscis.gov/n-648" target="_blank" rel="noopener noreferrer">Form N-648, Medical Certification for Disability Exceptions</a></li>
+        <li><a href="https://www.uscis.gov/about-us/disability-accommodations-for-the-public" target="_blank" rel="noopener noreferrer">USCIS Disability Accommodations for the Public</a></li>
+        <li><a href="https://www.uscis.gov/sites/default/files/document/questions-and-answers/2025-Civics-Test-128-Questions-and-Answers.pdf" target="_blank" rel="noopener noreferrer">2025 Civics Test — 128 Questions and Answers (PDF, stars mark the 65/20 questions)</a></li>
+      </ul>
+    </section>
+  </div>
+
   <!-- ══ SCREEN 6: ABOUT ════════════════════════════════════════════════ -->
   <div id="screen-about" class="screen">
     <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
@@ -3245,6 +3629,8 @@
       <a href="#" onclick="goAbout(); return false;" data-i18n="footer.about">About</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="#" onclick="goPrivacy(); return false;" data-i18n="footer.privacy">Privacy Policy</a>
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a href="#" onclick="goExemptions(); return false;" data-i18n="exempt_title">Exemptions &amp; Accommodations</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="/support.html">Support</a>
       <span class="footer-dot" aria-hidden="true">·</span>
@@ -4273,22 +4659,63 @@ function showScreen(id) {
   if (typeof stopListening === 'function') stopListening();
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
+  const screenEl = document.getElementById('screen-'+id);
+  screenEl.classList.add('active');
+  // Move the caret into the new screen. Without this a keyboard or screen-
+  // reader user stays parked wherever they were on the screen that just went
+  // away. The container itself takes focus rather than a heading, because the
+  // ten screens do not share one heading shape — the quiz screen has none at
+  // all. preventScroll: every caller does its own scrollTo.
+  // #screen-onboard ships with class="screen active" and showScreen is not
+  // called for it at boot, so a normal page load never steals focus.
+  screenEl.setAttribute('tabindex', '-1');
+  screenEl.focus({ preventScroll: true });
   // The top tab bar only makes sense on entry screens. Hide while a quiz
   // is in progress or the result is being shown — switching tabs mid-quiz
   // would be confusing.
   const tabBar = document.getElementById('tab-bar');
   if (tabBar) tabBar.classList.toggle('hidden',
     id === 'quiz' || id === 'result' ||
-    id === 'about' || id === 'privacy' || id === 'policy-notice' || id === 'case-status');
+    id === 'about' || id === 'privacy' || id === 'policy-notice' || id === 'case-status' ||
+    id === 'exemptions');
 }
 
 // Footer page navigation. About / Privacy / Policy-Notice all return to the
 // onboarding screen via the back button (goBack alias of goHome).
-function goAbout()        { showScreen('about');          window.scrollTo({top:0,behavior:'smooth'}); }
-function goPrivacy()      { showScreen('privacy');        window.scrollTo({top:0,behavior:'smooth'}); }
-function goPolicyNotice() { showScreen('policy-notice');  window.scrollTo({top:0,behavior:'smooth'}); }
-function goBack()         { showScreen('onboard');        window.scrollTo({top:0,behavior:'smooth'}); }
+// Honour prefers-reduced-motion for programmatic scrolling. The media query
+// in the stylesheet cannot reach a scrollTo() call, so it is checked here.
+// Read live rather than cached — the user can flip the OS setting while the
+// page is open.
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function smoothScroll(top) {
+  window.scrollTo({ top: top || 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+}
+
+function goAbout()        { showScreen('about');          smoothScroll(); }
+function goPrivacy()      { showScreen('privacy');        smoothScroll(); }
+function goPolicyNotice() { showScreen('policy-notice');  smoothScroll(); }
+function goBack()         { showScreen('onboard');        smoothScroll(); }
+
+function goExemptions()   { showScreen('exemptions');     smoothScroll(); }
+
+// CTA đích của mục 65/20 trên trang Exemptions. Mở thẻ route 65/20 + panel
+// chọn ngày nộp hồ sơ, rồi DỪNG — chúng ta KHÔNG tự chọn 6520_2025 hay
+// 6520_2008 thay người dùng. Đoán route nào đúng là đoán họ nộp Form N-400
+// khi nào, tức là tư vấn điều kiện hồ sơ (Invariant VII). Câu đó để chính
+// họ trả lời.
+//
+// selectRoute('6520_meta') là một TOGGLE — chỉ gọi khi panel đang đóng,
+// nếu không sẽ vô tình đóng nó lại.
+function goExemptions65() {
+  showScreen('onboard');
+  const card = document.querySelector('.route-card[data-route="6520_meta"]');
+  if (!card) { smoothScroll(); return; }
+  const sub = document.getElementById('subselect-65');
+  if (sub && !sub.classList.contains('expanded')) selectRoute(card);
+  card.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block:'center' });
+}
 
 // ── N-400 Case Status lookup (Phase WEB-2) ────────────────────────────
 // Live lookup against the official USCIS Case Status API, proxied by our
@@ -4303,7 +4730,7 @@ function goBack()         { showScreen('onboard');        window.scrollTo({top:0
 
 function goCaseStatus() {
   showScreen('case-status');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  smoothScroll();
 }
 
 
@@ -4540,6 +4967,43 @@ function dismissCommunityBanner() {
   if (el) el.hidden = true;
 }
 
+// ── TEXT SIZE (A / A / A) ─────────────────────────────────────────────
+// Three absolute steps, 100 / 115 / 130 %, applied as CSS zoom on
+// .app-wrapper.
+//
+// INVARIANT VIII: the only thing stored is which of three buttons is
+// pressed. That is a display preference, not information about the person
+// — nothing they typed, nothing about their case — and it goes in
+// sessionStorage, so it dies with the tab. Same treatment as
+// POLICY_BANNER_DISMISS_KEY above, try/catch included: Safari private mode
+// throws on write rather than returning null.
+const TEXTSIZE_KEY   = 'n400.textsize.v1';
+const TEXTSIZE_STEPS = ['100', '115', '130'];
+
+function setTextSize(size) {
+  if (!TEXTSIZE_STEPS.includes(size)) return;
+  const wrap = document.querySelector('.app-wrapper');
+  if (wrap) wrap.setAttribute('data-textsize', size);
+  document.querySelectorAll('#textsize .ts-btn').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.size === size));
+  });
+  try { sessionStorage.setItem(TEXTSIZE_KEY, size); }
+  catch (e) { /* private mode — the choice still applies to this view */ }
+}
+
+function initTextSize() {
+  const ctl = document.getElementById('textsize');
+  if (!ctl) return;
+  // Firefox only shipped `zoom` in 126. Where it is unsupported these
+  // buttons would do nothing at all, so the control never appears rather
+  // than appearing dead.
+  if (!(typeof CSS !== 'undefined' && CSS.supports && CSS.supports('zoom', '1.15'))) return;
+  ctl.classList.add('visible');
+  let saved = null;
+  try { saved = sessionStorage.getItem(TEXTSIZE_KEY); } catch (e) { /* private mode */ }
+  setTextSize(TEXTSIZE_STEPS.includes(saved) ? saved : '100');
+}
+
 // Update the URL's ?lang= param to match the active language without
 // triggering a navigation. English is the canonical/default so we strip the
 // param for ?lang=en to keep the bare `/` URL clean.
@@ -4674,6 +5138,44 @@ const UI_TEXT = {
                                   pt:"<span class=\"el-label\">65/20 Questions (PDF)</span> · The 20 starred civics questions →",
                                   ru:"<span class=\"el-label\">65/20 Questions (PDF)</span> · The 20 starred civics questions →" , fr:"<span class=\"el-label\">Questions 65/20 (PDF)</span> · Les 20 questions d'éducation civique marquées d'une étoile →" , uk:"<span class=\"el-label\">Питання 65/20 (PDF)</span> · 20 питань із громадянознавства, позначених зірочкою →" , gu:"<span class=\"el-label\">65/20 પ્રશ્નો (PDF)</span> · તારાંકિત 20 નાગરિકશાસ્ત્ર પ્રશ્નો →" , bn:"<span class=\"el-label\">৬৫/২০ প্রশ্ন (PDF)</span> · তারকাচিহ্নিত ২০টি নাগরিকশাস্ত্র প্রশ্ন →" , ar:"<span class=\"el-label\">أسئلة 65/20 (PDF)</span> · أسئلة التربية الوطنية العشرون المميزة بنجمة →" , ur:"<span class=\"el-label\">65/20 سوالات (PDF)</span> · ستارے والے 20 شہریت سوالات →" },
 
+  // ─── Exemptions & Accommodations page ───────────────────────────────────
+  // VERBATIM legal copy from official USCIS sources (Invariant I). Do not
+  // reword. Do not machine-translate.
+  //
+  // Underscore naming (exempt_*) is deliberate: it is the grep boundary
+  // against the older dotted exemption.* block that feeds the onboarding
+  // <details> summary. The two are different content, not duplicates.
+  //
+  // TODO(vi): Long điền bản tiếng Việt. Thêm `vi:` vào từng key khi có.
+  // ⚠️ KHÔNG bao giờ viết `vi:""` — pick() dùng `!= null`, chuỗi rỗng sẽ
+  //    render ra section TRỐNG thay vì fallback sang EN. Thiếu bản dịch =
+  //    thiếu hẳn key, không phải key rỗng.
+  //
+  // `exempt_disclaimer` và nhãn 4 link chính thức KHÔNG có ở đây — chúng
+  // hardcode tiếng Anh thẳng trong #screen-exemptions, mọi locale như nhau.
+  "exempt_title":               { en:"Exemptions & Accommodations" },
+  "exempt_langnote":            { en:"This page is currently available in English only." },
+  "exempt_intro":               { en:"A disability does not stop you from becoming a U.S. citizen. U.S. law gives you three kinds of help: accommodations (a different way to take the test), exemptions based on your age, and exemptions based on a medical condition. This page explains each one in simple English." },
+
+  "exempt_accom_title":         { en:"Test accommodations — deaf, blind, and other disabilities" },
+  "exempt_accom_body":          { en:'<p>If you are deaf, hard of hearing, blind, or have another disability, USCIS can change the way you take the test. Examples:</p><ul class="page-bullets"><li>A sign language interpreter at your interview</li><li>Extra time to answer questions</li><li>An interview at your home or another location, if you cannot travel to a USCIS office</li></ul><p>An accommodation changes HOW you take the test. You still take the English and civics tests, unless you also qualify for an exemption below.</p><p>How to request it: answer the accommodation questions on your Form N-400, or call USCIS at 800-375-5283 (TTY: 800-767-1833). Requesting an accommodation is free and does not hurt your application.</p>' },
+
+  "exempt_age_title":           { en:'English test exemptions by age — the "50/20" and "55/15" rules' },
+  "exempt_age_body":            { en:'<ul class="page-bullets"><li>50/20: If you are age 50 or older AND have lived in the U.S. as a permanent resident (green card holder) for 20 years or more, you do not take the English test.</li><li>55/15: If you are age 55 or older AND have been a permanent resident for 15 years or more, you do not take the English test.</li></ul><p>You must still take the civics test, but you may take it in your own language. You will need to bring an interpreter to your interview.</p>' },
+
+  "exempt_6520_title":          { en:'The "65/20" rule — a shorter civics test' },
+  "exempt_6520_body":           { en:'<p>If you are age 65 or older AND have been a permanent resident for 20 years or more:</p><ul class="page-bullets"><li>You study only 20 questions — the ones marked with a star (*) — instead of all 128.</li><li>The officer asks you 10 of those 20 questions. You pass by answering 6 correctly.</li><li>You may answer in your own language, with an interpreter.</li></ul>' },
+  "exempt_6520_cta":            { en:"Practice the 20 questions now." },
+
+  "exempt_n648_title":          { en:"Medical exemption — Form N-648" },
+  "exempt_n648_body":           { en:'<p>If a physical or developmental disability, or a mental impairment, makes you unable to learn English or civics, you may not have to take one test — or both tests — at all.</p><ul class="page-bullets"><li>A licensed medical doctor, doctor of osteopathy, or licensed clinical psychologist must examine you and complete Form N-648, Medical Certification for Disability Exceptions.</li><li>The disability must have lasted, or be expected to last, at least 12 months.</li><li>File Form N-648 together with your Form N-400. The doctor must certify the form no more than 180 days before you file.</li><li>Illiteracy or advanced age alone is not enough — there must be a medical condition.</li></ul>' },
+
+  "exempt_oath_title":          { en:"Oath of Allegiance waiver" },
+  "exempt_oath_body":           { en:"If a disability prevents you from understanding the meaning of the Oath of Allegiance, USCIS may waive the oath. A legal guardian or a designated family member can help complete this part of the process." },
+
+  "exempt_note_title":          { en:"Important" },
+  "exempt_note_body":           { en:"Every applicant must still meet the other requirements of Form N-400. An exemption from a test is not an exemption from the rest of the naturalization process." },
+
   "onboard.title":              { en:"Which version do you need?",            vi:"Bạn cần phiên bản nào?",                             es:"¿Qué versión necesita?" , zh:"您需要哪个版本？", tl:"Anong bersyon ang kailangan mo?", ko:"어떤 버전이 필요하십니까?" , hi:"आपको कौन सा संस्करण चाहिए?", ht:"Ki vèsyon ou bezwen?", th:"คุณต้องการเวอร์ชันใด?", lo:"ທ່ານຕ້ອງການເວີຊັນໃດ?", hmn:"Koj xav tau qhov twg?", my:"မည်သည့်ဗားရှင်းကို လိုအပ်ပါသလဲ?", pt:"Qual versão você precisa?", ru:"Какая версия вам нужна?" , fr:"De quelle version avez-vous besoin ?" , uk:"Яка версія вам потрібна?" , gu:"તમારે કઈ આવૃત્તિ જોઈએ છે?" , bn:"আপনার কোন সংস্করণ প্রয়োজন?" , ar:"أي إصدار تحتاج؟" , ur:"آپ کو کون سا ورژن چاہیے؟" },
   "onboard.sub":                { en:"Your version depends on when you filed Form N-400. Choose below.", vi:"Phiên bản phụ thuộc vào ngày bạn nộp Mẫu N-400. Hãy chọn bên dưới.", es:"Su versión depende de cuándo presentó el Formulario N-400. Elija a continuación." , zh:"您的版本取决于您提交 N-400 表格的时间。请在下方选择。", tl:"Ang iyong bersyon ay depende sa kung kailan mo isinampa ang Form N-400. Pumili sa ibaba.", ko:"버전은 N-400 양식을 제출한 시기에 따라 결정됩니다. 아래에서 선택하세요." , hi:"आपका संस्करण इस पर निर्भर है कि आपने Form N-400 कब दाखिल किया।", ht:"Vèsyon ou depann sou kilè ou te ranpli Fòm N-400 a.", th:"เวอร์ชันขึ้นอยู่กับวันที่คุณยื่นแบบฟอร์ม N-400", lo:"ເວີຊັນຂຶ້ນກັບເວລາທີ່ທ່ານຍື່ນແບບຟອມ N-400", hmn:"Koj qhov version nyob ntawm thaum twg koj xa Daim N-400.", my:"သင်၏ ဗားရှင်းသည် Form N-400 တင်သွင်းသည့်အချိန်ပေါ်တွင်မူတည်သည်", pt:"Sua versão depende de quando você arquivou o Formulário N-400.", ru:"Версия зависит от того, когда вы подали форму N-400." , fr:"Votre version dépend de la date de dépôt du formulaire N-400. Choisissez ci-dessous." , uk:"Ваша версія залежить від дати подання форми N-400. Оберіть нижче." , gu:"તમારી આવૃત્તિ તમે ફોર્મ N-400 ક્યારે ભર્યું તેના પર આધાર રાખે છે. નીચે પસંદ કરો." , bn:"আপনার সংস্করণ নির্ভর করে আপনি কখন N-400 ফর্ম জমা দিয়েছেন তার উপর। নিচে বেছে নিন।" , ar:"يعتمد إصدارك على تاريخ تقديمك للنموذج N-400. اختر أدناه." , ur:"آپ کا ورژن اس بات پر منحصر ہے کہ آپ نے فارم N-400 کب جمع کرایا۔ نیچے منتخب کریں۔" },
 
@@ -4763,6 +5265,11 @@ const UI_TEXT = {
 
   // ─── Quiz screen ────────────────────────────────────────────────────────
   "quiz.questionOf":            { en:"Question {n} of {m}",                  vi:"Câu {n} / {m}",                                       es:"Pregunta {n} de {m}" , zh:"第 {n} 题 / 共 {m} 题", tl:"Tanong {n} ng {m}", ko:"{n} / {m} 문항" , hi:"प्रश्न {n} / {m}", ht:"Kesyon {n} sou {m}", th:"คำถาม {n}/{m}", lo:"ຄຳຖາມ {n}/{m}", hmn:"Nqe Lus {n}/{m}", my:"မေးခွန်း {n}/{m}", pt:"Pergunta {n} de {m}", ru:"Вопрос {n} из {m}" , fr:"Question {n} sur {m}" , uk:"Питання {n} з {m}" , gu:"{m} માંથી પ્રશ્ન {n}" , bn:"{m}-এর মধ্যে প্রশ্ন {n}" , ar:"السؤال {n} من {m}" , ur:"سوال {n} از {m}" },
+  // 65/20 star badge. TODO(vi): Long điền chuỗi tiếng Việt.
+  // ⚠️ KHÔNG viết `vi:""` — pick() coi chuỗi rỗng là "đã có" (`!= null`)
+  //    nên badge sẽ render trống thay vì fallback sang EN.
+  //    Cứ bỏ hẳn key `vi` cho tới khi có bản dịch thật.
+  "quiz.starred6520":           { en:"65/20 question" },
   "quiz.chooseAnswer":          { en:"Choose your answer",                   vi:"Chọn câu trả lời",                                    es:"Elige tu respuesta" , zh:"选择您的答案", tl:"Piliin ang iyong sagot", ko:"답을 선택하세요" , hi:"अपना उत्तर चुनें", ht:"Chwazi repons ou", th:"เลือกคำตอบ", lo:"ເລືອກຄຳຕອບ", hmn:"Xaiv koj qhov teb", my:"အဖြေကို ရွေးပါ", pt:"Escolha sua resposta", ru:"Выберите ответ" , fr:"Choisissez votre réponse" , uk:"Оберіть свою відповідь" , gu:"તમારો જવાબ પસંદ કરો" , bn:"আপনার উত্তর বেছে নিন" , ar:"اختر إجابتك" , ur:"اپنا جواب منتخب کریں" },
   "quiz.listen":                { en:"🔊 Listen",                            vi:"🔊 Nghe",                                              es:"🔊 Escuchar" , zh:"🔊 收听", tl:"🔊 Makinig", ko:"🔊 듣기" , hi:"🔊 सुनें", ht:"🔊 Koute", th:"🔊 ฟัง", lo:"🔊 ຟັງ", hmn:"🔊 Mloog", my:"🔊 နားထောင်", pt:"🔊 Ouvir", ru:"🔊 Прослушать" , fr:"🔊 Écouter" , uk:"🔊 Слухати" , gu:"🔊 સાંભળો" , bn:"🔊 শুনুন" , ar:"🔊 استمع" , ur:"🔊 سنیں" },
   "quiz.correct":               { en:"✓ Correct!",                           vi:"✓ Chính xác!",                                        es:"✓ ¡Correcto!" , zh:"✓ 正确！", tl:"✓ Tama!", ko:"✓ 정답!" , hi:"✓ सही!", ht:"✓ Kòrèk!", th:"✓ ถูกต้อง!", lo:"✓ ຖືກຕ້ອງ!", hmn:"✓ Yog lawm!", my:"✓ မှန်တယ်!", pt:"✓ Correto!", ru:"✓ Правильно!" , fr:"✓ Correct !" , uk:"✓ Правильно!" , gu:"✓ સાચું!" , bn:"✓ সঠিক!" , ar:"✓ صحيح!" , ur:"✓ درست!" },
@@ -6260,13 +6767,15 @@ function checkStartEnabled() {
     state.langExplicit = true;
   }
   updateUILanguage(initial);
-  // Phase WEB-2 deep-link: only `?screen=case-status` is honored. Any
-  // other value is ignored — we intentionally do NOT ship a generic
-  // screen-routing param.
+  // Deep-link: only `?screen=case-status` and `?screen=exemptions` are
+  // honored. Any other value is ignored — we intentionally do NOT ship a
+  // generic screen-routing param.
   try {
     const screenParam = new URL(window.location.href).searchParams.get('screen');
     if (screenParam === 'case-status') {
       showScreen('case-status');
+    } else if (screenParam === 'exemptions') {
+      showScreen('exemptions');
     }
   } catch (e) { /* older browser without URL ctor — ignore */ }
   // Show the PM-602-0194 banner if the user landed with one of the
@@ -6280,6 +6789,10 @@ function checkStartEnabled() {
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
+
+// Restore this tab's text-size choice, and reveal the control if the
+// browser can honour it.
+initTextSize();
 
 // ══ QUIZ ENGINE ══
 function shuffle(arr) {
@@ -6346,7 +6859,10 @@ function updateScore() {
   document.getElementById('score-correct').textContent = state.correct;
   document.getElementById('score-wrong').textContent = state.wrong;
   const pct = ((state.correct + state.wrong) / state.askCount) * 100;
-  document.getElementById('progress-fill').style.width = Math.min(pct,100)+'%';
+  const clamped = Math.min(pct, 100);
+  document.getElementById('progress-fill').style.width = clamped+'%';
+  const track = document.getElementById('progress-track');
+  if (track) track.setAttribute('aria-valuenow', String(Math.round(clamped)));
 }
 
 function getT(q, field) {
@@ -6470,7 +6986,9 @@ function renderModeToggle() {
   }
   toggle.classList.add('visible');
   for (const btn of toggle.querySelectorAll('.mode-toggle-btn')) {
-    btn.classList.toggle('active', btn.dataset.mode === state.mode);
+    const on = btn.dataset.mode === state.mode;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     btn.onclick = () => setMode(btn.dataset.mode);
   }
 }
@@ -6671,7 +7189,7 @@ function submitSpeakAnswer(ended) {
   state.qIndex++;
   if (state.qIndex >= state.questions.length) { showResult(); return; }
   renderQuestion();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  smoothScroll();
 }
 
 function renderSpeakInterface(q, questionTextBlock) {
@@ -6679,7 +7197,7 @@ function renderSpeakInterface(q, questionTextBlock) {
   const supported = !!SR;
   document.getElementById('question-area').innerHTML = `
     <div class="question-card">
-      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: gradedPositionAt(state.qIndex), m: state.askCount }))}</div>
+      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: gradedPositionAt(state.qIndex), m: state.askCount }))}${starBadge(q)}</div>
       ${questionTextBlock}
       ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
       ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
@@ -6717,6 +7235,17 @@ function renderSpeakInterface(q, questionTextBlock) {
   // replay. Browsers that block auto-play (notably iOS Safari before any
   // user gesture) will silently skip — the user can tap 🔊 manually.
   setTimeout(() => speakText(audioText, audioLangCode), 400);
+}
+
+// ★ badge cho bộ 20 câu 65/20 của USCIS (`starred_6520`).
+// Chỉ hiện NGOÀI hai route 65/20: bên trong chúng mọi câu trong pool đều
+// starred, badge sẽ xuất hiện trên từng thẻ và không mang thông tin gì.
+// Đọc `q.starred_6520` — cả ba nhánh của resolveQuestion() đều dùng
+// Object.assign({}, q, …) hoặc trả về q nguyên vẹn, nên cờ luôn còn.
+function starBadge(q) {
+  if (!q || !q.starred_6520) return '';
+  if (/^6520/.test(state.route || '')) return '';
+  return `<span class="q-star"><span aria-hidden="true">★</span>${escapeHtml(t('quiz.starred6520'))}</span>`;
 }
 
 function renderQuestion() {
@@ -6789,9 +7318,14 @@ function renderQuestion() {
     return;
   }
 
+  // Hoisted out of the option-rendering IIFE below because read-aloud needs
+  // the same decision it does: the options are spoken in the native
+  // language only when every one of them has a translation.
+  const bilingualReady = nativeMode && opts.every(o => o[state.lang]);
+
   document.getElementById('question-area').innerHTML = `
     <div class="question-card">
-      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: gradedPositionAt(state.qIndex), m: state.askCount }))}</div>
+      <div class="q-number">${escapeHtml(t('quiz.questionOf', { n: gradedPositionAt(state.qIndex), m: state.askCount }))}${starBadge(q)}</div>
       ${questionTextBlock}
       ${q.dynamic ? `<div class="q-note">${escapeHtml(q.dynamic_note||'')}</div>` : ''}
       ${q.helpNote ? `<div class="q-note q-note-help">${escapeHtml(q.helpNote)}</div>` : ''}
@@ -6799,7 +7333,7 @@ function renderQuestion() {
     </div>
     <div class="answer-section">
       <div class="answer-label">${escapeHtml(t('quiz.chooseAnswer'))}</div>
-      <div class="answer-options" id="opts">
+      <div class="answer-options" id="opts" role="group" aria-label="${escapeHtml(t('quiz.chooseAnswer'))}">
         ${(() => {
           // Native-mode bilingual rendering is all-or-nothing per question.
           // Enabling it only when EVERY option (correct + 3 distractors) has
@@ -6809,8 +7343,9 @@ function renderQuestion() {
           // wrong answers visually looked richer than the right one
           // (audit 2026-06-02). A single missing translation now reverts
           // the whole question to English-only, which is honest and
-          // consistent. Computed once outside the .map below.
-          var bilingualReady = nativeMode && opts.every(o => o[state.lang]);
+          // consistent. `bilingualReady` is computed just above this
+          // template literal, because the read-aloud segments below need
+          // the identical decision.
           return opts.map((opt,i) => {
           const translated = bilingualReady ? opt[state.lang] : null;
           const inner = translated
@@ -6826,11 +7361,27 @@ function renderQuestion() {
       </div>
     </div>`;
 
-  // Speak the native-language version when available; otherwise fall back to
-  // English so the audio button still works while translations are incomplete.
-  const audioText = nativeMode && tq ? tq : q.q;
-  const audioLangCode = (LANG_META[nativeMode && tq ? state.lang : 'en'] || LANG_META.en).tts;
-  document.getElementById('audio-btn').addEventListener('click', () => speakText(audioText, audioLangCode));
+  // Read-aloud: the question first, then every option with its letter, so
+  // someone who cannot read the screen still hears all four choices.
+  //
+  // Built from DATA — `q`, `opts`, `letters` — and never from the rendered
+  // DOM. After selectAnswer runs, each option button carries an appended
+  // .sr-only " — Accepted:" marker; reading textContent would speak the
+  // answer key out loud.
+  //
+  // Two languages in one press is normal here: the question can be
+  // Vietnamese while the options are still English-only, so each segment
+  // carries its own language and speakSequence gives each its own voice.
+  // Native-language speech falls back to English exactly where the display
+  // does, so the audio never claims a translation the screen does not show.
+  const qLang   = (LANG_META[nativeMode && tq ? state.lang : 'en'] || LANG_META.en).tts;
+  const optLang = (LANG_META[bilingualReady ? state.lang : 'en'] || LANG_META.en).tts;
+  const audioSegments = [{ text: nativeMode && tq ? tq : q.q, lang: qLang }].concat(
+    opts.map((opt, i) => ({
+      text: letters[i] + '. ' + (bilingualReady ? opt[state.lang] : opt.en),
+      lang: optLang
+    })));
+  document.getElementById('audio-btn').addEventListener('click', () => speakSequence(audioSegments));
   document.querySelectorAll('#opts .answer-opt').forEach(btn => {
     btn.addEventListener('click', () => selectAnswer(btn, btn.dataset.opt));
   });
@@ -6853,6 +7404,26 @@ function selectAnswer(el, chosen) {
     const isThisCorrect = q.a.some(a => norm(v).includes(norm(a)) || norm(a).includes(norm(v)));
     if (opt===el) opt.classList.add(isCorrect?'selected-correct':'selected-wrong');
     else if (isThisCorrect) opt.classList.add('show-correct');
+    // The green/red styling is colour-only. Add an off-screen label so the
+    // same information reaches a screen reader and anyone re-reading the list
+    // who cannot separate the two hues. .sr-only is position:absolute with no
+    // offsets, so it costs no layout.
+    //
+    // Safe to append unconditionally: selectAnswer cannot run twice for one
+    // rendered question. The early-return guard and the assignment that
+    // latches state.answered are synchronous with nothing awaited between
+    // them, and every option is disabled just below. Verified by driving two
+    // rapid clicks at the real DOM. That guarantee dies the moment anyone
+    // makes this function async — if you do, dedupe this append.
+    const mark = opt===el
+      ? (isCorrect ? t('quiz.correct') : t('quiz.incorrect'))
+      : (isThisCorrect ? t('quiz.accepted') : '');
+    if (mark) {
+      const srMark = document.createElement('span');
+      srMark.className = 'sr-only';
+      srMark.textContent = ' — ' + mark;
+      opt.appendChild(srMark);
+    }
   });
 
   isCorrect ? state.correct++ : state.wrong++;
@@ -6906,7 +7477,7 @@ function nextQuestion() {
   state.qIndex++;
   if (state.qIndex >= state.questions.length) { showResult(); return; }
   renderQuestion();
-  window.scrollTo({top:0,behavior:'smooth'});
+  smoothScroll();
 }
 
 // ─── INFO-CARD RENDER PATH (BƯỚC 2B) ────────────────────────────────────
@@ -6958,7 +7529,7 @@ function renderInfoCard(q) {
 
   document.getElementById('question-area').innerHTML = `
     <div class="question-card info-card">
-      <div class="q-number info-card-tag">⚡ USCIS testupdates</div>
+      <div class="q-number info-card-tag">⚡ USCIS testupdates${starBadge(q)}</div>
       ${questionTextBlock}
       ${noteHtml}
       <a class="info-lookup-link" href="${escapeHtml(lookupHref)}" target="_blank" rel="noopener noreferrer">🔗 ${escapeHtml(lookupHref)}</a>
@@ -6991,11 +7562,15 @@ function showResult() {
   // current language since updateUILanguage runs lazily.
   updateUILanguage(state.lang);
   showScreen('result');
-  window.scrollTo({top:0,behavior:'smooth'});
+  // Land the caret on the verdict. showScreen focuses the screen container,
+  // but the verdict is the one thing the user came here for.
+  const verdictEl = document.getElementById('result-verdict');
+  if (verdictEl) verdictEl.focus({ preventScroll: true });
+  smoothScroll();
 }
 
-function restartQuiz() { startQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
-function goHome() { showScreen('onboard'); window.scrollTo({top:0,behavior:'smooth'}); }
+function restartQuiz() { startQuiz(); smoothScroll(); }
+function goHome() { showScreen('onboard'); smoothScroll(); }
 
 // ══ TAB NAVIGATION + INTERVIEW PRACTICE ══════════════════════════════════
 // INVARIANT VIII: nothing in this section writes to localStorage / cookies /
@@ -7004,7 +7579,14 @@ function goHome() { showScreen('onboard'); window.scrollTo({top:0,behavior:'smoo
 
 function switchTab(tab) {
   state.tab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    // aria-current has to be REMOVED, not set to "false" — the attribute's
+    // mere presence is what a screen reader reports.
+    if (on) b.setAttribute('aria-current', 'page');
+    else    b.removeAttribute('aria-current');
+  });
   if (tab === 'test') {
     showScreen('onboard');
   } else if (tab === 'interview') {
@@ -7013,7 +7595,7 @@ function switchTab(tab) {
   } else if (tab === 'resources') {
     showScreen('resources');
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  smoothScroll();
 }
 
 function renderInterview() {
@@ -7388,22 +7970,135 @@ function speakInterviewQuestion() {
 
 function speakFullOath() {
   // Read the oath as one block in English, slowly.
+  //
+  // Routed through speakSequence rather than calling cancel()/speak()
+  // directly. It has to be: a raw cancel() here would stop whatever is
+  // speaking without claiming a generation, so a chain started by
+  // speakSequence would still believe it owns the engine and could resume
+  // over the oath. One entry point, one token.
   const text = INTERVIEW_OATH.map(c => c.en).join(' ');
+  // rate 0.75 is deliberate — give the user time to read along.
+  speakSequence([{ text: text, lang: 'en-US', rate: 0.75 }]);
+}
+
+// ── SPEECH SYNTHESIS ──────────────────────────────────────────────────
+// Voice lookup, deliberately FAIL-OPEN. getVoices() returns an empty array
+// on the first call in Chrome and on iOS Safari — the list arrives
+// asynchronously — and on some Linux builds it stays empty for the whole
+// session even though the engine speaks fine. Reading "no matching voice"
+// as "this device cannot speak" would hide the Listen button from people
+// whose device speaks perfectly well. So: look for a voice, use it if we
+// find one, and if we do not, still hand the utterance to the engine with
+// u.lang set and let it choose. The one thing we never do is suppress the
+// control.
+function pickVoice(langCode) {
+  let voices = [];
+  try { voices = window.speechSynthesis.getVoices() || []; }
+  catch (e) { return null; }
+  if (!voices.length) return null;
+  const want = String(langCode || 'en-US').toLowerCase().replace('_', '-');
+  const base = want.split('-')[0];
+  const lang = v => String(v.lang || '').toLowerCase().replace('_', '-');
+  return voices.find(v => lang(v) === want)
+      || voices.find(v => lang(v).split('-')[0] === base)
+      || null;
+}
+
+// Warm the voice list. The first getVoices() is empty in Chrome and iOS
+// Safari; the engine fires voiceschanged once it has loaded. The handler
+// has nothing to do — calling getVoices() is itself what populates the
+// cache that pickVoice reads on the user's first press.
+if ('speechSynthesis' in window) {
+  try {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener('voiceschanged',
+      () => { window.speechSynthesis.getVoices(); }, { once: true });
+  } catch (e) { /* engine present but uncooperative — fail open, speak anyway */ }
+}
+
+// Generation token. Every call to speakSequence claims the next number;
+// any chain or watchdog left over from an earlier call sees that the
+// number moved and returns without speaking.
+//
+// This exists because the code below cannot be verified on the device that
+// matters. The specification says cancel() fires 'error' on the utterance,
+// not 'end', so an interrupted chain should stop on its own — but that is
+// exactly the corner where engines disagree, and a browser that fires
+// 'end' instead would resume a sequence the user had already replaced,
+// reading the previous question over the current one. The token makes the
+// old chain and the old watchdog inert whichever event the engine chose.
+// Anything that starts speech must go through speakSequence so the token
+// is claimed; do not call speechSynthesis.cancel() or .speak() directly.
+let speakGen = 0;
+
+// Speak a list of {text, lang, rate} segments in order. A list rather than
+// one string because a question can be Vietnamese while its answer options
+// are still English-only, and each segment then needs its own voice.
+function speakSequence(segments) {
   if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US';
-  u.rate = 0.75;     // deliberately slow — give the user time to read along
-  window.speechSynthesis.speak(u);
+  const queue = (segments || []).filter(s => s && s.text && String(s.text).trim());
+  if (!queue.length) return;
+  const synth = window.speechSynthesis;
+  const gen = ++speakGen;
+
+  // Only cancel when there is something to cancel. In the ordinary case —
+  // the user presses Listen once — no cancel happens at all, so Chrome's
+  // "utterance queued in the same tick as cancel() is silently dropped"
+  // bug never gets a chance to fire, and no timeout is needed to dodge it.
+  const wasBusy = synth.speaking || synth.pending;
+  if (wasBusy) synth.cancel();
+
+  // Did the engine actually take the first utterance? The watchdog below
+  // needs to tell "never started" apart from "already finished", and
+  // synth.speaking cannot: it reads false in both cases. Tested against a
+  // stub engine that ends each utterance in 40ms — checking only
+  // synth.speaking made the watchdog read the entire sequence a second
+  // time. 'start' is the signal; 'end' is a backstop for engines that
+  // skip 'start' on very short strings.
+  let started = false;
+
+  function speakAt(n) {
+    const seg = queue[n];
+    const u = new SpeechSynthesisUtterance(seg.text);
+    u.lang = seg.lang || (LANG_META[state.lang] || LANG_META.en).tts;
+    const v = pickVoice(u.lang);
+    if (v) u.voice = v;
+    u.rate = seg.rate || 0.88;
+    if (n === 0) {
+      const mark = () => { started = true; };
+      u.addEventListener('start', mark);
+      u.addEventListener('end', mark);
+    }
+    // Chained on 'end' rather than queued all at once: a long queue is
+    // where iOS Safari tends to drop the tail.
+    if (n + 1 < queue.length) {
+      u.addEventListener('end', () => {
+        if (gen !== speakGen) return;   // this sequence has been replaced
+        speakAt(n + 1);
+      });
+    }
+    synth.speak(u);
+  }
+
+  // SYNCHRONOUS, still inside the click handler that called us. iOS Safari
+  // requires a user gesture for speech, and a gesture does not survive a
+  // timer — the first utterance must be spoken now, not on a later tick.
+  speakAt(0);
+
+  // Watchdog for the one path that can still meet the Chrome bug: we did
+  // cancel() and then spoke in the same tick. If nothing started, say it
+  // again. This never runs on iOS, where the synchronous call above has
+  // already worked — which matters, because a retry from a timer is
+  // outside the gesture and iOS would refuse it.
+  if (wasBusy) setTimeout(() => {
+    if (gen !== speakGen) return;                 // replaced by a newer press
+    if (started) return;                          // it spoke; nothing to repair
+    if (!synth.speaking && !synth.pending) speakAt(0);
+  }, 250);
 }
 
 function speakText(text, langCode) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = langCode || (LANG_META[state.lang] || LANG_META.en).tts;
-  u.rate = 0.88;
-  window.speechSynthesis.speak(u);
+  speakSequence([{ text: text, lang: langCode }]);
 }
 </script>
 </body>
