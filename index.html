@@ -2537,16 +2537,13 @@
     </div>
 
     <!-- Text size. The visible content is the same letter at three sizes,
-         so there is nothing here to translate: the glyph IS the label.
-         KNOWN LIMITATION, the same backlog item as the tab bar below: the
-         aria-labels are English in every locale, because updateUILanguage
-         only rewrites textContent/innerHTML and we deliberately did not
-         build a data-i18n-aria mechanism. A screen-reader user in another
-         language hears English here. -->
-    <div class="textsize" id="textsize" role="group" aria-label="Text size">
-      <button class="ts-btn" type="button" data-size="100" aria-pressed="true"  aria-label="Default text size" onclick="setTextSize('100')">A</button>
-      <button class="ts-btn" type="button" data-size="115" aria-pressed="false" aria-label="Larger text size"  onclick="setTextSize('115')">A</button>
-      <button class="ts-btn" type="button" data-size="130" aria-pressed="false" aria-label="Largest text size" onclick="setTextSize('130')">A</button>
+         so there is nothing sighted users need translated: the glyph IS
+         the label. The accessible names are another matter, and they are
+         translated — data-i18n-aria, resolved in updateUILanguage. -->
+    <div class="textsize" id="textsize" role="group" data-i18n-aria="aria.textSize" aria-label="Text size">
+      <button class="ts-btn" type="button" data-size="100" aria-pressed="true"  data-i18n-aria="aria.textDefault" aria-label="Default text size" onclick="setTextSize('100')">A</button>
+      <button class="ts-btn" type="button" data-size="115" aria-pressed="false" data-i18n-aria="aria.textLarger" aria-label="Larger text size"  onclick="setTextSize('115')">A</button>
+      <button class="ts-btn" type="button" data-size="130" aria-pressed="false" data-i18n-aria="aria.textLargest" aria-label="Largest text size" onclick="setTextSize('130')">A</button>
     </div>
   </header>
 
@@ -2557,11 +2554,9 @@
        aria-controls, no tabpanel). A half-built tablist misleads a screen
        reader worse than no role at all, so it is gone. aria-current="page"
        carries which one is active — maintained in switchTab.
-       KNOWN LIMITATION: aria-label is English in every locale.
-       updateUILanguage only rewrites textContent/innerHTML; translating
-       attributes needs a data-i18n-aria mechanism we deliberately did not
-       build here. -->
-  <nav class="tab-bar" id="tab-bar" aria-label="Main">
+       The accessible name is translated via data-i18n-aria, resolved in
+       updateUILanguage alongside data-i18n and data-i18n-html. -->
+  <nav class="tab-bar" id="tab-bar" data-i18n-aria="aria.mainNav" aria-label="Main">
     <button class="tab-btn active" id="tab-btn-test" data-tab="test" type="button" aria-current="page" data-i18n="tab.test">Practice Test</button>
     <button class="tab-btn" id="tab-btn-interview" data-tab="interview" type="button" data-i18n="tab.interview">Interview Practice</button>
     <button class="tab-btn" id="tab-btn-resources" data-tab="resources" type="button" data-i18n="tab.resources">Resources</button>
@@ -2829,7 +2824,7 @@
     <!-- Same reasoning as #tab-bar: this was a tablist with no tabs and no
          panels. It is a two-state switch, so it is a group of toggle
          buttons and aria-pressed carries the state (set in renderModeToggle). -->
-    <div class="mode-toggle" id="mode-toggle" role="group" aria-label="Practice mode">
+    <div class="mode-toggle" id="mode-toggle" role="group" data-i18n-aria="aria.practiceMode" aria-label="Practice mode">
       <button class="mode-toggle-btn active" id="mode-btn-mcq" data-mode="mcq" type="button" aria-pressed="true" data-i18n="quiz.modeMcq">Multiple choice</button>
       <button class="mode-toggle-btn" id="mode-btn-speak" data-mode="speak" type="button" aria-pressed="false" data-i18n="quiz.modeSpeak">Speak answer</button>
     </div>
@@ -5024,6 +5019,17 @@ function syncLangToURL(lang) {
 // Every key declares an `en` string; a locale with no entry of its own for a
 // given key renders that English fallback via pick() in updateUILanguage.
 const UI_TEXT = {
+  // Accessible names for controls whose visible label is a glyph or
+  // nothing at all. Translated through data-i18n-aria (see
+  // updateUILanguage); the other eighteen locales fall back to English
+  // the same way every other key does.
+  "aria.mainNav":               { en:"Main",              vi:"Điều hướng chính" },
+  "aria.practiceMode":          { en:"Practice mode",     vi:"Chế độ luyện tập" },
+  "aria.textSize":              { en:"Text size",         vi:"Cỡ chữ" },
+  "aria.textDefault":           { en:"Default text size", vi:"Cỡ chữ mặc định" },
+  "aria.textLarger":            { en:"Larger text size",  vi:"Cỡ chữ lớn hơn" },
+  "aria.textLargest":           { en:"Largest text size", vi:"Cỡ chữ lớn nhất" },
+
   "tab.test":                   { en:"Practice Test",                        vi:"Luyện Thi",                                           es:"Examen de Práctica" , zh:"练习测试", tl:"Pagsasanay na Eksamen", ko:"연습 시험" , hi:"अभ्यास परीक्षा", ht:"Egzamen Antrenman", th:"แบบฝึก", lo:"ບົດຝຶກຫັດ", hmn:"Xeem Xyaum", my:"လေ့ကျင့်ခန်း", pt:"Teste de Prática", ru:"Практика" , fr:"Test d'entraînement" , uk:"Пробний тест" , gu:"અભ્યાસ કસોટી" , bn:"অনুশীলন পরীক্ষা" , ar:"اختبار تدريبي" , ur:"مشق ٹیسٹ" },
   "tab.interview":              { en:"Interview Practice",                   vi:"Luyện Phỏng Vấn",                                     es:"Práctica de Entrevista" , zh:"面试练习", tl:"Pagsasanay sa Panayam", ko:"인터뷰 연습" , hi:"साक्षात्कार अभ्यास", ht:"Antrenman Entèvyou", th:"ฝึกสัมภาษณ์", lo:"ຝຶກສຳພາດ", hmn:"Xyaum Kev Xam Xaj", my:"တွေ့ဆုံမေးမြန်းခြင်း", pt:"Prática de Entrevista", ru:"Практика интервью" , fr:"Entretien d'entraînement" , uk:"Тренування співбесіди" , gu:"ઇન્ટરવ્યૂ અભ્યાસ" , bn:"সাক্ষাৎকার অনুশীলন" , ar:"تدريب المقابلة" , ur:"انٹرویو کی مشق" },
   "tab.resources":              { en:"Resources",                            vi:"Tài Liệu",                                            es:"Recursos" , zh:"资料", tl:"Mga Kagamitan", ko:"자료" , hi:"संसाधन", ht:"Resous", th:"แหล่งข้อมูล", lo:"ແຫຼ່ງຂໍ້ມູນ", hmn:"Cov Khoom Siv", my:"အရင်းအမြစ်များ", pt:"Recursos", ru:"Материалы" , fr:"Ressources" , uk:"Ресурси" , gu:"સંસાધનો" , bn:"সম্পদ" , ar:"المصادر" , ur:"وسائل" },
@@ -6633,6 +6639,15 @@ function updateUILanguage(lang) {
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const html = pick(UI_TEXT[el.getAttribute('data-i18n-html')]);
     if (html != null) el.innerHTML = html;
+  });
+  // Attributes. The two loops above cover visible copy; an aria-label is
+  // neither textContent nor innerHTML, so every one of them used to stay
+  // English in all twenty locales — a screen-reader user reading the site
+  // in Vietnamese heard "Text size" in English. Same pick() fallback as
+  // the loops above: a locale with no value for the key gets English.
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const label = pick(UI_TEXT[el.getAttribute('data-i18n-aria')]);
+    if (label != null) el.setAttribute('aria-label', label);
   });
   // Reflect the language on <html lang=…> so the browser uses correct
   // hyphenation, font-rendering, and screen-reader voice. Filipino HTML lang
