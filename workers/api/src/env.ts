@@ -24,6 +24,11 @@ export interface Env {
   // no receipt/PII. Unset or empty (delete the wrangler.toml [vars] line) => the
   // header is not sent at all — removal is config, not code.
   DEMO_ID?: string;
+
+  // Rate Limiting binding (wrangler.toml [[ratelimits]]). Optional on purpose:
+  // the unit tests and any older deployed config have no binding, and the
+  // Worker must keep serving rather than crash when it is absent.
+  CASE_STATUS_LIMITER?: RateLimit;
 }
 
 /**

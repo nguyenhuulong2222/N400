@@ -248,4 +248,300 @@ await check('LIVE: valid upstream 200 → 200 passthrough', async () => {
   });
 });
 
+// ─── C2: upstream error passthrough ───────────────────────────────────
+// A capable stub: counts token fetches and returns a scripted sequence of
+// upstream case-status responses, so a test can prove the token cache was
+// dropped between two calls.
+async function withUpstream(responses, fn) {
+  const realFetch = globalThis.fetch;
+  const counts = { token: 0, caseStatus: 0 };
+  const queue = Array.isArray(responses) ? [...responses] : [responses];
+  globalThis.fetch = async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+    if (url.includes('/oauth/')) {
+      counts.token++;
+      return { ok: true, status: 200, async json() { return { access_token: 'T', expires_in: 3600 }; } };
+    }
+    counts.caseStatus++;
+    const next = queue.length > 1 ? queue.shift() : queue[0];
+    if (typeof next === 'function') return next(init);
+    return next;
+  };
+  __resetTokenCache();
+  try {
+    return await fn(counts);
+  } finally {
+    globalThis.fetch = realFetch;
+    __resetTokenCache();
+  }
+}
+
+// The shape the PUBLISHED spec documents: flat { code, message }. Tested first
+// because it is what we will actually receive.
+const upstreamFlat = (status, message) => ({
+  status,
+  async text() { return JSON.stringify({ code: status, message }); },
+});
+
+for (const [status, message] of [
+  [401, 'Invalid Access Token'],
+  [404, 'Case Status Online does not recognize the receipt number entered.'],
+  [422, 'The application receipt number is not formatted correctly'],
+  [429, 'Spike Arrest Violation'],
+  [500, 'Internal Server Error'],
+  [503, 'Service Unavailable'],
+]) {
+  await check(`LIVE: upstream ${status} (flat shape) → ${status} passthrough w/ USCIS message`, async () => {
+    await withUpstream(upstreamFlat(status, message), async () => {
+      const res = await liveCaseStatusCall();
+      assert.equal(res.status, status, 'upstream status must be preserved, not collapsed to 503');
+      const json = await res.json();
+      assert.equal(json.ok, false);
+      assert.equal(json.status, status);
+      assert.equal(json.source, 'uscis');
+      assert.equal(json.errors.length, 1, 'flat body must normalise to one errors[] item');
+      assert.equal(json.errors[0].message, message, 'the USCIS message must reach the client verbatim');
+      assert.equal(json.errors[0].code, status);
+      // Backward compatibility with the already-deployed frontend.
+      assert.equal(typeof json.error, 'string');
+      assert.equal(typeof json.message, 'string');
+    });
+  });
+}
+
+await check('LIVE: upstream errors[] array shape → whitelisted fields only', async () => {
+  const body = {
+    errors: [
+      {
+        code: 'BAD_REQUEST', message: 'Rejected', category: 'VALIDATION',
+        reference: 'ref-1', status: '400', traceId: 'trace-1',
+        // None of these may survive.
+        stackTrace: 'at foo()', internal: { secret: 'x' }, extras: [1, 2],
+      },
+    ],
+  };
+  await withUpstream({ status: 400, async text() { return JSON.stringify(body); } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 400);
+    const json = await res.json();
+    assert.equal(json.errors.length, 1);
+    const keys = Object.keys(json.errors[0]).sort();
+    assert.deepEqual(keys, ['category', 'code', 'message', 'reference', 'status', 'traceId']);
+    const text = JSON.stringify(json);
+    assert.ok(!text.includes('stackTrace'), 'non-whitelisted field leaked');
+    assert.ok(!text.includes('secret'), 'nested object leaked');
+  });
+});
+
+await check('LIVE: receipt-shaped token in an upstream message is MASKED', async () => {
+  const msg = 'No case for EAC9999103403 or for ABC*123456789 right now';
+  await withUpstream(upstreamFlat(404, msg), async () => {
+    const res = await liveCaseStatusCall();
+    const text = await res.text();
+    assert.ok(text.includes('EAC*******403'), 'standard receipt not masked');
+    assert.ok(text.includes('ABC*******789'), 'star-form receipt not masked');
+    assert.ok(!text.includes('EAC9999103403'), 'unmasked receipt leaked');
+    assert.ok(!text.includes('ABC*123456789'), 'unmasked star-form receipt leaked');
+  });
+});
+
+await check('LIVE: non-JSON upstream error body → errors:[] plus our fallback', async () => {
+  const html = '<html><body><h1>502 Bad Gateway</h1></body></html>';
+  await withUpstream({ status: 502, async text() { return html; } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 502);
+    const json = await res.json();
+    assert.deepEqual(json.errors, []);
+    assert.equal(json.source, 'uscis');
+    assert.ok(json.message.length > 0, 'fallback message required');
+    const text = JSON.stringify(json);
+    assert.ok(!text.includes('Bad Gateway'), 'raw upstream body leaked');
+  });
+});
+
+await check('LIVE: upstream 401 clears the cached token (next call re-auths)', async () => {
+  await withUpstream([upstreamFlat(401, 'Invalid Access Token'), upstreamFlat(401, 'Invalid Access Token')], async (counts) => {
+    const first = await liveCaseStatusCall();
+    assert.equal(first.status, 401);
+    assert.equal(counts.token, 1, 'first call fetches a token');
+    await liveCaseStatusCall();
+    assert.equal(counts.token, 2, 'a 401 must invalidate the cache so the next call re-auths');
+  });
+});
+
+await check('LIVE: upstream 404 does NOT clear the cached token', async () => {
+  await withUpstream(upstreamFlat(404, 'nope'), async (counts) => {
+    await liveCaseStatusCall();
+    await liveCaseStatusCall();
+    assert.equal(counts.token, 1, 'token must still be reused after a non-401');
+  });
+});
+
+await check('LIVE: upstream timeout → 504 UPSTREAM_TIMEOUT source:worker', async () => {
+  const timeout = () => {
+    const e = new Error('timed out');
+    e.name = 'TimeoutError';
+    throw e;
+  };
+  await withUpstream(timeout, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 504);
+    const json = await res.json();
+    assert.equal(json.source, 'worker');
+    assert.equal(json.errors[0].code, 'UPSTREAM_TIMEOUT');
+  });
+});
+
+await check('LIVE: token endpoint 401 → client 401 USCIS_AUTH_FAILED, body never read', async () => {
+  const realFetch = globalThis.fetch;
+  let tokenBodyRead = false;
+  globalThis.fetch = async (input) => {
+    const url = typeof input === 'string' ? input : input.url;
+    if (url.includes('/oauth/')) {
+      return {
+        ok: false, status: 401,
+        async json() { tokenBodyRead = true; return { error: 'invalid_client' }; },
+        async text() { tokenBodyRead = true; return 'invalid_client'; },
+      };
+    }
+    throw new Error('case-status must not be called when the token fails');
+  };
+  __resetTokenCache();
+  try {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 401);
+    const json = await res.json();
+    assert.equal(json.source, 'worker');
+    assert.equal(json.errors[0].code, 'USCIS_AUTH_FAILED');
+    assert.equal(tokenBodyRead, false, 'the token response body must NEVER be read');
+  } finally {
+    globalThis.fetch = realFetch;
+    __resetTokenCache();
+  }
+});
+
+await check('worker-originated 422 uses the shared envelope', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'IOE123' } });
+  const json = await res.json();
+  assert.equal(json.source, 'worker');
+  assert.equal(json.status, 422);
+  assert.equal(json.errors[0].code, 'INVALID_RECEIPT_FORMAT');
+  assert.equal(json.errors[0].status, '422');
+  assert.equal(json.error, 'invalid_receipt_format', 'legacy field kept for the deployed frontend');
+});
+
+// ─── C3: rate limiting ────────────────────────────────────────────────
+function limiterEnv(behaviour) {
+  return {
+    ...MOCK_ENV,
+    CASE_STATUS_LIMITER: {
+      limit: async ({ key }) => {
+        limiterEnv.lastKey = key;
+        if (behaviour === 'throw') throw new Error('limiter down');
+        return { success: behaviour === 'allow' };
+      },
+    },
+  };
+}
+
+await check('RATE LIMIT: over the limit → 429 RATE_LIMITED source:worker', async () => {
+  const res = await call('POST', '/case-status', {
+    env: limiterEnv('deny'),
+    body: { receiptNumber: 'EAC9999103403' },
+  });
+  assert.equal(res.status, 429);
+  const json = await res.json();
+  assert.equal(json.source, 'worker', 'must be distinguishable from a USCIS 429');
+  assert.equal(json.errors[0].code, 'RATE_LIMITED');
+  assert.equal(json.error, 'rate_limited');
+});
+
+await check('RATE LIMIT: under the limit → request proceeds', async () => {
+  const res = await call('POST', '/case-status', {
+    env: limiterEnv('allow'),
+    body: { receiptNumber: 'EAC9999103403' },
+  });
+  assert.equal(res.status, 200);
+});
+
+await check('RATE LIMIT: keyed on CF-Connecting-IP, never the receipt', async () => {
+  const env = limiterEnv('allow');
+  const res = await worker.fetch(
+    new Request('https://api.local/case-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.7' },
+      body: JSON.stringify({ receiptNumber: 'EAC9999103403' }),
+    }),
+    env,
+  );
+  assert.equal(res.status, 200);
+  assert.equal(limiterEnv.lastKey, '203.0.113.7');
+  assert.ok(!String(limiterEnv.lastKey).includes('9999103403'), 'receipt must never be a limiter key');
+});
+
+await check('RATE LIMIT: no header → key "unknown"', async () => {
+  await call('POST', '/case-status', { env: limiterEnv('allow'), body: { receiptNumber: 'EAC9999103403' } });
+  assert.equal(limiterEnv.lastKey, 'unknown');
+});
+
+await check('RATE LIMIT: binding absent → never crashes, request proceeds', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'EAC9999103403' } });
+  assert.equal(res.status, 200);
+});
+
+await check('RATE LIMIT: limiter throws → fails OPEN', async () => {
+  const res = await call('POST', '/case-status', {
+    env: limiterEnv('throw'),
+    body: { receiptNumber: 'EAC9999103403' },
+  });
+  assert.equal(res.status, 200);
+});
+
+// ─── C4: reserved MOCK_MODE demo receipts ─────────────────────────────
+for (const [receipt, status, fragment] of [
+  ['MCK0000000401', 401, 'Invalid Access Token'],
+  ['MCK0000000404', 404, 'does not recognize the receipt number'],
+  ['MCK0000000429', 429, 'Spike Arrest Violation'],
+  ['MCK0000000503', 503, 'Service Unavailable'],
+  ['MCK0000000500', 500, 'Internal Server Error'],
+]) {
+  await check(`MOCK: ${receipt} → ${status} with the USCIS-shaped message`, async () => {
+    const res = await call('POST', '/case-status', { body: { receiptNumber: receipt } });
+    assert.equal(res.status, status);
+    const json = await res.json();
+    assert.equal(json.source, 'uscis');
+    assert.equal(json.errors.length, 1);
+    assert.ok(json.errors[0].message.includes(fragment));
+    assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
+  });
+}
+
+await check('MOCK: MCK0000009457 → errors[] shape, receipt masked', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'MCK0000009457' } });
+  assert.equal(res.status, 400);
+  const text = await res.text();
+  assert.ok(text.includes('EAC*******403'), 'receipt in the mock message must be masked');
+  assert.ok(!text.includes('EAC9999103403'));
+  const json = JSON.parse(text);
+  assert.equal(json.errors[0].traceId, 'mock-trace-0001');
+  assert.equal(json.errors[0].category, 'VALIDATION');
+});
+
+await check('MOCK: generic miss → 404 carrying the documented USCIS message', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'EAC0000000000' } });
+  assert.equal(res.status, 404);
+  const json = await res.json();
+  assert.equal(json.error, 'case_not_found');
+  assert.ok(json.errors[0].message.includes('does not recognize the receipt number'));
+});
+
+await check('MOCK: history items use the spec field name completed_text_en', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'EAC9999103403' } });
+  const hist = (await res.json()).case_status.hist_case_status;
+  assert.ok(Array.isArray(hist) && hist.length > 0);
+  assert.equal(typeof hist[0].date, 'string');
+  assert.equal(typeof hist[0].completed_text_en, 'string');
+  assert.equal(hist[0].current_case_status_text_en, undefined, 'the invented field name must be gone');
+});
+
 console.log(`\nworker.test.mjs: ${passed} passed`);

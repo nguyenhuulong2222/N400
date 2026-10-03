@@ -24,10 +24,28 @@ export class UpstreamError extends Error {
 }
 
 /**
+ * The upstream did not answer inside UPSTREAM_TIMEOUT_MS. Distinct from
+ * UpstreamError so the router can return 504 rather than a generic 503 — "USCIS
+ * is slow" and "we could not reach USCIS" are different operational facts, and
+ * the demo has to be able to show both.
+ */
+export class UpstreamTimeoutError extends Error {
+  constructor() {
+    super('upstream_timeout');
+    this.name = 'UpstreamTimeoutError';
+  }
+}
+
+// USCIS's production target is 10 TPS. A request still open after 10 seconds is
+// not going to be useful to someone watching a spinner.
+export const UPSTREAM_TIMEOUT_MS = 10_000;
+
+/**
  * Call USCIS for a normalized, already-validated receipt number and return the
- * raw upstream Response. The caller inspects status and decides what (if any)
- * body to forward — error bodies are NEVER passed through (they may echo the
- * receipt). Throws UpstreamError on transport failure.
+ * raw upstream Response. The caller inspects the status and decides what to do
+ * with the body: error bodies are forwarded, but only through the whitelist and
+ * receipt mask in errors.ts — never raw, because they can echo the receipt.
+ * Throws UpstreamTimeoutError on timeout, UpstreamError on transport failure.
  */
 export async function fetchCaseStatus(env: Env, token: string, receipt: string): Promise<Response> {
   const base = env.USCIS_BASE_URL;
@@ -51,8 +69,12 @@ export async function fetchCaseStatus(env: Env, token: string, receipt: string):
     return await fetch(url, {
       method: 'GET',
       headers,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
-  } catch {
+  } catch (err) {
+    // AbortSignal.timeout rejects with a DOMException named 'TimeoutError' in
+    // both workerd and Node, so this check holds in tests and in production.
+    if (err && (err as Error).name === 'TimeoutError') throw new UpstreamTimeoutError();
     throw new UpstreamError();
   }
 }

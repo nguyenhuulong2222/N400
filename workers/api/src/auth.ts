@@ -85,7 +85,17 @@ export async function getAccessToken(env: Env): Promise<string> {
   return token;
 }
 
-/** Test-only: clear the in-memory token cache. */
-export function __resetTokenCache(): void {
+/**
+ * Drop the cached access token.
+ *
+ * Called on an upstream 401 from the Case Status call: the cached token is
+ * either expired early or revoked, and reusing it would 401 every subsequent
+ * lookup for the life of the isolate. Clearing it costs one extra token fetch
+ * on the next request. Logs nothing — not the token, not even its length.
+ */
+export function resetTokenCache(): void {
   cached = null;
 }
+
+/** Test-only alias, kept so existing tests keep compiling. */
+export const __resetTokenCache = resetTokenCache;

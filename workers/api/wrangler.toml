@@ -28,6 +28,22 @@ USCIS_TOKEN_URL = "https://api-int.uscis.gov/oauth/accesstoken"
 # An unset/empty value means the header is not sent at all.
 DEMO_ID = "4069"
 
+# Rate limiting (Cloudflare Rate Limiting binding).
+#   https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+# `simple.period` must be 10 or 60. Counters are shared by any binding on this
+# account carrying the same namespace_id, and are counted per Cloudflare
+# location rather than globally. 20 per 60s per connection sits far under the
+# USCIS sandbox quota (5 TPS / 1,000 per day) while leaving a real user room to
+# retry. namespace_id 400221 was checked against every wrangler.toml on this
+# machine and is unused.
+[[ratelimits]]
+name = "CASE_STATUS_LIMITER"
+namespace_id = "400221"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
 # CORS origins are intentionally NOT configured here. The allowlist is hardcoded
 # in src/cors.ts (API Invariant V) so it cannot be widened by a config typo.
 
