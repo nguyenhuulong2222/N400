@@ -2,3 +2,9 @@
 .DS_Store
 mobile/ios/
 mobile/android/
+
+# Local Wrangler state. The cache files hold the Cloudflare account id and
+# account name — wrangler.toml deliberately keeps those out of the repo, so
+# they must not arrive here by the back door. (workers/api/.gitignore already
+# ignores its own .wrangler/; this covers the repo root.)
+.wrangler/
