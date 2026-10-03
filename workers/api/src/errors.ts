@@ -2,19 +2,40 @@
 // requires that the USCIS `message` reach the user's screen. Everything here
 // exists to let that happen without also forwarding anything we should not.
 //
-// SHAPE. Two are accepted, deliberately:
+// SHAPE. Four are accepted. USCIS is known to use three of them, each observed
+// somewhere different, and the third was found the hard way — in production:
 //
-//  1. FLAT `{ code: <int>, message: "<string>" }` — this is what the published
-//     Case Status spec documents (swagger_3.yaml, Case Status API 1.0.0). Its
-//     only error schema is `ErrorRequest { message: string }` and every example
-//     is flat. This is the shape we will actually see, so it is the one the
-//     tests exercise first.
+//  1. FLAT `{ code: <int>, message: "<string>" }` — what the published Case
+//     Status spec documents (swagger_3.yaml, Case Status API 1.0.0). Its only
+//     error schema is `ErrorRequest { message: string }` and every example is
+//     flat. Source: the spec's own 401/404/422/429/503 examples.
+//
 //  2. ARRAY `{ errors: [ … ] }` — the RFC 9457 envelope the USCIS Production
-//     Access documentation describes for Torch APIs.
+//     Access documentation describes for Torch APIs. Source: that page. Not
+//     yet observed on the wire from the Case Status API.
 //
-// A parser that accepted only (2) would drop every documented body on the floor
-// and show our own fallback instead — failing the exact criterion this file is
-// for. One normaliser, one shape for the UI to render.
+//  3. SINGULAR `{ "error": { "code": "503", "message": "…" } }` — what the LIVE
+//     sandbox actually returns. Captured 2026-10-03 09:34 UTC by direct curl
+//     against a closed sandbox. Note `code` is a STRING here, not the integer
+//     the spec's examples use. An `error` ARRAY is accepted on the same branch.
+//
+//  4. STRING `{ "error": "invalid_token" }` — DEFENSIVE, not observed. The
+//     string becomes `message` and there is no code to report. OAuth-style
+//     bodies look like this, and after shape 3 the cost of guessing wrong
+//     about USCIS's error envelope is better paid here than in production.
+//
+// Shape 3 is the reason this comment exists in this form. Shapes 1 and 2 were
+// built from documentation; the first real error body we ever saw matched
+// neither, errors[] came back empty in production, and the USCIS message was
+// silently replaced by our own fallback — the precise failure this file was
+// written to prevent. Documentation told us two shapes. The wire told us a
+// third. Assume there is a fifth: an unrecognised body must keep degrading to
+// our own message, never to a crash, and never to a guess.
+//
+// The shape-3 body arrives with leading newlines and spaces. That is NOT why it
+// was dropped — whitespace before a value is legal JSON and JSON.parse already
+// accepted it; the trimmed body failed identically. No trim is needed and none
+// was added, so nothing here pretends to fix a problem that did not exist.
 //
 // API Invariant II. Every passed-through string is masked first: an upstream
 // message may quote the receipt number back at us (the 200 descriptions do),
@@ -53,10 +74,16 @@ export function maskReceipts(input: string): string {
 /**
  * Pull a whitelisted error list out of an upstream body.
  *
- * Accepts `{ errors: [...] }`, or a flat `{ code, message }` / `{ message }`
- * wrapped into a single item. Anything else — non-JSON, an HTML gateway page,
- * an empty body — yields [] and the caller falls back to our own plain-English
- * message.
+ * Checked in this order (see the four shapes at the top of this file):
+ *   1. `{ errors: [ … ] }`
+ *   2. `{ error: [ … ] }`
+ *   3. `{ error: { … } }`
+ *   4. `{ error: "<string>" }`      → becomes a lone `message`
+ *   5. flat `{ code, message }` / `{ message }`
+ *
+ * Anything else — non-JSON, an HTML gateway page, an empty body, an object
+ * with none of these keys — yields [] and the caller falls back to our own
+ * plain-English message.
  *
  * Only string and finite-number values survive. Nested objects, arrays and
  * functions are dropped rather than serialized, so no unexpected structure can
@@ -74,8 +101,21 @@ export function extractUpstreamErrors(text: string): PassthroughError[] {
 
   let raw: unknown[];
   if (Array.isArray(obj.errors)) {
+    // Shape 2.
     raw = obj.errors.slice(0, MAX_ITEMS);
+  } else if (Array.isArray(obj.error)) {
+    // Shape 3, plural variant. Tested before the object check below, because
+    // an array is also an object.
+    raw = obj.error.slice(0, MAX_ITEMS);
+  } else if (obj.error && typeof obj.error === 'object') {
+    // Shape 3 as the live sandbox sends it: one wrapped error object.
+    raw = [obj.error];
+  } else if (typeof obj.error === 'string' && obj.error.trim() !== '') {
+    // Shape 4. Synthesized into the same item form so the whitelist loop
+    // below masks it exactly like any other message. No code is invented.
+    raw = [{ message: obj.error }];
   } else if (typeof obj.message === 'string' || obj.code !== undefined) {
+    // Shape 1, the documented flat body.
     raw = [obj];
   } else {
     return [];

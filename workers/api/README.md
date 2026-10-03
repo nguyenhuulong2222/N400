@@ -58,6 +58,23 @@ Every string passed through from upstream is whitelisted to `code`, `message`,
 `category`, `reference`, `status`, `traceId` (max 10 items) and
 receipt-masked — `EAC9999103403` becomes `EAC*******403`.
 
+### Error body shapes
+
+USCIS does not use one error envelope. All of these normalise to `errors[]`:
+
+| Shape | Where it came from |
+|---|---|
+| `{ "code": 503, "message": "…" }` | the published spec's own examples |
+| `{ "errors": [ … ] }` | the Torch Production Access page (RFC 9457) |
+| `{ "error": { "code": "503", "message": "…" } }` | **the live sandbox** — captured 2026-10-03 09:34 UTC. `code` is a string here, not an int |
+| `{ "error": [ … ] }` | defensive, not observed |
+| `{ "error": "invalid_token" }` | defensive, not observed — the string becomes `message`, no code is invented |
+
+The third was missing until a real 503 exposed it in production: `errors[]` came
+back empty and the USCIS sentence was replaced by our own fallback, which is the
+one failure this layer exists to prevent. An unrecognised body still degrades to
+`errors: []` plus our own message — never a crash, never a guess.
+
 ## Demonstrating each response code locally
 
 ### 429 — our rate limiter
@@ -102,7 +119,7 @@ passthrough code:
 | `MCK0000000401` | 401 `Invalid Access Token` |
 | `MCK0000000404` | 404 `Case Status Online does not recognize the receipt number entered.…` |
 | `MCK0000000429` | 429 `Spike Arrest Violation` |
-| `MCK0000000503` | 503 `Service Unavailable` |
+| `MCK0000000503` | 503 — the **real captured sandbox body**, `{"error":{…}}` with its leading whitespace: "The Case Status API Sandbox is unavailable at this time…" |
 | `MCK0000009457` | 400 in the RFC 9457 `errors[]` shape; its message contains a receipt, which must come back masked as `EAC*******403` |
 | `MCK0000000500` | 500 — **undocumented code, for tests only. Not part of the demo.** |
 

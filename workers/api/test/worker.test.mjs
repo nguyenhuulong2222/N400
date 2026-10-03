@@ -502,7 +502,7 @@ for (const [receipt, status, fragment] of [
   ['MCK0000000401', 401, 'Invalid Access Token'],
   ['MCK0000000404', 404, 'does not recognize the receipt number'],
   ['MCK0000000429', 429, 'Spike Arrest Violation'],
-  ['MCK0000000503', 503, 'Service Unavailable'],
+  ['MCK0000000503', 503, 'The Case Status API Sandbox is unavailable at this time'],
   ['MCK0000000500', 500, 'Internal Server Error'],
 ]) {
   await check(`MOCK: ${receipt} → ${status} with the USCIS-shaped message`, async () => {
@@ -542,6 +542,130 @@ await check('MOCK: history items use the spec field name completed_text_en', asy
   assert.equal(typeof hist[0].date, 'string');
   assert.equal(typeof hist[0].completed_text_en, 'string');
   assert.equal(hist[0].current_case_status_text_en, undefined, 'the invented field name must be gone');
+});
+
+// ─── The third error shape: {"error":{…}} ─────────────────────────────
+// Regression for a PRODUCTION failure. The deployed normaliser accepted the
+// spec's flat shape and the Torch RFC 9457 array, and the first real error body
+// we ever received matched neither — so errors[] came back empty and the USCIS
+// sentence was replaced by our own fallback.
+//
+// This is the exact body, captured 2026-10-03 09:34 UTC by direct curl against
+// the closed sandbox. The leading newlines and spaces are part of what USCIS
+// sent and are kept deliberately: they are NOT the cause of the bug (JSON.parse
+// accepts leading whitespace, and the trimmed body failed identically), so this
+// fixture proves both that the shape is handled and that the whitespace never
+// mattered.
+const REAL_503_MESSAGE =
+  'The Case Status API Sandbox is unavailable at this time. ' +
+  'Please retry your API request during normal operation hours M-F 7:00AM EST - 8:00 PM EST';
+const REAL_503_BODY = '\n\n  {"error":{"code":"503","message":"' + REAL_503_MESSAGE + '"}}';
+
+await check('LIVE: real sandbox 503 — {"error":{…}} + leading whitespace → USCIS message passed through', async () => {
+  await withUpstream({ status: 503, async text() { return REAL_503_BODY; } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 503);
+    const json = await res.json();
+    assert.equal(json.source, 'uscis');
+    assert.equal(json.errors.length, 1, 'the wrapped error object must normalise to one item');
+    assert.equal(json.errors[0].message, REAL_503_MESSAGE);
+    assert.equal(json.errors[0].code, '503', 'code is a STRING in this shape, not an int');
+  });
+});
+
+await check('LIVE: the same body trimmed behaves identically (whitespace was never the cause)', async () => {
+  await withUpstream({ status: 503, async text() { return REAL_503_BODY.trim(); } }, async () => {
+    const json = await (await liveCaseStatusCall()).json();
+    assert.equal(json.errors[0].message, REAL_503_MESSAGE);
+  });
+});
+
+for (const [status, message] of [
+  [401, 'Invalid Access Token'],
+  [429, 'Spike Arrest Violation'],
+]) {
+  await check(`LIVE: upstream ${status} in the {"error":{…}} shape → ${status} w/ USCIS message`, async () => {
+    const body = JSON.stringify({ error: { code: String(status), message } });
+    await withUpstream({ status, async text() { return body; } }, async () => {
+      const res = await liveCaseStatusCall();
+      assert.equal(res.status, status);
+      const json = await res.json();
+      assert.equal(json.source, 'uscis');
+      assert.equal(json.errors.length, 1);
+      assert.equal(json.errors[0].message, message);
+      assert.equal(json.errors[0].code, String(status));
+    });
+  });
+}
+
+await check('LIVE: {"error":[ … ]} array variant → items normalised, whitelist enforced', async () => {
+  const body = JSON.stringify({
+    error: [
+      { code: '503', message: 'First', traceId: 't-1', stackTrace: 'at foo()' },
+      { code: '503', message: 'Second' },
+    ],
+  });
+  await withUpstream({ status: 503, async text() { return body; } }, async () => {
+    const res = await liveCaseStatusCall();
+    const text = await res.text();
+    const json = JSON.parse(text);
+    assert.equal(json.errors.length, 2);
+    assert.equal(json.errors[0].traceId, 't-1');
+    assert.ok(!text.includes('stackTrace'), 'non-whitelisted field leaked');
+  });
+});
+
+// Shape 4 — defensive, never observed from USCIS. An OAuth-style string body.
+await check('LIVE: {"error":"<string>"} → string becomes the message, no code invented', async () => {
+  const body = JSON.stringify({ error: 'invalid_token' });
+  await withUpstream({ status: 401, async text() { return body; } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 401);
+    const json = await res.json();
+    assert.equal(json.source, 'uscis');
+    assert.equal(json.errors.length, 1);
+    assert.equal(json.errors[0].message, 'invalid_token');
+    assert.equal(json.errors[0].code, undefined, 'no code may be fabricated for a bare string');
+  });
+});
+
+await check('LIVE: {"error":""} and {"error":"   "} stay unrecognised → errors:[]', async () => {
+  for (const v of ['', '   ']) {
+    const body = JSON.stringify({ error: v });
+    await withUpstream({ status: 503, async text() { return body; } }, async () => {
+      const json = await (await liveCaseStatusCall()).json();
+      assert.deepEqual(json.errors, [], `empty error string ${JSON.stringify(v)} must not produce an item`);
+      assert.ok(json.message.length > 0, 'our fallback must still be present');
+    });
+  }
+});
+
+await check('LIVE: masking applies on the {"error":{…}} branch too', async () => {
+  const body = JSON.stringify({ error: { code: '404', message: 'No case for EAC9999103403' } });
+  await withUpstream({ status: 404, async text() { return body; } }, async () => {
+    const text = await (await liveCaseStatusCall()).text();
+    assert.ok(text.includes('EAC*******403'));
+    assert.ok(!text.includes('EAC9999103403'));
+  });
+});
+
+await check('LIVE: masking applies on the {"error":"<string>"} branch too', async () => {
+  const body = JSON.stringify({ error: 'Rejected for EAC9999103403' });
+  await withUpstream({ status: 400, async text() { return body; } }, async () => {
+    const text = await (await liveCaseStatusCall()).text();
+    assert.ok(text.includes('EAC*******403'));
+    assert.ok(!text.includes('EAC9999103403'));
+  });
+});
+
+await check('MOCK: MCK0000000503 now returns the real captured sandbox body', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'MCK0000000503' } });
+  assert.equal(res.status, 503);
+  const json = await res.json();
+  assert.equal(json.source, 'uscis');
+  assert.equal(json.errors[0].code, '503');
+  assert.ok(json.errors[0].message.startsWith('The Case Status API Sandbox is unavailable'));
+  assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
 });
 
 console.log(`\nworker.test.mjs: ${passed} passed`);

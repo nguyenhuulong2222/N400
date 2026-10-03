@@ -103,9 +103,18 @@ const MOCK_UPSTREAM_ERRORS: Record<string, { status: number; body: unknown }> = 
     status: 429,
     body: { code: 429, message: 'Spike Arrest Violation (Mock — simulated USCIS error)' },
   },
+  // The REAL body the live sandbox returned, captured 2026-10-03 09:34 UTC by
+  // direct curl while the sandbox was closed — the `{"error":{…}}` wrapper,
+  // `code` as a string, and the leading newlines and spaces exactly as they
+  // arrived. Held as a raw string rather than an object so the whitespace
+  // survives: this fixture is the bytes we were sent, not a tidied version of
+  // them, so the local demo parses what production parses.
   MCK0000000503: {
     status: 503,
-    body: { code: 503, message: 'Service Unavailable (Mock — simulated USCIS error)' },
+    body:
+      '\n\n  {"error":{"code":"503","message":"The Case Status API Sandbox is unavailable at this time. ' +
+      'Please retry your API request during normal operation hours M-F 7:00AM EST - 8:00 PM EST ' +
+      '(Mock — simulated USCIS error)"}}',
   },
   // Undocumented code. Tests only — not part of the demo.
   MCK0000000500: {
@@ -142,7 +151,10 @@ const MOCK_UPSTREAM_ERRORS: Record<string, { status: number; body: unknown }> = 
 export function mockUpstreamError(receipt: string): Response | null {
   const hit = MOCK_UPSTREAM_ERRORS[receipt];
   if (!hit) return null;
-  return new Response(JSON.stringify(hit.body), {
+  // A string body is emitted verbatim — that is how the captured 503 keeps its
+  // leading whitespace. Object bodies are serialized as before.
+  const payload = typeof hit.body === 'string' ? hit.body : JSON.stringify(hit.body);
+  return new Response(payload, {
     status: hit.status,
     headers: { 'Content-Type': 'application/json' },
   });
