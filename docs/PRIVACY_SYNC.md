@@ -26,7 +26,7 @@ Changing any of these means changing **both** files in the same commit.
 | What the app does NOT do / Data we DO NOT collect | `<h2>What the app does NOT do</h2>` | `privacy.donot.*` | no |
 | What stays on your device | `<h2>What stays on your device</h2>` | `privacy.donot.body` | no |
 | **Mobile app (iOS)** | `<h2>Mobile app (iOS)</h2>` | `privacy.mobile.*` | **YES** |
-| Case Status Helper | `<h2>Case Status Helper (coming soon)</h2>` | `privacy.casestatus.*` | no |
+| Case Status Helper | `<h2>Case Status Helper</h2>` | `privacy.casestatus.*` | no |
 | No sale or sharing of data | `<h2>No sale or sharing of data</h2>` | `privacy.nosale.*` | no |
 | Data retention and deletion | `<h2>Data retention and deletion</h2>` | `privacy.retention.*` | no |
 | Third-party services | `<h2>Third-party services</h2>` | `privacy.thirdparty.*` | no |
