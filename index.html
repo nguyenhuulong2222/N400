@@ -2345,7 +2345,62 @@
   }
   .cs-card.cs-card-error h3   { color: var(--wrong); }
   .cs-card.cs-card-offline h3 { color: #a16207; }
-  .cs-card p { margin: 0; font-size: 15px; line-height: 1.55; }
+  .cs-card p { margin: 0 0 10px; font-size: 15px; line-height: 1.55; }
+  .cs-card p:last-child { margin-bottom: 0; }
+
+  /* Case facts, as USCIS sent them. Two columns so label and value line up
+     without a table; rows are omitted entirely when USCIS omits the field
+     (every IOE receipt has no submitted/updated date). */
+  .cs-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    margin: 12px 0 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .cs-meta dt { color: var(--text-muted); font-weight: 700; }
+  .cs-meta dd { margin: 0; color: var(--text-mid); }
+
+  .cs-history {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .cs-history h4 {
+    margin: 0 0 8px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+  }
+  .cs-history ul { margin: 0; padding-left: 18px; }
+  .cs-history li { margin: 5px 0; font-size: 14px; line-height: 1.5; }
+  .cs-history-date {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .cs-history-none { font-size: 14px; color: var(--text-muted); }
+
+  /* Provenance under an upstream message: code / HTTP status / trace id.
+     Selector is `.cs-card p.cs-err-meta` (0,2,1) so it outranks `.cs-card p`
+     (0,1,1) on the margin WITHOUT !important — the reduced-motion block above
+     is the only place in this sheet that is allowed to use it. */
+  .cs-card p.cs-err-meta {
+    margin: 2px 0 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .cs-card p.cs-err-meta:last-child { margin-bottom: 0; }
+
+  /* As-you-type format hint. Amber rather than red: nothing is wrong yet, the
+     number is just unfinished, and the button stays enabled. #a16207 on
+     --bg-card measures 4.92:1 — AA at this size. */
+  .cs-hint.cs-hint-warn { color: #a16207; font-weight: 600; }
   .cs-loading {
     display: flex; align-items: center; gap: 10px;
     color: var(--text-muted); font-size: 15px;
@@ -3556,8 +3611,12 @@
         spellcheck="false"
         maxlength="20"
         placeholder="IOE1234567890"
-        aria-describedby="cs-hint cs-privacy-line">
+        oninput="csOnInput(this)"
+        aria-describedby="cs-hint cs-format-hint cs-privacy-line">
       <p id="cs-hint" class="cs-hint" data-i18n="cs.hint">A USCIS receipt number usually has 3 letters followed by 10 numbers, such as IOE1234567890.</p>
+      <!-- Filled by csOnInput. aria-live so a screen reader hears the hint
+           appear; advisory only, so the submit button is never disabled. -->
+      <p id="cs-format-hint" class="cs-hint" role="status" aria-live="polite"></p>
       <p id="cs-privacy-line" class="cs-privacy-line" data-i18n-html="casestatus.ui.privacy">Your receipt number is sent only to USCIS through our proxy and is never stored. <a href="#" onclick="goPrivacy(); return false;">How we handle it</a></p>
 
       <button type="button" id="cs-submit" class="btn-primary cs-btn-full" onclick="csLookup()" data-i18n="casestatus.ui.submit">Check Case Status</button>
@@ -3659,7 +3718,14 @@
 // the official USCIS Case Status API so USCIS credentials never reach the
 // browser. It never serves question or quiz data — that stays inline below.
 // Custom Domain; the workers.dev hostname is disabled (routes-only deploy).
-const API_BASE = 'https://api.formn400.org';
+//
+// Local development points at `wrangler dev` so the whole flow — including the
+// error states, which are the hard part to see — can be exercised without
+// touching the USCIS sandbox and its 1,000-per-day quota. The check is on
+// hostname, not protocol or port, so a static preview on any local port works.
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:8787'
+  : 'https://api.formn400.org';
 
 // ══ DATA: 128 USCIS Civics Test Questions (2025 version, M-1778 09/25) ══
 // Question text + accepted answers are verbatim from USCIS public-domain
@@ -4752,16 +4818,16 @@ async function csLookup() {
       // Receipt travels in the BODY only — never the URL.
       body: JSON.stringify({ receiptNumber: receipt })
     });
+    // The body is parsed for EVERY status, not just 200. On a non-200 it
+    // carries the USCIS error message, and showing that message is the whole
+    // point of this screen — USCIS grades production access on whether their
+    // own error text reaches the user.
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
     if (res.status === 200) {
-      let data = null;
-      try { data = await res.json(); } catch (e) { data = null; }
       csRenderStatus(data);
-    } else if (res.status === 422) {
-      csRenderError(t('casestatus.ui.err.invalid.title'), t('casestatus.ui.err.invalid.body'));
-    } else if (res.status === 404) {
-      csRenderError(t('casestatus.ui.err.notfound.title'), t('casestatus.ui.err.notfound.body'));
     } else {
-      csRenderUnavailable();
+      csRenderErrors(res.status, data);
     }
   } catch (e) {
     // Network failure / DNS / CORS block. No technical detail is surfaced and
@@ -4817,7 +4883,180 @@ function csRenderStatus(data) {
   p.textContent = desc;
   card.appendChild(h);
   card.appendChild(p);
+
+  // Case facts, printed EXACTLY as USCIS sends them. USCIS uses
+  // MM-DD-YYYY HH:MM:SS at the top level and has been seen using other
+  // formats inside the history array; we do not parse or reformat either,
+  // because a date we reinterpret is a date we can get wrong.
+  //
+  // Receipts with an IOE prefix carry neither submittedDate nor modifiedDate
+  // (the spec's IOE-Prefix-SuccessResponse omits both), so each row is only
+  // added when the value is actually present — never as "undefined".
+  const meta = document.createElement('dl');
+  meta.className = 'cs-meta';
+  csMetaRow(meta, t('casestatus.ui.meta.formType'), cs.formType);
+  csMetaRow(meta, t('casestatus.ui.meta.submitted'), cs.submittedDate);
+  csMetaRow(meta, t('casestatus.ui.meta.updated'), cs.modifiedDate);
+  if (meta.childElementCount > 0) card.appendChild(meta);
+
+  // Status history, in the order USCIS returned it — not re-sorted. The spec
+  // names the item fields `date` + `completed_text_en`; our MOCK_MODE fixture
+  // used `current_case_status_text_en` for a while, and the live sandbox has
+  // never been checked (the shape-delta runner only diffs top-level keys), so
+  // both names are read and whichever exists is shown.
+  const histWrap = document.createElement('div');
+  histWrap.className = 'cs-history';
+  const histTitle = document.createElement('h4');
+  histTitle.textContent = t('casestatus.ui.history.title');
+  histWrap.appendChild(histTitle);
+
+  const hist = Array.isArray(cs.hist_case_status) ? cs.hist_case_status : [];
+  if (hist.length === 0) {
+    const none = document.createElement('p');
+    none.className = 'cs-history-none';
+    none.textContent = t('casestatus.ui.history.none');
+    histWrap.appendChild(none);
+  } else {
+    const ul = document.createElement('ul');
+    for (const row of hist) {
+      if (!row || typeof row !== 'object') continue;
+      const text = csPlainText(row.completed_text_en || row.current_case_status_text_en || '');
+      const date = typeof row.date === 'string' ? row.date : '';
+      if (!text && !date) continue;
+      const li = document.createElement('li');
+      if (date) {
+        const d = document.createElement('span');
+        d.className = 'cs-history-date';
+        d.textContent = date;
+        li.appendChild(d);
+      }
+      if (text) {
+        const tx = document.createElement('span');
+        tx.textContent = text;
+        li.appendChild(tx);
+      }
+      ul.appendChild(li);
+    }
+    histWrap.appendChild(ul);
+  }
+  card.appendChild(histWrap);
   el.appendChild(card);
+}
+
+// One <dt>/<dd> pair, appended only when USCIS actually sent the value.
+// textContent throughout — API data never reaches innerHTML.
+function csMetaRow(dl, label, value) {
+  if (typeof value !== 'string' || value.trim() === '') return;
+  const dt = document.createElement('dt');
+  dt.textContent = label;
+  const dd = document.createElement('dd');
+  dd.textContent = value;
+  dl.appendChild(dt);
+  dl.appendChild(dd);
+}
+
+// Render a non-200. Title comes from the HTTP status; the body is EVERY item in
+// errors[], each with the upstream message verbatim plus a small provenance
+// line. An empty errors[] falls back to the localized messages that were here
+// before, so a client talking to an older Worker still gets a sentence.
+function csRenderErrors(status, data) {
+  const el = csResultEl();
+  if (!el) return;
+  const errors = data && Array.isArray(data.errors) ? data.errors : [];
+
+  if (errors.length === 0) {
+    if (status === 422) {
+      csRenderError(t('casestatus.ui.err.invalid.title'), t('casestatus.ui.err.invalid.body'));
+    } else if (status === 404) {
+      csRenderError(t('casestatus.ui.err.notfound.title'), t('casestatus.ui.err.notfound.body'));
+    } else {
+      csRenderUnavailable();
+    }
+    return;
+  }
+
+  el.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'cs-card ' + (status === 503 || status === 504 ? 'cs-card-offline' : 'cs-card-error');
+
+  const h = document.createElement('h3');
+  h.textContent = csErrorTitle(status);
+  card.appendChild(h);
+
+  for (const item of errors) {
+    if (!item || typeof item !== 'object') continue;
+    const msg = typeof item.message === 'string' ? item.message : '';
+    if (msg) {
+      const p = document.createElement('p');
+      p.textContent = msg;          // verbatim, textContent only
+      card.appendChild(p);
+    }
+    // Provenance: whatever USCIS gave us, for a support conversation. Parts
+    // that are missing are left out rather than printed empty.
+    const bits = [];
+    if (item.code !== undefined && item.code !== null && item.code !== '') {
+      bits.push(t('casestatus.ui.err.code') + ' ' + item.code);
+    }
+    if (item.status !== undefined && item.status !== null && item.status !== '') {
+      bits.push(t('casestatus.ui.err.http') + ' ' + item.status);
+    }
+    if (item.traceId !== undefined && item.traceId !== null && item.traceId !== '') {
+      bits.push(t('casestatus.ui.err.trace') + ' ' + item.traceId);
+    }
+    if (bits.length > 0) {
+      const meta = document.createElement('p');
+      meta.className = 'cs-err-meta';
+      meta.textContent = bits.join(' · ');
+      card.appendChild(meta);
+    }
+  }
+
+  // Keep the route to the official site open when the problem is on our side
+  // of the conversation rather than the user's.
+  if (status === 503 || status === 504) {
+    const link = document.createElement('p');
+    const a = document.createElement('a');
+    a.href = 'https://egov.uscis.gov/casestatus/landing.do';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = t('casestatus.ui.err.official');
+    link.appendChild(a);
+    card.appendChild(link);
+  }
+
+  el.appendChild(card);
+}
+
+function csErrorTitle(status) {
+  if (status === 401) return t('casestatus.ui.err.auth.title');
+  if (status === 404) return t('casestatus.ui.err.notfound.title');
+  if (status === 422) return t('casestatus.ui.err.invalid.title');
+  if (status === 429) return t('casestatus.ui.err.ratelimited.title');
+  if (status === 504) return t('casestatus.ui.err.timeout.title');
+  if (status >= 500)  return t('casestatus.ui.err.unavailable.title');
+  return t('casestatus.ui.err.generic.title');
+}
+
+// As-you-type format hint. Advisory only: it never blocks submission, because
+// the Worker's own 422 has to stay reachable from the UI — USCIS asks to see
+// validation failures handled, and a disabled button hides them.
+function csOnInput(input) {
+  const hint = document.getElementById('cs-format-hint');
+  if (!hint || !input) return;
+  const normalized = input.value.replace(/[\s-]/g, '').toUpperCase();
+  if (normalized !== input.value) input.value = normalized;
+  if (normalized === '') {
+    hint.textContent = '';
+    hint.classList.remove('cs-hint-warn');
+    return;
+  }
+  if (/^[A-Z]{3}[0-9]{10}$/.test(normalized)) {
+    hint.textContent = '';
+    hint.classList.remove('cs-hint-warn');
+  } else {
+    hint.textContent = t('casestatus.ui.format.hint');
+    hint.classList.add('cs-hint-warn');
+  }
 }
 
 // Strip any USCIS-supplied markup down to its text, safely.
@@ -5891,6 +6130,20 @@ const UI_TEXT = {
   "casestatus.ui.err.invalid.body":  { en: "USCIS could not read that receipt number. It is usually 3 letters followed by 10 numbers, for example IOE1234567890. Check your receipt notice and try again." },
   "casestatus.ui.err.notfound.title": { en: "No case found" },
   "casestatus.ui.err.notfound.body":  { en: "USCIS has no case matching that receipt number. Double-check the number on your receipt notice. If it is correct, use your USCIS online account at my.uscis.gov." },
+  "casestatus.ui.err.auth.title":        { en: "USCIS could not verify our access" },
+  "casestatus.ui.err.ratelimited.title": { en: "Too many lookups" },
+  "casestatus.ui.err.timeout.title":     { en: "USCIS did not respond in time" },
+  "casestatus.ui.err.generic.title":     { en: "USCIS returned an error" },
+  "casestatus.ui.err.code":              { en: "Code:" },
+  "casestatus.ui.err.http":              { en: "HTTP" },
+  "casestatus.ui.err.trace":             { en: "Trace ID:" },
+  "casestatus.ui.err.official":          { en: "Check your status directly at egov.uscis.gov →" },
+  "casestatus.ui.meta.formType":         { en: "Form type" },
+  "casestatus.ui.meta.submitted":        { en: "Submitted" },
+  "casestatus.ui.meta.updated":          { en: "Last updated" },
+  "casestatus.ui.history.title":         { en: "Status history" },
+  "casestatus.ui.history.none":          { en: "No earlier status history is available for this case." },
+  "casestatus.ui.format.hint":           { en: "Format: 3 letters + 10 numbers, e.g. IOE1234567890" },
   "casestatus.ui.err.unavailable.title": { en: "Service temporarily unavailable" },
   "casestatus.ui.err.unavailable.body":  { en: "The case status service is temporarily unavailable. Please try again later, or check your status directly at my.uscis.gov." },
 
