@@ -671,45 +671,62 @@ await check('MOCK: MCK0000000503 now returns the real captured sandbox body', as
   assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
 });
 
-// ─── CORS: local-dev origins are honoured only on a local Worker ──────
-const PROD_URL = 'https://api.formn400.org/case-status';
-const LOCAL_URL = 'http://localhost:8787/case-status';
-const LOOPBACK_URL = 'http://127.0.0.1:8787/case-status';
+// ─── CORS: local-dev origins are honoured only off the Cloudflare edge ─
+// The discriminator is the CF-Ray header, not the request host. `wrangler dev`
+// rewrites request.url to the custom-domain route when wrangler.toml declares
+// one, so the hostname reads api.formn400.org even locally — see
+// test/dev-cors.test.mjs, which proves that against a real dev server.
+//
+// A real captured value, so the fixture matches what the edge actually sends.
+const EDGE_HEADERS = { 'CF-Ray': 'a45e95ba7f609b6d-SEA' };
 
-function preflight(url, origin) {
-  return worker.fetch(new Request(url, { method: 'OPTIONS', headers: { Origin: origin } }), MOCK_ENV);
+// Every request below uses the production URL; only CF-Ray differs.
+function preflight(origin, extraHeaders = {}) {
+  return worker.fetch(
+    new Request('https://api.formn400.org/case-status', {
+      method: 'OPTIONS',
+      headers: { Origin: origin, ...extraHeaders },
+    }),
+    MOCK_ENV,
+  );
 }
 const acao = (res) => res.headers.get('Access-Control-Allow-Origin');
 
-await check('CORS: on the production host, the local preview origin is refused', async () => {
-  assert.equal(acao(await preflight(PROD_URL, 'http://localhost:8765')), null);
+await check('CORS: an edge request refuses the local preview origin', async () => {
+  assert.equal(acao(await preflight('http://localhost:8765', EDGE_HEADERS)), null);
 });
 
-await check('CORS: on a local host, the local preview origin is allowed', async () => {
-  assert.equal(acao(await preflight(LOCAL_URL, 'http://localhost:8765')), 'http://localhost:8765');
+await check('CORS: a non-edge request allows the local preview origin', async () => {
+  assert.equal(acao(await preflight('http://localhost:8765')), 'http://localhost:8765');
 });
 
-await check('CORS: on a 127.0.0.1 host, the local preview origin is allowed', async () => {
-  assert.equal(acao(await preflight(LOOPBACK_URL, 'http://localhost:8765')), 'http://localhost:8765');
-});
-
-await check('CORS: on the production host, the production origin is allowed', async () => {
-  assert.equal(acao(await preflight(PROD_URL, 'https://formn400.org')), 'https://formn400.org');
-  assert.equal(acao(await preflight(PROD_URL, 'https://www.formn400.org')), 'https://www.formn400.org');
-});
-
-await check('CORS: the old wrangler-dev origins are no longer on the allowlist', async () => {
-  for (const origin of ['http://localhost:8787', 'http://127.0.0.1:8787']) {
-    assert.equal(acao(await preflight(LOCAL_URL, origin)), null, origin + ' must not be allowed');
-    assert.equal(acao(await preflight(PROD_URL, origin)), null, origin + ' must not be allowed');
+await check('CORS: production origins are allowed on and off the edge', async () => {
+  for (const origin of ['https://formn400.org', 'https://www.formn400.org']) {
+    assert.equal(acao(await preflight(origin, EDGE_HEADERS)), origin);
+    assert.equal(acao(await preflight(origin)), origin);
   }
 });
 
-await check('CORS: an unknown origin is refused on both hosts', async () => {
-  assert.equal(acao(await preflight(PROD_URL, 'https://evil.example')), null);
-  assert.equal(acao(await preflight(LOCAL_URL, 'https://evil.example')), null);
+await check('CORS: the removed wrangler-dev origins are refused on and off the edge', async () => {
+  for (const origin of ['http://localhost:8787', 'http://127.0.0.1:8787']) {
+    assert.equal(acao(await preflight(origin, EDGE_HEADERS)), null, origin);
+    assert.equal(acao(await preflight(origin)), null, origin);
+  }
 });
 
+await check('CORS: an unknown origin is refused on and off the edge', async () => {
+  assert.equal(acao(await preflight('https://evil.example', EDGE_HEADERS)), null);
+  assert.equal(acao(await preflight('https://evil.example')), null);
+});
+
+// CF-Ray is trusted, which is sound only because the Cloudflare edge
+// overwrites any client-supplied value. A caller that sets it on a non-edge
+// request therefore makes the Worker behave as if it were on the edge — which
+// only ever makes the rule STRICTER, never more permissive.
+await check('CORS: a client-supplied CF-Ray makes a local request behave as edge', async () => {
+  assert.equal(acao(await preflight('http://localhost:8765', { 'CF-Ray': 'forged' })), null);
+  assert.equal(acao(await preflight('https://formn400.org', { 'CF-Ray': 'forged' })), 'https://formn400.org');
+});
 await check('LIVE: 401 gateway fault → 401 carrying faultstring and errorcode', async () => {
   await withUpstream({ status: 401, async text() { return FAULT_401; } }, async () => {
     const res = await liveCaseStatusCall();

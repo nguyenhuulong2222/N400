@@ -88,10 +88,21 @@ variable, binding or `wrangler.toml` value can widen it.
 | `http://localhost:8765` | **refused** | allowed |
 | anything else | refused | refused |
 
-"Local Worker" means the request's own hostname is `localhost` or `127.0.0.1`,
-which is true under `wrangler dev` and never true in production. A request with
-no `Origin` header — native mobile, which is not governed by browser CORS — is
-served normally and simply gets no `Access-Control-Allow-Origin`.
+"Local Worker" means the request arrived **without a `CF-Ray` header**.
+Cloudflare sets `CF-Ray` on every request through its edge and overwrites any
+client-supplied value, so its absence means the request did not come from the
+edge.
+
+The request URL cannot be used for this. When `wrangler.toml` declares a
+custom-domain route, `wrangler dev` rewrites `request.url` to that route, so
+the hostname reads `api.formn400.org` even on a local server — which is why an
+earlier hostname-based version of this rule passed every unit test and still
+refused the local origin on a real dev server. `npm run test:dev-cors` exists
+to catch exactly that.
+
+A request with no `Origin` header — native mobile, which is not governed by
+browser CORS — is served normally and simply gets no
+`Access-Control-Allow-Origin`.
 
 ## Demonstrating each response code locally
 
@@ -187,8 +198,12 @@ curl -s -X POST localhost:8787/case-status \
 
 ```bash
 cd workers/api
-npm test          # pure receipt classifier + direct worker.fetch() handler tests
+npm test              # receipt classifier + direct worker.fetch() handler tests
+npm run test:dev-cors # CORS against a real `wrangler dev` server (~30s, spawns wrangler)
 ```
+
+`test:dev-cors` is deliberately outside `npm test`: it starts a real server, so
+it is slow and needs a free port. Run it before a demo.
 
 ## Going live (Long runs these — not the agent)
 

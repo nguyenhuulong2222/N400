@@ -1,7 +1,7 @@
 // CORS — hardcoded origin allowlist (API Invariant V). Never a wildcard.
 // Production origins are always accepted. Local-dev origins are accepted only
-// when this Worker is itself running locally, decided from the request URL
-// hostname, so no env var or wrangler.toml value can widen production.
+// when the request did not come through the Cloudflare edge, so no env var or
+// wrangler.toml value can widen production.
 // An allowlisted Origin is echoed back; anything else gets no ACAO header and
 // the browser blocks it. A request with no Origin (native mobile) is unaffected.
 
@@ -16,12 +16,21 @@ export interface CorsContext {
   local: boolean;
 }
 
-/** Derive the CORS context once per request, from the request itself. */
+/**
+ * Derive the CORS context once per request, from the request itself.
+ *
+ * Local is decided by the absence of CF-Ray. Cloudflare sets that header on
+ * every request through its edge and overwrites any client-supplied value, so
+ * a request without it did not come from the edge.
+ *
+ * The request URL cannot be used for this: when wrangler.toml declares a
+ * custom-domain route, `wrangler dev` rewrites request.url to that route, so
+ * the hostname reads api.formn400.org even on a local server.
+ */
 export function corsContext(request: Request): CorsContext {
-  const hostname = new URL(request.url).hostname;
   return {
     origin: request.headers.get('Origin'),
-    local: hostname === 'localhost' || hostname === '127.0.0.1',
+    local: request.headers.get('CF-Ray') === null,
   };
 }
 
