@@ -256,6 +256,25 @@ async function withUpstream(responses, fn) {
   }
 }
 
+// ─── The gateway fault envelope, captured from api-int.uscis.gov ──────
+// The published spec documents a flat { code, message } for 401 and 429. The
+// live gateway sends its own fault envelope instead, so both were captured and
+// both are fixtures here.
+const FAULT_401 =
+  '{"fault":{"faultstring":"Invalid Access Token","detail":' +
+  '{"errorcode":"keymanagement.service.invalid_access_token"}}}';
+
+// Captured 2026-10-05 18:45:42 GMT, 6 of 10 parallel requests.
+const FAULT_429_MESSAGE =
+  'Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, ' +
+  'periodInMicroseconds=1000000, maxBurstMessageCount=1.0}';
+const FAULT_429 = JSON.stringify({
+  fault: {
+    faultstring: FAULT_429_MESSAGE,
+    detail: { errorcode: 'policies.ratelimit.SpikeArrestViolation' },
+  },
+});
+
 // The shape the PUBLISHED spec documents: flat { code, message }. Tested first
 // because it is what we will actually receive.
 const upstreamFlat = (status, message) => ({
@@ -340,7 +359,10 @@ await check('LIVE: non-JSON upstream error body → errors:[] plus our fallback'
 });
 
 await check('LIVE: upstream 401 clears the cached token (next call re-auths)', async () => {
-  await withUpstream([upstreamFlat(401, 'Invalid Access Token'), upstreamFlat(401, 'Invalid Access Token')], async (counts) => {
+  // Uses the captured gateway fault body, so the cache reset is proven against
+  // the shape USCIS actually sends on a 401.
+  const faultResponse = { status: 401, async text() { return FAULT_401; } };
+  await withUpstream([faultResponse, faultResponse], async (counts) => {
     const first = await liveCaseStatusCall();
     assert.equal(first.status, 401);
     assert.equal(counts.token, 1, 'first call fetches a token');
@@ -481,7 +503,8 @@ await check('RATE LIMIT: limiter throws → fails OPEN', async () => {
 for (const [receipt, status, fragment] of [
   ['MCK0000000401', 401, 'Invalid Access Token'],
   ['MCK0000000404', 404, 'does not recognize the receipt number'],
-  ['MCK0000000429', 429, 'Spike Arrest Violation'],
+  // The live gateway's wording, not the spec example's "Spike Arrest Violation".
+  ['MCK0000000429', 429, 'Spike arrest violation. Allowed rate'],
   ['MCK0000000503', 503, 'The Case Status API Sandbox is unavailable at this time'],
   ['MCK0000000500', 500, 'Internal Server Error'],
 ]) {
@@ -685,6 +708,97 @@ await check('CORS: the old wrangler-dev origins are no longer on the allowlist',
 await check('CORS: an unknown origin is refused on both hosts', async () => {
   assert.equal(acao(await preflight(PROD_URL, 'https://evil.example')), null);
   assert.equal(acao(await preflight(LOCAL_URL, 'https://evil.example')), null);
+});
+
+await check('LIVE: 401 gateway fault → 401 carrying faultstring and errorcode', async () => {
+  await withUpstream({ status: 401, async text() { return FAULT_401; } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 401);
+    const json = await res.json();
+    assert.equal(json.source, 'uscis');
+    assert.equal(json.errors.length, 1);
+    assert.ok(json.errors[0].message.length > 0, 'message must be non-empty');
+    assert.ok(String(json.errors[0].code).length > 0, 'code must be non-empty');
+    assert.equal(json.errors[0].message, 'Invalid Access Token');
+    assert.equal(json.errors[0].code, 'keymanagement.service.invalid_access_token');
+  });
+});
+
+await check('LIVE: 429 gateway fault → 429 carrying faultstring and errorcode', async () => {
+  await withUpstream({ status: 429, async text() { return FAULT_429; } }, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.status, 429);
+    const json = await res.json();
+    assert.equal(json.source, 'uscis', 'a USCIS 429 must be distinguishable from our own');
+    assert.equal(json.errors.length, 1);
+    assert.ok(json.errors[0].message.length > 0, 'message must be non-empty');
+    assert.ok(String(json.errors[0].code).length > 0, 'code must be non-empty');
+    assert.equal(json.errors[0].message, FAULT_429_MESSAGE);
+    assert.equal(json.errors[0].code, 'policies.ratelimit.SpikeArrestViolation');
+  });
+});
+
+await check('LIVE: a fault with no detail still yields its message', async () => {
+  const body = JSON.stringify({ fault: { faultstring: 'Gateway unavailable' } });
+  await withUpstream({ status: 503, async text() { return body; } }, async () => {
+    const json = await (await liveCaseStatusCall()).json();
+    assert.equal(json.errors.length, 1);
+    assert.equal(json.errors[0].message, 'Gateway unavailable');
+    assert.equal(json.errors[0].code, undefined, 'no code may be invented');
+  });
+});
+
+await check('LIVE: a receipt inside a faultstring is masked', async () => {
+  const body = JSON.stringify({
+    fault: { faultstring: 'Rejected for EAC9999103403', detail: { errorcode: 'x.y' } },
+  });
+  await withUpstream({ status: 401, async text() { return body; } }, async () => {
+    const text = await (await liveCaseStatusCall()).text();
+    assert.ok(text.includes('EAC*******403'));
+    assert.ok(!text.includes('EAC9999103403'));
+  });
+});
+
+await check('LIVE: no upstream header reaches the client', async () => {
+  const upstream = {
+    status: 401,
+    headers: new Headers({
+      'www-authenticate': 'Bearer realm="null",error="invalid_token"',
+      'x-upstream-secret': 'must-not-appear',
+    }),
+    async text() { return FAULT_401; },
+  };
+  await withUpstream(upstream, async () => {
+    const res = await liveCaseStatusCall();
+    assert.equal(res.headers.get('www-authenticate'), null);
+    assert.equal(res.headers.get('x-upstream-secret'), null);
+    // Our three CORS headers plus content-type, and nothing else. The request
+    // carries no Origin, so no Access-Control-Allow-Origin is set.
+    assert.deepEqual(
+      [...res.headers.keys()].sort(),
+      ['access-control-allow-headers', 'access-control-allow-methods', 'content-type'],
+    );
+  });
+});
+
+await check('MOCK: MCK0000000401 returns the captured gateway fault', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'MCK0000000401' } });
+  assert.equal(res.status, 401);
+  const json = await res.json();
+  assert.equal(json.source, 'uscis');
+  assert.equal(json.errors[0].code, 'keymanagement.service.invalid_access_token');
+  assert.ok(json.errors[0].message.startsWith('Invalid Access Token'));
+  assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
+});
+
+await check('MOCK: MCK0000000429 returns the captured spike-arrest fault', async () => {
+  const res = await call('POST', '/case-status', { body: { receiptNumber: 'MCK0000000429' } });
+  assert.equal(res.status, 429);
+  const json = await res.json();
+  assert.equal(json.source, 'uscis');
+  assert.equal(json.errors[0].code, 'policies.ratelimit.SpikeArrestViolation');
+  assert.ok(json.errors[0].message.startsWith('Spike arrest violation. Allowed rate'));
+  assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
 });
 
 console.log(`\nworker.test.mjs: ${passed} passed`);

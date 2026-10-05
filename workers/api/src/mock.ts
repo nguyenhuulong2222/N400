@@ -66,17 +66,37 @@ function buildCaseStatus(receipt: string, withHistory: boolean): unknown {
 // examples plus a "(Mock — simulated USCIS error)" suffix. MCK is not a known
 // prefix, so classifyReceipt returns "warn", which the router accepts.
 const MOCK_UPSTREAM_ERRORS: Record<string, { status: number; body: unknown }> = {
+  // The real 401 body from api-int.uscis.gov, captured 2026-10-05: the gateway
+  // fault envelope, not the flat shape the spec documents. The upstream also
+  // sends a www-authenticate header carrying the same text; we never read
+  // upstream headers, so it is not reproduced here.
   MCK0000000401: {
     status: 401,
-    body: { code: 401, message: 'Invalid Access Token (Mock — simulated USCIS error)' },
+    body: {
+      fault: {
+        faultstring: 'Invalid Access Token (Mock — simulated USCIS error)',
+        detail: { errorcode: 'keymanagement.service.invalid_access_token' },
+      },
+    },
   },
   MCK0000000404: {
     status: 404,
     body: { code: 404, message: NOT_FOUND_MESSAGE },
   },
+  // The real 429 body from api-int.uscis.gov, captured 2026-10-05 18:45:42 GMT
+  // (6 of 10 parallel requests; cf-ray a45e95ba7f609b6d-SEA). Also a gateway
+  // fault, and the faultstring carries the live rate numbers.
   MCK0000000429: {
     status: 429,
-    body: { code: 429, message: 'Spike Arrest Violation (Mock — simulated USCIS error)' },
+    body: {
+      fault: {
+        faultstring:
+          'Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, ' +
+          'periodInMicroseconds=1000000, maxBurstMessageCount=1.0} ' +
+          '(Mock — simulated USCIS error)',
+        detail: { errorcode: 'policies.ratelimit.SpikeArrestViolation' },
+      },
+    },
   },
   // The body the live sandbox really returns: an { error: { … } } wrapper, a
   // string code, and leading whitespace. Kept as a raw string so the

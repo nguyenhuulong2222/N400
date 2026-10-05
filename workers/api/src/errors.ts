@@ -1,7 +1,7 @@
 // Upstream error passthrough: get the USCIS message to the user's screen
 // without forwarding anything we should not.
 //
-// USCIS uses more than one error envelope, so four are accepted and normalised
+// USCIS uses more than one error envelope, so five are accepted and normalised
 // to one errors[] list. Each passed-through string is receipt-masked first,
 // because an upstream message can quote the receipt back at us (Invariant II).
 
@@ -40,6 +40,7 @@ function maskReceipts(input: string): string {
 //   { error: [...] }            defensive, not observed
 //   { error: {...} }            what the live sandbox sends; code is a string
 //   { error: "text" }           defensive, not observed; becomes a message
+//   { fault: {...} }            Apigee gateway fault; seen on 401 and 429
 //   { code, message }           what the published spec documents
 // Anything else returns null, and the caller falls back to our own message.
 function selectErrorItems(obj: Record<string, unknown>): unknown[] | null {
@@ -48,8 +49,33 @@ function selectErrorItems(obj: Record<string, unknown>): unknown[] | null {
   if (Array.isArray(obj.error)) return obj.error.slice(0, MAX_ITEMS);
   if (obj.error && typeof obj.error === 'object') return [obj.error];
   if (typeof obj.error === 'string' && obj.error.trim() !== '') return [{ message: obj.error }];
+  const fault = faultItem(obj);
+  if (fault) return [fault];
   if (typeof obj.message === 'string' || obj.code !== undefined) return [obj];
   return null;
+}
+
+// The gateway in front of USCIS answers with its own fault envelope:
+//   { fault: { faultstring, detail: { errorcode } } }
+// faultstring is the human message, detail.errorcode the machine code. Matched
+// on shape, not on status, so it covers the 401 and 429 we have captured and
+// any other status answered the same way. A fault with no detail still yields
+// its message. The result goes through the whitelist and mask below like every
+// other shape.
+function faultItem(obj: Record<string, unknown>): Record<string, unknown> | null {
+  const fault = obj.fault;
+  if (!fault || typeof fault !== 'object' || Array.isArray(fault)) return null;
+  const f = fault as Record<string, unknown>;
+  const item: Record<string, unknown> = {};
+  if (typeof f.faultstring === 'string' && f.faultstring.trim() !== '') {
+    item.message = f.faultstring;
+  }
+  const detail = f.detail;
+  if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+    const code = (detail as Record<string, unknown>).errorcode;
+    if (typeof code === 'string' && code.trim() !== '') item.code = code;
+  }
+  return Object.keys(item).length > 0 ? item : null;
 }
 
 /**

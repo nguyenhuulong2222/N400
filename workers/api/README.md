@@ -60,7 +60,9 @@ receipt-masked — `EAC9999103403` becomes `EAC*******403`.
 
 ### Error body shapes
 
-USCIS does not use one error envelope. All of these normalise to `errors[]`:
+USCIS does not use one error envelope. All five of these normalise to
+`errors[]`. Note that for 401 and 429 the published spec shows a flat
+`{ code, message }` while the live gateway sends a `fault` — both are handled:
 
 | Shape | Where it came from |
 |---|---|
@@ -69,6 +71,7 @@ USCIS does not use one error envelope. All of these normalise to `errors[]`:
 | `{ "error": { "code": "503", "message": "…" } }` | **the live sandbox** — captured 2026-10-03 09:34 UTC. `code` is a string here, not an int |
 | `{ "error": [ … ] }` | defensive, not observed |
 | `{ "error": "invalid_token" }` | defensive, not observed — the string becomes `message`, no code is invented |
+| `{ "fault": { "faultstring", "detail": { "errorcode" } } }` | **the live gateway** — captured 2026-10-05 on both 401 and 429. `faultstring` becomes `message`, `detail.errorcode` becomes `code` |
 
 An unrecognised body degrades to `errors: []` plus our own message — never a
 crash, never a guess.
