@@ -70,10 +70,25 @@ USCIS does not use one error envelope. All of these normalise to `errors[]`:
 | `{ "error": [ … ] }` | defensive, not observed |
 | `{ "error": "invalid_token" }` | defensive, not observed — the string becomes `message`, no code is invented |
 
-The third was missing until a real 503 exposed it in production: `errors[]` came
-back empty and the USCIS sentence was replaced by our own fallback, which is the
-one failure this layer exists to prevent. An unrecognised body still degrades to
-`errors: []` plus our own message — never a crash, never a guess.
+An unrecognised body degrades to `errors: []` plus our own message — never a
+crash, never a guess.
+
+## CORS
+
+The allowlist is hardcoded in `src/cors.ts` (API Invariant V). No environment
+variable, binding or `wrangler.toml` value can widen it.
+
+| Origin | On `api.formn400.org` | On a local Worker |
+|---|---|---|
+| `https://formn400.org` | allowed | allowed |
+| `https://www.formn400.org` | allowed | allowed |
+| `http://localhost:8765` | **refused** | allowed |
+| anything else | refused | refused |
+
+"Local Worker" means the request's own hostname is `localhost` or `127.0.0.1`,
+which is true under `wrangler dev` and never true in production. A request with
+no `Origin` header — native mobile, which is not governed by browser CORS — is
+served normally and simply gets no `Access-Control-Allow-Origin`.
 
 ## Demonstrating each response code locally
 
@@ -87,7 +102,8 @@ RECEIPT=EAC9999103403 npm run demo:429
 timestamp, status, `source` and `errors[0].code` per response — never a body and
 never the receipt. **Wait a full 60 seconds before the next lookup from the same
 connection**, or it will still be throttled. Cloudflare counts limits per
-location, so run it from one machine.
+location, so run it from one machine. Point it at a local Worker with
+`BASE_URL=http://localhost:8787` to avoid spending the USCIS quota.
 
 ### 401 — a real authentication failure
 
@@ -132,10 +148,13 @@ Production sets `MOCK_MODE = "0"`, so none of these are reachable there.
 
 ## Local run (no credentials needed — MOCK_MODE)
 
+`wrangler.toml` ships `MOCK_MODE = "0"` (the live USCIS path), so pass the
+override to run without credentials:
+
 ```bash
 cd workers/api
 npm install
-npm run dev        # wrangler dev; MOCK_MODE=1 from wrangler.toml [vars]
+npm run dev -- --var MOCK_MODE:1
 ```
 
 Smoke-test the mock (in another shell):
@@ -180,9 +199,8 @@ npm test          # pure receipt classifier + direct worker.fetch() handler test
    ```bash
    USCIS_CLIENT_ID=… USCIS_CLIENT_SECRET=… npm run test:uscis-sandbox
    ```
-3. Turn off mock and deploy (only on explicit approval):
+3. Deploy (only on explicit approval):
    ```bash
-   # set MOCK_MODE = "0" in wrangler.toml [vars], then:
    npx wrangler deploy
    curl https://api.formn400.org/health   # → { "ok": true, ..., "mock": false }
    ```
@@ -193,7 +211,7 @@ npm test          # pure receipt classifier + direct worker.fetch() handler test
 |------|---------|
 | `src/index.ts`      | Router, CORS wiring, validation, mock vs live dispatch, error mapping |
 | `src/env.ts`        | `Env` shape + `isMockMode()` |
-| `src/receipt.ts`    | Pure receipt validation/normalization (synced with `index.html`'s `csClassifyReceipt`) |
+| `src/receipt.ts`    | Pure receipt validation and normalization |
 | `src/cors.ts`       | Hardcoded origin allowlist + JSON/preflight helpers |
 | `src/mock.ts`       | Canned sandbox responses + reserved MOCK_MODE demo receipts |
 | `src/errors.ts`     | Upstream error whitelist, receipt masking, client envelope |

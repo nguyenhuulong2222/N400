@@ -7,7 +7,7 @@
 
 import assert from 'node:assert/strict';
 import worker from '../src/index.ts';
-import { __resetTokenCache } from '../src/auth.ts';
+import { resetTokenCache } from '../src/auth.ts';
 
 // MOCK_MODE on: the shell serves canned responses with no secrets (API-1).
 const MOCK_ENV = { MOCK_MODE: '1' };
@@ -167,26 +167,6 @@ const LIVE_ENV = {
   USCIS_TOKEN_URL: 'https://api-int.uscis.gov/oauth/accesstoken',
 };
 
-// Run worker.fetch with a stubbed global fetch: token endpoint → access token,
-// case-status endpoint → the provided upstream Response-like object.
-async function withStubbedUpstream(caseResponse, fn) {
-  const realFetch = globalThis.fetch;
-  globalThis.fetch = async (input) => {
-    const url = typeof input === 'string' ? input : input.url;
-    if (url.includes('/oauth/')) {
-      return { ok: true, status: 200, async json() { return { access_token: 'T', expires_in: 3600 }; } };
-    }
-    return caseResponse;
-  };
-  __resetTokenCache();
-  try {
-    return await fn();
-  } finally {
-    globalThis.fetch = realFetch;
-    __resetTokenCache();
-  }
-}
-
 function liveCaseStatusCall(receipt = 'EAC9999103400') {
   return worker.fetch(
     new Request('https://api.local/case-status', {
@@ -214,7 +194,7 @@ await check('LIVE: malformed upstream 200 (invalid JSON) → 502 upstream_unpars
     '"current_case_status_desc_en":"See <a href="https://egov.uscis.gov">status</a> for details.",' +
     '"hist_case_status":null}}';
   const caseResponse = { status: 200, async text() { return MALFORMED_BODY; } };
-  await withStubbedUpstream(caseResponse, async () => {
+  await withUpstream(caseResponse, async () => {
     const res = await liveCaseStatusCall();
     assert.equal(res.status, 502, 'malformed upstream 200 must map to 502, not 503/200');
     const text = await res.text();
@@ -239,7 +219,7 @@ await check('LIVE: valid upstream 200 → 200 passthrough', async () => {
     },
   });
   const caseResponse = { status: 200, async text() { return VALID_BODY; } };
-  await withStubbedUpstream(caseResponse, async () => {
+  await withUpstream(caseResponse, async () => {
     const res = await liveCaseStatusCall();
     assert.equal(res.status, 200, 'valid upstream 200 must pass through');
     const json = await res.json();
@@ -267,12 +247,12 @@ async function withUpstream(responses, fn) {
     if (typeof next === 'function') return next(init);
     return next;
   };
-  __resetTokenCache();
+  resetTokenCache();
   try {
     return await fn(counts);
   } finally {
     globalThis.fetch = realFetch;
-    __resetTokenCache();
+    resetTokenCache();
   }
 }
 
@@ -406,7 +386,7 @@ await check('LIVE: token endpoint 401 → client 401 USCIS_AUTH_FAILED, body nev
     }
     throw new Error('case-status must not be called when the token fails');
   };
-  __resetTokenCache();
+  resetTokenCache();
   try {
     const res = await liveCaseStatusCall();
     assert.equal(res.status, 401);
@@ -416,7 +396,7 @@ await check('LIVE: token endpoint 401 → client 401 USCIS_AUTH_FAILED, body nev
     assert.equal(tokenBodyRead, false, 'the token response body must NEVER be read');
   } finally {
     globalThis.fetch = realFetch;
-    __resetTokenCache();
+    resetTokenCache();
   }
 });
 
@@ -666,6 +646,45 @@ await check('MOCK: MCK0000000503 now returns the real captured sandbox body', as
   assert.equal(json.errors[0].code, '503');
   assert.ok(json.errors[0].message.startsWith('The Case Status API Sandbox is unavailable'));
   assert.ok(json.errors[0].message.includes('(Mock — simulated USCIS error)'));
+});
+
+// ─── CORS: local-dev origins are honoured only on a local Worker ──────
+const PROD_URL = 'https://api.formn400.org/case-status';
+const LOCAL_URL = 'http://localhost:8787/case-status';
+const LOOPBACK_URL = 'http://127.0.0.1:8787/case-status';
+
+function preflight(url, origin) {
+  return worker.fetch(new Request(url, { method: 'OPTIONS', headers: { Origin: origin } }), MOCK_ENV);
+}
+const acao = (res) => res.headers.get('Access-Control-Allow-Origin');
+
+await check('CORS: on the production host, the local preview origin is refused', async () => {
+  assert.equal(acao(await preflight(PROD_URL, 'http://localhost:8765')), null);
+});
+
+await check('CORS: on a local host, the local preview origin is allowed', async () => {
+  assert.equal(acao(await preflight(LOCAL_URL, 'http://localhost:8765')), 'http://localhost:8765');
+});
+
+await check('CORS: on a 127.0.0.1 host, the local preview origin is allowed', async () => {
+  assert.equal(acao(await preflight(LOOPBACK_URL, 'http://localhost:8765')), 'http://localhost:8765');
+});
+
+await check('CORS: on the production host, the production origin is allowed', async () => {
+  assert.equal(acao(await preflight(PROD_URL, 'https://formn400.org')), 'https://formn400.org');
+  assert.equal(acao(await preflight(PROD_URL, 'https://www.formn400.org')), 'https://www.formn400.org');
+});
+
+await check('CORS: the old wrangler-dev origins are no longer on the allowlist', async () => {
+  for (const origin of ['http://localhost:8787', 'http://127.0.0.1:8787']) {
+    assert.equal(acao(await preflight(LOCAL_URL, origin)), null, origin + ' must not be allowed');
+    assert.equal(acao(await preflight(PROD_URL, origin)), null, origin + ' must not be allowed');
+  }
+});
+
+await check('CORS: an unknown origin is refused on both hosts', async () => {
+  assert.equal(acao(await preflight(PROD_URL, 'https://evil.example')), null);
+  assert.equal(acao(await preflight(LOCAL_URL, 'https://evil.example')), null);
 });
 
 console.log(`\nworker.test.mjs: ${passed} passed`);
