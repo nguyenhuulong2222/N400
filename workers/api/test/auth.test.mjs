@@ -4,7 +4,7 @@
 // Run: node test/auth.test.mjs (Node 23.6+ strips the TS types on import).
 
 import assert from 'node:assert/strict';
-import { getAccessToken, __resetTokenCache, TokenError } from '../src/auth.ts';
+import { getAccessToken, resetTokenCache, TokenError } from '../src/auth.ts';
 
 const ENV = {
   USCIS_CLIENT_ID: 'test-id',
@@ -39,7 +39,7 @@ async function check(name, fn) {
 console.log('auth.getAccessToken:');
 
 await check('fetches once, then REUSES the cached token across calls', async () => {
-  __resetTokenCache();
+  resetTokenCache();
   stubToken({ expiresIn: 3600, token: 'tok-reuse' });
   const a = await getAccessToken(ENV);
   const b = await getAccessToken(ENV);
@@ -51,7 +51,7 @@ await check('fetches once, then REUSES the cached token across calls', async () 
 });
 
 await check('REFRESHES when the cached token is within the safety window of expiry', async () => {
-  __resetTokenCache();
+  resetTokenCache();
   // expires_in 30s → expiresAt = now + 30s - 60s safety window → already past →
   // every call must refetch.
   stubToken({ expiresIn: 30 });
@@ -62,7 +62,7 @@ await check('REFRESHES when the cached token is within the safety window of expi
 });
 
 await check('missing credentials → TokenError (no fetch attempted)', async () => {
-  __resetTokenCache();
+  resetTokenCache();
   stubToken();
   await assert.rejects(
     () => getAccessToken({ USCIS_TOKEN_URL: ENV.USCIS_TOKEN_URL }),
@@ -72,7 +72,7 @@ await check('missing credentials → TokenError (no fetch attempted)', async () 
 });
 
 await check('non-OK token response → TokenError carrying upstream status', async () => {
-  __resetTokenCache();
+  resetTokenCache();
   stubToken({ status: 401 });
   await assert.rejects(
     () => getAccessToken(ENV),

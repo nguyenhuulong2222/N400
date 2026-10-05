@@ -1,60 +1,22 @@
-// Upstream error passthrough — criterion 4 of the USCIS production-access demo
-// requires that the USCIS `message` reach the user's screen. Everything here
-// exists to let that happen without also forwarding anything we should not.
+// Upstream error passthrough: get the USCIS message to the user's screen
+// without forwarding anything we should not.
 //
-// SHAPE. Four are accepted. USCIS is known to use three of them, each observed
-// somewhere different, and the third was found the hard way — in production:
-//
-//  1. FLAT `{ code: <int>, message: "<string>" }` — what the published Case
-//     Status spec documents (swagger_3.yaml, Case Status API 1.0.0). Its only
-//     error schema is `ErrorRequest { message: string }` and every example is
-//     flat. Source: the spec's own 401/404/422/429/503 examples.
-//
-//  2. ARRAY `{ errors: [ … ] }` — the RFC 9457 envelope the USCIS Production
-//     Access documentation describes for Torch APIs. Source: that page. Not
-//     yet observed on the wire from the Case Status API.
-//
-//  3. SINGULAR `{ "error": { "code": "503", "message": "…" } }` — what the LIVE
-//     sandbox actually returns. Captured 2026-10-03 09:34 UTC by direct curl
-//     against a closed sandbox. Note `code` is a STRING here, not the integer
-//     the spec's examples use. An `error` ARRAY is accepted on the same branch.
-//
-//  4. STRING `{ "error": "invalid_token" }` — DEFENSIVE, not observed. The
-//     string becomes `message` and there is no code to report. OAuth-style
-//     bodies look like this, and after shape 3 the cost of guessing wrong
-//     about USCIS's error envelope is better paid here than in production.
-//
-// Shape 3 is the reason this comment exists in this form. Shapes 1 and 2 were
-// built from documentation; the first real error body we ever saw matched
-// neither, errors[] came back empty in production, and the USCIS message was
-// silently replaced by our own fallback — the precise failure this file was
-// written to prevent. Documentation told us two shapes. The wire told us a
-// third. Assume there is a fifth: an unrecognised body must keep degrading to
-// our own message, never to a crash, and never to a guess.
-//
-// The shape-3 body arrives with leading newlines and spaces. That is NOT why it
-// was dropped — whitespace before a value is legal JSON and JSON.parse already
-// accepted it; the trimmed body failed identically. No trim is needed and none
-// was added, so nothing here pretends to fix a problem that did not exist.
-//
-// API Invariant II. Every passed-through string is masked first: an upstream
-// message may quote the receipt number back at us (the 200 descriptions do),
-// and that must not survive into a response we emit.
+// USCIS uses more than one error envelope, so four are accepted and normalised
+// to one errors[] list. Each passed-through string is receipt-masked first,
+// because an upstream message can quote the receipt back at us (Invariant II).
 
-export const WHITELIST_FIELDS = [
-  'code',
-  'message',
-  'category',
-  'reference',
-  'status',
-  'traceId',
-] as const;
+// Fields allowed out of an upstream error. Everything else is dropped.
+const WHITELIST_FIELDS = ['code', 'message', 'category', 'reference', 'status', 'traceId'] as const;
 
+// Upper bound on items forwarded from one upstream body.
 const MAX_ITEMS = 10;
 
-// Both receipt formats the spec's RegEx allows: [a-zA-Z]{3}[0-9]{10} and
-// [a-zA-Z]{3}\*[0-9]{9}. Our own validator accepts only the first, but USCIS
-// can echo either, so the mask covers both.
+// Receipt masking: keep the first and last 3 characters, replace the middle.
+const MASK_KEEP = 3;
+const MASK_FILL = '*******';
+
+// Both receipt formats the USCIS spec allows: AAA0000000000 and AAA*000000000.
+// Our validator accepts only the first, but USCIS can echo either.
 const RECEIPT_TOKEN_RE = /\b[A-Z]{3}(?:[0-9]{10}|\*[0-9]{9})\b/gi;
 
 export interface PassthroughError {
@@ -66,28 +28,36 @@ export interface PassthroughError {
   traceId?: string | number;
 }
 
-/** First 3 chars + ******* + last 3 chars, for every receipt-shaped token. */
-export function maskReceipts(input: string): string {
-  return input.replace(RECEIPT_TOKEN_RE, (m) => `${m.slice(0, 3)}*******${m.slice(-3)}`);
+function maskReceipts(input: string): string {
+  return input.replace(
+    RECEIPT_TOKEN_RE,
+    (m) => `${m.slice(0, MASK_KEEP)}${MASK_FILL}${m.slice(-MASK_KEEP)}`,
+  );
+}
+
+// Pick the error items out of a parsed body, in this order:
+//   { errors: [...] }           RFC 9457, per the USCIS Production Access page
+//   { error: [...] }            defensive, not observed
+//   { error: {...} }            what the live sandbox sends; code is a string
+//   { error: "text" }           defensive, not observed; becomes a message
+//   { code, message }           what the published spec documents
+// Anything else returns null, and the caller falls back to our own message.
+function selectErrorItems(obj: Record<string, unknown>): unknown[] | null {
+  if (Array.isArray(obj.errors)) return obj.errors.slice(0, MAX_ITEMS);
+  // Array first: an array is also an object.
+  if (Array.isArray(obj.error)) return obj.error.slice(0, MAX_ITEMS);
+  if (obj.error && typeof obj.error === 'object') return [obj.error];
+  if (typeof obj.error === 'string' && obj.error.trim() !== '') return [{ message: obj.error }];
+  if (typeof obj.message === 'string' || obj.code !== undefined) return [obj];
+  return null;
 }
 
 /**
- * Pull a whitelisted error list out of an upstream body.
+ * Whitelisted, receipt-masked error items from an upstream body.
  *
- * Checked in this order (see the four shapes at the top of this file):
- *   1. `{ errors: [ … ] }`
- *   2. `{ error: [ … ] }`
- *   3. `{ error: { … } }`
- *   4. `{ error: "<string>" }`      → becomes a lone `message`
- *   5. flat `{ code, message }` / `{ message }`
- *
- * Anything else — non-JSON, an HTML gateway page, an empty body, an object
- * with none of these keys — yields [] and the caller falls back to our own
- * plain-English message.
- *
- * Only string and finite-number values survive. Nested objects, arrays and
- * functions are dropped rather than serialized, so no unexpected structure can
- * ride along. At most MAX_ITEMS items.
+ * Non-JSON, an HTML gateway page, an empty body or an unrecognised object all
+ * yield [], and the caller falls back to our own plain-English message. Only
+ * strings and finite numbers survive, so no nested structure can ride along.
  */
 export function extractUpstreamErrors(text: string): PassthroughError[] {
   let parsed: unknown;
@@ -97,34 +67,17 @@ export function extractUpstreamErrors(text: string): PassthroughError[] {
     return [];
   }
   if (!parsed || typeof parsed !== 'object') return [];
-  const obj = parsed as Record<string, unknown>;
 
-  let raw: unknown[];
-  if (Array.isArray(obj.errors)) {
-    // Shape 2.
-    raw = obj.errors.slice(0, MAX_ITEMS);
-  } else if (Array.isArray(obj.error)) {
-    // Shape 3, plural variant. Tested before the object check below, because
-    // an array is also an object.
-    raw = obj.error.slice(0, MAX_ITEMS);
-  } else if (obj.error && typeof obj.error === 'object') {
-    // Shape 3 as the live sandbox sends it: one wrapped error object.
-    raw = [obj.error];
-  } else if (typeof obj.error === 'string' && obj.error.trim() !== '') {
-    // Shape 4. Synthesized into the same item form so the whitelist loop
-    // below masks it exactly like any other message. No code is invented.
-    raw = [{ message: obj.error }];
-  } else if (typeof obj.message === 'string' || obj.code !== undefined) {
-    // Shape 1, the documented flat body.
-    raw = [obj];
-  } else {
-    return [];
-  }
+  const items = selectErrorItems(parsed as Record<string, unknown>);
+  if (items === null) return [];
 
   const out: PassthroughError[] = [];
-  for (const item of raw) {
+  for (const item of items) {
     if (!item || typeof item !== 'object') continue;
     const src = item as Record<string, unknown>;
+    // Record<> accumulator, then one cast: assigning through a union key into
+    // PassthroughError does not narrow, and the whitelist above is what makes
+    // the cast sound.
     const kept: Record<string, string | number> = {};
     for (const field of WHITELIST_FIELDS) {
       const v = src[field];
@@ -137,11 +90,8 @@ export function extractUpstreamErrors(text: string): PassthroughError[] {
 }
 
 /**
- * The client envelope.
- *
- * `ok` / `error` / `message` are kept exactly as the previously deployed
- * frontend expects them — the Worker ships before the web app, so this must
- * stay backward-compatible. `status`, `source` and `errors` are additive.
+ * The client error envelope. ok / error / message are kept for the deployed
+ * frontend; status / source / errors are additive.
  */
 export function errorBody(opts: {
   error: string;
@@ -160,20 +110,15 @@ export function errorBody(opts: {
   };
 }
 
-/**
- * `new Response(body, { status })` throws a RangeError outside 200–599, so an
- * absurd upstream status must not be handed to it verbatim. Anything out of
- * range becomes 502 — the upstream misbehaved.
- */
+/** new Response() throws outside 200-599, so an absurd status becomes 502. */
 export function safeStatus(status: number): number {
   return Number.isInteger(status) && status >= 200 && status <= 599 ? status : 502;
 }
 
 /**
- * Our own code + plain-English fallback for a given upstream status. Used when
- * the upstream body carried nothing usable, and as the envelope's `message`
- * even when it did (the UI prefers the USCIS text, but a client that only reads
- * `message` still gets a sentence it can show).
+ * Our own code and plain-English message for an upstream status. Used when the
+ * upstream body carried nothing usable, and as the envelope message even when
+ * it did, so a client that reads only `message` still has a sentence to show.
  */
 export function fallbackFor(status: number): { error: string; message: string } {
   switch (status) {

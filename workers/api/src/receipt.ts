@@ -1,23 +1,16 @@
-// PURE receipt-number validation — the single source of truth for the Worker.
+// Receipt-number validation. Pure: no side effects, no storage, no network,
+// no logging. Dependency-free so the mobile app can reuse it.
 //
-// Originally ported from `csClassifyReceipt` in the web app (index.html,
-// WEB-2). That web-side copy was removed when the public Case Status entry
-// points were taken down, so there is no second copy to keep in sync — this
-// module is now the only implementation. It is intentionally dependency-free
-// and portable so the mobile app can import the same logic later.
-//
-// API Invariant II — RECEIPT NUMBERS ARE SENSITIVE PII:
-// This function is pure — no side effects, no storage, no network, no logging.
-// It MUST NOT return, echo, or otherwise expose the full (normalized) receipt
-// number. Callers only ever receive a coarse classification.
+// classifyReceipt never returns the receipt itself, only a coarse state
+// (Invariant II). normalizeReceipt does return it, for the outbound USCIS call
+// only — see the warning on that function.
 
-// USCIS receipt-number format: 3 letters followed by 10 digits (e.g., IOE1234567890).
-export const RECEIPT_RE = /^[A-Z]{3}[0-9]{10}$/;
+// USCIS format: 3 letters then 10 digits, e.g. IOE1234567890.
+const RECEIPT_RE = /^[A-Z]{3}[0-9]{10}$/;
 
-// Common service-center prefixes USCIS publishes as examples. Not exhaustive —
-// an applicant may have a less common but still structurally valid prefix, which
-// is why an unknown prefix is a soft "warn", not a hard "invalid".
-export const KNOWN_PREFIXES = new Set(['EAC', 'WAC', 'LIN', 'SRC', 'NBC', 'MSC', 'IOE']);
+// Prefixes USCIS publishes as examples. Not exhaustive, which is why an
+// unknown prefix is a soft "warn" rather than a hard "invalid".
+const KNOWN_PREFIXES = new Set(['EAC', 'WAC', 'LIN', 'SRC', 'NBC', 'MSC', 'IOE']);
 
 export type ReceiptState = 'empty' | 'invalid' | 'warn' | 'valid';
 
@@ -27,17 +20,12 @@ export interface ReceiptClassification {
 }
 
 /**
- * Classify a raw receipt-number string.
- *
- * Normalization: uppercase, then strip whitespace and hyphens (`/[\s-]/g`).
- *
- * Returns only a coarse classification — never the normalized/full receipt
- * number (Invariant II).
- *
- * - empty / null / non-string / whitespace-only → { state: 'empty',   prefixKnown: false }
- * - structurally invalid shape                  → { state: 'invalid', prefixKnown: false }
- * - valid shape + known prefix                  → { state: 'valid',   prefixKnown: true  }
- * - valid shape + unknown prefix                → { state: 'warn',    prefixKnown: false }
+ * Classify a raw receipt string. Normalizes by uppercasing and stripping
+ * whitespace and hyphens, then reports:
+ *   empty   — missing, not a string, or whitespace only
+ *   invalid — wrong shape
+ *   valid   — right shape, known prefix
+ *   warn    — right shape, unknown prefix (still accepted)
  */
 export function classifyReceipt(raw: unknown): ReceiptClassification {
   if (typeof raw !== 'string') return { state: 'empty', prefixKnown: false };
@@ -45,19 +33,16 @@ export function classifyReceipt(raw: unknown): ReceiptClassification {
   if (cleaned.length === 0) return { state: 'empty', prefixKnown: false };
   if (!RECEIPT_RE.test(cleaned)) return { state: 'invalid', prefixKnown: false };
   const prefixKnown = KNOWN_PREFIXES.has(cleaned.slice(0, 3));
-  // Deliberately do not include `cleaned` in the returned object.
+  // `cleaned` is deliberately not returned.
   return { state: prefixKnown ? 'valid' : 'warn', prefixKnown };
 }
 
 /**
- * Return the normalized (uppercased, whitespace/hyphen-stripped) receipt number
- * IFF it is structurally valid, otherwise null.
+ * The normalized receipt if the shape is valid, else null.
  *
- * UNLIKE `classifyReceipt`, this intentionally returns the full receipt — it is
- * needed transiently to build the upstream USCIS request path. API Invariant II:
- * the caller MUST use the result only in-memory for the outbound USCIS call and
- * MUST NEVER log it, store it, cache it, or place it in any response/error/URL
- * we return to our own clients. Discard immediately after the upstream fetch.
+ * Unlike classifyReceipt this does return the full receipt, because the
+ * outbound USCIS URL needs it. Use it in memory for that one call and never
+ * log, store, cache, or return it (Invariant II).
  */
 export function normalizeReceipt(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
