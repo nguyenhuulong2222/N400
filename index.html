@@ -2488,6 +2488,62 @@
     .cs-onboard-head { flex-direction: column; align-items: flex-start; gap: 8px; }
     .cs-onboard-cta { display: block; width: 100%; }
   }
+  /* About page: "how it connects to USCIS" card. Reuses .cs-onboard-card and
+     .cs-onboard-cta from the home card. Timeline is pure CSS: a navy dot per
+     step and a thin line joining them. Contrast on --bg-card: title and
+     dates --navy 15.61:1, step text --text 16.35:1, note --text-muted
+     5.36:1, dots --navy 15.61:1, line --navy-light 8.17:1. */
+  .about-uscis { margin: 0 0 16px; }
+  .about-uscis-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.25;
+    margin: 0 0 16px;
+  }
+  .about-uscis-timeline { list-style: none; margin: 0 0 16px; padding: 0; }
+  .about-uscis-timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    column-gap: 12px;
+    padding: 0 0 16px 26px;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .about-uscis-timeline li:last-child { padding-bottom: 0; }
+  .about-uscis-timeline li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.4em;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--navy);
+  }
+  .about-uscis-timeline li::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: calc(0.4em + 12px);
+    bottom: 0;
+    width: 2px;
+    background: var(--navy-light);
+  }
+  .about-uscis-timeline li:last-child::after { display: none; }
+  .aut-date {
+    font-weight: 700;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+  }
+  .about-uscis-note { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--text-muted); }
+  @media (max-width: 480px) {
+    .about-uscis-timeline li { grid-template-columns: 1fr; }
+  }
   .page-section ul.page-bullets {
     margin: 8px 0 12px;
     padding-left: 22px;
@@ -3461,6 +3517,21 @@
       <h2 data-i18n="about.intro.title">About this project</h2>
       <p data-i18n="about.intro.body1">formN400.org is a free non-profit community project to help immigrants prepare for the U.S. citizenship test — entirely free, no ads, no personal data collection.</p>
       <p data-i18n="about.intro.body2">Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language.</p>
+    </section>
+
+    <!-- Operator disclosure: how the Case Status Helper came to use the USCIS
+         production API. ENGLISH ONLY in every language (about.uscis.* define
+         only `en`). Text only: no seal, logo, letter image or staff name
+         (Invariant VI). -->
+    <section class="cs-onboard-card about-uscis" aria-labelledby="about-uscis-title">
+      <h2 id="about-uscis-title" class="about-uscis-title" data-i18n="about.uscis.title">Case Status Helper: how it connects to USCIS</h2>
+      <ol class="about-uscis-timeline">
+        <li><span class="aut-date" data-i18n="about.uscis.t1.date">June 2026</span><span class="aut-text" data-i18n="about.uscis.t1.text">Five-day test run against the USCIS Case Status API sandbox</span></li>
+        <li><span class="aut-date" data-i18n="about.uscis.t2.date">October 22, 2026</span><span class="aut-text" data-i18n="about.uscis.t2.text">Live demonstration with the USCIS Torch API team, passing all demo requirements</span></li>
+        <li><span class="aut-date" data-i18n="about.uscis.t3.date">October 26, 2026</span><span class="aut-text" data-i18n="about.uscis.t3.text">Live on the official USCIS Case Status API</span></li>
+      </ol>
+      <p class="about-uscis-note" data-i18n="about.uscis.note">Case status results come directly from the official USCIS Case Status API. This access does not mean USCIS endorses, sponsors, or is affiliated with formN400.org.</p>
+      <button type="button" class="btn-primary cs-onboard-cta" onclick="goCaseStatus()" data-i18n="about.uscis.cta">Check your case status →</button>
     </section>
 
     <section class="page-section">
@@ -6537,6 +6608,20 @@ const UI_TEXT = {
                                   my:"Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language.",
                                   pt:"Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language.",
                                   ru:"Built because everyone deserves access to quality test-prep materials, regardless of financial circumstances or language." , fr:"Créé parce que chacun mérite d'avoir accès à des supports de préparation de qualité, quelles que soient sa situation financière ou sa langue." , uk:"Створено тому, що кожен заслуговує на доступ до якісних матеріалів для підготовки, незалежно від фінансового становища чи мови." , gu:"બનાવ્યું કારણ કે દરેક વ્યક્તિ, તેની આર્થિક પરિસ્થિતિ કે ભાષાને ધ્યાનમાં લીધા વગર, ગુણવત્તાયુક્ત કસોટી-તૈયારી સામગ્રીની પહોંચને લાયક છે." , bn:"তৈরি করা হয়েছে কারণ আর্থিক অবস্থা বা ভাষা নির্বিশেষে প্রত্যেকে মানসম্পন্ন পরীক্ষা-প্রস্তুতি সামগ্রীর অধিকার রাখে।" , ar:"أُنشئ لأن كل شخص يستحق الوصول إلى مواد تحضير عالية الجودة، بغض النظر عن وضعه المالي أو لغته." , ur:"یہ اس لیے بنایا گیا کہ ہر شخص، اپنی مالی حالت یا زبان سے قطع نظر، معیاری ٹیسٹ تیاری مواد تک رسائی کا حقدار ہے۔" },
+
+  // "How it connects to USCIS" card (About). ENGLISH ONLY in every language:
+  // an operator disclosure, given verbatim. Define only `en` — pick() falls
+  // back to it everywhere. Do NOT add other languages and do not translate
+  // or machine-translate (Invariant I).
+  "about.uscis.title":   { en: "Case Status Helper: how it connects to USCIS" },
+  "about.uscis.t1.date": { en: "June 2026" },
+  "about.uscis.t1.text": { en: "Five-day test run against the USCIS Case Status API sandbox" },
+  "about.uscis.t2.date": { en: "October 22, 2026" },
+  "about.uscis.t2.text": { en: "Live demonstration with the USCIS Torch API team, passing all demo requirements" },
+  "about.uscis.t3.date": { en: "October 26, 2026" },
+  "about.uscis.t3.text": { en: "Live on the official USCIS Case Status API" },
+  "about.uscis.note":    { en: "Case status results come directly from the official USCIS Case Status API. This access does not mean USCIS endorses, sponsors, or is affiliated with formN400.org." },
+  "about.uscis.cta":     { en: "Check your case status →" },
 
   "about.free.title":           { en:"Why is it free?",                      vi:"Tại sao miễn phí?",                                   es:"¿Por qué es gratis?",                                  zh:"为什么免费？",                                    tl:"Bakit libre?",                                        ko:"왜 무료인가요?" , hi:"Why is it free?", ht:"Why is it free?", th:"Why is it free?", lo:"Why is it free?", hmn:"Why is it free?", my:"Why is it free?", pt:"Why is it free?", ru:"Why is it free?" , fr:"Pourquoi est-ce gratuit ?" , uk:"Чому це безкоштовно?" , gu:"તે મફત કેમ છે?" , bn:"এটি বিনামূল্যে কেন?" , ar:"لماذا هو مجاني؟" , ur:"یہ مفت کیوں ہے؟" },
   "about.free.body1":           { en:"All civics questions are public-domain materials published by USCIS under 17 U.S.C. § 105. We do not own this content — we just make it easier to access.",
