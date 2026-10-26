@@ -2425,21 +2425,68 @@
     color: var(--text-muted);
     margin: 4px 0 12px;
   }
-  /* Onboard entry card for the Case Status lookup. */
+  /* Onboard entry card for the Case Status lookup — the first card on the
+     home screen. Static: no animation, and the CTA drops .btn-primary's
+     hover lift. Contrast on --bg-card: badge white on --red 6.62:1, title
+     --navy 15.61:1, body --text-mid 10.05:1, source --text-muted 5.36:1,
+     CTA white on --navy 15.61:1. */
   .cs-onboard-card {
-    margin-top: 24px;
-    padding: 16px 18px;
+    margin: 0 0 28px;
+    padding: 20px 22px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-left: 4px solid var(--navy);
     border-radius: var(--radius);
+    box-shadow: var(--shadow);
   }
-  .cs-onboard-card .section-label { margin-bottom: 6px; }
-  .cs-onboard-card p { margin: 0 0 10px; font-size: 14px; color: var(--text-muted); }
-  .cs-onboard-link {
-    background: none; border: none; padding: 0;
-    font-family: inherit; font-size: 15px; font-weight: 600;
-    color: var(--navy); cursor: pointer; text-decoration: underline;
+  .cs-onboard-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .cs-onboard-eyebrow .section-label { margin: 0; }
+  .cs-onboard-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--red);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+  }
+  .cs-onboard-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .cs-onboard-icon { flex: 0 0 40px; width: 40px; height: 40px; color: var(--navy-light); }
+  .cs-onboard-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .cs-onboard-body { margin: 0 0 8px; font-size: 1.05rem; color: var(--text-mid); line-height: 1.5; }
+  /* "Comes from the official USCIS API" line, on the card and under the
+     Case Status title. The check is decorative (aria-hidden). */
+  .cs-source-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .cs-check { flex: 0 0 14px; color: var(--navy-light); }
+  .cs-source-note { margin: 0 0 16px; }
+  .cs-onboard-cta {
+    display: inline-block;
+    width: auto;
+    min-height: 48px;
+    margin-top: 16px;
+    padding: 12px 28px;
+    transition: none;
+  }
+  .cs-onboard-cta:hover { transform: none; }
+  @media (max-width: 480px) {
+    .cs-onboard-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .cs-onboard-cta { display: block; width: 100%; }
   }
   .page-section ul.page-bullets {
     margin: 8px 0 12px;
@@ -2659,6 +2706,30 @@
       <button type="button" class="policy-banner-dismiss" onclick="dismissPolicyBanner()" data-i18n="policy.banner.dismiss" aria-label="Dismiss notice">Dismiss</button>
     </div>
 
+    <!-- Case Status Helper entry — the first card on the home screen. The
+         icon is a generic document + magnifying glass: no seal, flag or
+         agency mark (Invariant VI). Wording says only where the data comes
+         from; it never presents this site as USCIS or as speaking for it. -->
+    <section class="cs-onboard-card" aria-labelledby="cs-onboard-title">
+      <div class="cs-onboard-eyebrow">
+        <span class="section-label" data-i18n="casestatus.ui.onboard.label">Already filed?</span>
+        <span class="cs-onboard-badge" data-i18n="casestatus.ui.onboard.badge">NEW</span>
+      </div>
+      <div class="cs-onboard-head">
+        <svg class="cs-onboard-icon" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 35H9V4h15l7 7v10"/>
+          <path d="M24 4v7h7"/>
+          <path d="M14 16h12M14 21h8M14 26h4"/>
+          <circle cx="28" cy="29" r="6"/>
+          <path d="M32.3 33.3L37 38"/>
+        </svg>
+        <h2 id="cs-onboard-title" class="cs-onboard-title" data-i18n="casestatus.ui.onboard.title">Check your USCIS case status here</h2>
+      </div>
+      <p class="cs-onboard-body" data-i18n="casestatus.ui.onboard.body">Enter your receipt number to see your current status and case history.</p>
+      <p class="cs-source-line"><svg class="cs-check" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="casestatus.ui.onboard.source">Status comes directly from the official USCIS Case Status API.</span></p>
+      <button type="button" class="btn-primary cs-onboard-cta" onclick="goCaseStatus()" data-i18n="casestatus.ui.onboard.cta">Check my case status →</button>
+    </section>
+
     <details class="exemption-card">
       <summary class="exemption-summary">
         <span class="exemption-icon" aria-hidden="true">i</span>
@@ -2861,12 +2932,6 @@
     <button class="btn-primary" id="btn-start" disabled onclick="startQuiz()" data-i18n="start.button">
       Start Practice Session →
     </button>
-
-    <div class="cs-onboard-card">
-      <div class="section-label" data-i18n="casestatus.ui.onboard.label">Already filed?</div>
-      <p data-i18n="casestatus.ui.onboard.body">Check the status of your USCIS case with your receipt number.</p>
-      <button type="button" class="cs-onboard-link" onclick="goCaseStatus()" data-i18n="casestatus.ui.onboard.cta">Check my case status →</button>
-    </div>
   </div>
 
   <!-- ══ SCREEN 2: QUIZ ══ -->
@@ -3600,6 +3665,7 @@
   <div id="screen-case-status" class="screen">
     <button type="button" class="page-back-btn" onclick="goBack()" data-i18n="back.button">← Back</button>
     <h1 class="page-title" data-i18n="cs.title">N-400 Case Status Helper</h1>
+    <p class="cs-source-line cs-source-note"><svg class="cs-check" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="casestatus.ui.source.note">Data source: official USCIS Case Status API</span></p>
 
     <section class="page-section">
       <p data-i18n="cs.intro">Enter your USCIS receipt number to look up the current status of your case. The status text shown comes directly from USCIS.</p>
@@ -6196,6 +6262,26 @@ const UI_TEXT = {
   "cs.resources.link4":  { en: "USCIS Processing Times" },
   "cs.disclaimer":       { en: "This is an independent study and navigation tool. It is not affiliated with USCIS or any government agency and does not provide legal advice." },
 
+  // ─── Case Status entry card (home screen) + screen source note ───────
+  // en and vi only, both written by a person (Invariant I: no machine
+  // translation). Every other language falls back to en via pick(). These
+  // say only where the data comes from; they must never present
+  // formN400.org as USCIS or as a government site.
+  "casestatus.ui.onboard.label":  { en: "Already filed?",
+                                    vi: "Đã nộp hồ sơ?" },
+  "casestatus.ui.onboard.badge":  { en: "NEW",
+                                    vi: "MỚI" },
+  "casestatus.ui.onboard.title":  { en: "Check your USCIS case status here",
+                                    vi: "Tra tình trạng hồ sơ USCIS ngay tại đây" },
+  "casestatus.ui.onboard.body":   { en: "Enter your receipt number to see your current status and case history.",
+                                    vi: "Nhập số biên nhận (receipt number) để xem tình trạng hiện tại và lịch sử hồ sơ của bạn." },
+  "casestatus.ui.onboard.source": { en: "Status comes directly from the official USCIS Case Status API.",
+                                    vi: "Thông tin lấy trực tiếp từ API Case Status chính thức của USCIS." },
+  "casestatus.ui.onboard.cta":    { en: "Check my case status →",
+                                    vi: "Tra hồ sơ của tôi →" },
+  "casestatus.ui.source.note":    { en: "Data source: official USCIS Case Status API",
+                                    vi: "Nguồn dữ liệu: API Case Status chính thức của USCIS" },
+
   // ─── Case Status lookup UI (Phase WEB-2 live lookup) ──────────────────
   // ENGLISH-ONLY BY DESIGN. These strings report the outcome of a lookup
   // against an official USCIS API; an inaccurate translation would misstate
@@ -6204,9 +6290,6 @@ const UI_TEXT = {
   // community-review channel, and `pick()` in updateUILanguage falls back to
   // `en` for every other language until then. Same rationale as
   // privacy.operator.* and privacy.mobile.*.
-  "casestatus.ui.onboard.label": { en: "Already filed?" },
-  "casestatus.ui.onboard.body":  { en: "Check the status of your USCIS case with your receipt number." },
-  "casestatus.ui.onboard.cta":   { en: "Check my case status →" },
   "casestatus.ui.submit":        { en: "Check Case Status" },
   "casestatus.ui.loading":       { en: "Checking with USCIS…" },
   "casestatus.ui.privacy":       { en: 'Your receipt number is sent only to USCIS through our proxy and is never stored. <a href="#" onclick="goPrivacy(); return false;">How we handle it</a>' },
