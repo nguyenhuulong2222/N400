@@ -9,7 +9,6 @@
     "test": "node test/receipt.test.mjs && node test/worker.test.mjs && node test/auth.test.mjs",
     "test:uscis-sandbox": "node scripts/test-uscis-sandbox.mjs",
     "test:sandbox-plan": "node scripts/sandbox-test-plan.mjs",
-    "test:demo-traffic": "node scripts/demo-traffic-check.mjs",
     "test:dev-cors": "node test/dev-cors.test.mjs",
     "demo:429": "node scripts/demo-429-burst.mjs"
   },

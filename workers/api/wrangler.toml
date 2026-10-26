@@ -15,24 +15,21 @@ routes = [
 # "0" = live USCIS path. Set to "1" to serve canned responses with no
 # credentials (local demos and development).
 MOCK_MODE = "0"
-# Official USCIS Case Status API — SANDBOX endpoints (from the developer portal
-# OpenAPI). Swap to the production base/token URLs when promoting to prod.
-USCIS_BASE_URL = "https://api-int.uscis.gov/case-status"
-USCIS_TOKEN_URL = "https://api-int.uscis.gov/oauth/accesstoken"
-
-# TEMPORARY — USCIS Torch API demo scheduling. Sent as a `demo_id` request header
-# on the outbound Case Status call only (never on the OAuth token call, never in
-# any response to our clients). Non-secret; contains no PII.
-# TO REMOVE AFTER THE DEMO: delete the line below (or set it to "") and redeploy.
-# An unset/empty value means the header is not sent at all.
-DEMO_ID = "4069"
+# Official USCIS Case Status API — PRODUCTION endpoints, from the USCIS
+# production-access approval for the "FormN400 Production" app (2026-10-26).
+# Local dev stays on the SANDBOX: workers/api/.dev.vars sets both keys to the
+# api-int.uscis.gov URLs, and .dev.vars overrides same-named [vars] during
+# `wrangler dev`. See README "Production vs local dev".
+USCIS_BASE_URL = "https://api.uscis.gov/case-status"
+USCIS_TOKEN_URL = "https://api.uscis.gov/oauth/accesstoken"
 
 # Rate limiting (Cloudflare Rate Limiting binding).
 #   https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
 # `simple.period` must be 10 or 60. Counters are shared by any binding on this
 # account with the same namespace_id, and are counted per Cloudflare location,
-# not globally. 20 per 60s sits far under the USCIS sandbox quota of 5 requests
-# per second and 1,000 per day.
+# not globally. 20 per 60s per IP is far under the USCIS production quota of
+# 10 requests per second and 400,000 per day for any one client. It is not a
+# global cap: the quota protection is per connection, not for the whole Worker.
 [[ratelimits]]
 name = "CASE_STATUS_LIMITER"
 namespace_id = "400221"

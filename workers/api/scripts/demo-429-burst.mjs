@@ -20,12 +20,14 @@
 // placed in a URL. Only the timestamp, HTTP status, `source` and
 // `errors[0].code` are printed — never a response body.
 
-const BASE_URL = process.env.BASE_URL ?? 'https://api.formn400.org';
+// Defaults to a local Worker. The production Worker now calls USCIS PRODUCTION,
+// where sandbox sample receipts must never be sent.
+const BASE_URL = process.env.BASE_URL ?? 'http://localhost:8787';
 const RECEIPT = process.env.RECEIPT ?? '';
 const N = Number(process.env.N ?? process.argv[2] ?? 25);
 
 if (!RECEIPT) {
-  console.error('RECEIPT is required. Use an official USCIS sandbox sample, e.g.:');
+  console.error('RECEIPT is required. Against a local Worker (sandbox or MOCK_MODE), e.g.:');
   console.error('  RECEIPT=EAC9999103403 npm run demo:429');
   process.exit(2);
 }

@@ -116,8 +116,9 @@ RECEIPT=EAC9999103403 npm run demo:429
 timestamp, status, `source` and `errors[0].code` per response — never a body and
 never the receipt. **Wait a full 60 seconds before the next lookup from the same
 connection**, or it will still be throttled. Cloudflare counts limits per
-location, so run it from one machine. Point it at a local Worker with
-`BASE_URL=http://localhost:8787` to avoid spending the USCIS quota.
+location, so run it from one machine. It targets a local Worker
+(`http://localhost:8787`) by default. Never point it at `api.formn400.org`:
+that Worker calls USCIS **production**, where sandbox receipts must not be sent.
 
 ### 401 — a real authentication failure
 
@@ -205,23 +206,51 @@ npm run test:dev-cors # CORS against a real `wrangler dev` server (~30s, spawns 
 `test:dev-cors` is deliberately outside `npm test`: it starts a real server, so
 it is slow and needs a free port. Run it before a demo.
 
+## Production vs local dev
+
+| Where | USCIS endpoints | Credentials |
+|---|---|---|
+| `https://api.formn400.org` (deployed) | **Production** — `https://api.uscis.gov/case-status`, `https://api.uscis.gov/oauth/accesstoken` (wrangler.toml [vars]) | "FormN400 Production" app, Worker secrets |
+| `wrangler dev` (local) | **Sandbox** — `https://api-int.uscis.gov/…`, set in `.dev.vars` | sandbox app, `.dev.vars` |
+| `wrangler dev --var MOCK_MODE:1` | none | none |
+
+`.dev.vars` overrides same-named `[vars]` during `wrangler dev`, so a local
+`.dev.vars` must carry `USCIS_BASE_URL` and `USCIS_TOKEN_URL` pointing at the
+sandbox. Without them, local dev talks to USCIS production.
+Only use non-case inputs (`ABC123`, `EAC0000000000`) against production. Sandbox
+sample receipts are for the sandbox only.
+
 ## Going live (Long runs these — not the agent)
 
-1. Set the secrets (never committed, never logged):
+1. Record the active version ID first — it is the rollback target:
    ```bash
    cd workers/api
+   npx wrangler deployments list
+   ```
+2. Set the production secrets ("FormN400 Production" app; never committed,
+   never logged). Each `secret put` deploys a new version immediately, so run
+   step 3 straight after:
+   ```bash
    npx wrangler secret put USCIS_CLIENT_ID
    npx wrangler secret put USCIS_CLIENT_SECRET
-   ```
-2. Verify the OAuth + sandbox lookup end-to-end (local script, redacted output):
-   ```bash
-   USCIS_CLIENT_ID=… USCIS_CLIENT_SECRET=… npm run test:uscis-sandbox
    ```
 3. Deploy (only on explicit approval):
    ```bash
    npx wrangler deploy
    curl https://api.formn400.org/health   # → { "ok": true, ..., "mock": false }
    ```
+4. Smoke-test with non-case inputs only: `ABC123` → 422 `source:"worker"`;
+   `EAC0000000000` → 404 `source:"uscis"` (proves the production token works).
+5. Roll back with the ID from step 1 — **not** a bare `wrangler rollback`, which
+   picks the version uploaded just before the latest (a secret-only version):
+   ```bash
+   npx wrangler rollback <version-id> --message "revert"
+   ```
+   If lookups then fail with 401 `source:"worker"`, re-put the matching
+   credentials with `wrangler secret put`.
+
+The sandbox end-to-end check (`npm run test:uscis-sandbox`, sandbox
+credentials in the environment) still targets `api-int.uscis.gov` only.
 
 ## Files
 

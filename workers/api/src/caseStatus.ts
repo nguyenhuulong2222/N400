@@ -7,7 +7,6 @@
 // placed in a response we return to our own clients (Invariant II).
 
 import type { Env } from './env.ts';
-import { demoId } from './env.ts';
 
 // Thrown when the call cannot complete at all (network or transport). Carries
 // no receipt, token, or body.
@@ -40,20 +39,13 @@ export async function fetchCaseStatus(env: Env, token: string, receipt: string):
   if (!base) throw new UpstreamError();
   const url = `${base.replace(/\/+$/, '')}/${encodeURIComponent(receipt)}`;
 
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/json',
-  };
-
-  // Demo traffic identifier, outbound only. Attached when DEMO_ID is non-empty,
-  // so removing it after the demo is a config change, not a code change.
-  const demo = demoId(env);
-  if (demo !== null) headers['demo_id'] = demo;
-
   try {
     return await fetch(url, {
       method: 'GET',
-      headers,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
   } catch (err) {

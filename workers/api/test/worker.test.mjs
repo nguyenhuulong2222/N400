@@ -228,6 +228,23 @@ await check('LIVE: valid upstream 200 → 200 passthrough', async () => {
   });
 });
 
+// The outbound case-status call carries exactly Authorization + Accept. Guards
+// against the retired demo_id header (USCIS demo, 2026-10) creeping back in.
+await check('LIVE: outbound case-status headers are exactly Authorization + Accept, no demo_id', async () => {
+  let sent = null;
+  const caseResponse = (init) => {
+    sent = init.headers;
+    return { status: 200, async text() { return JSON.stringify({ case_status: {} }); } };
+  };
+  await withUpstream(caseResponse, async () => {
+    await liveCaseStatusCall();
+    assert.ok(sent, 'case-status fetch was not called');
+    const names = Object.keys(sent).map((k) => k.toLowerCase()).sort();
+    assert.deepEqual(names, ['accept', 'authorization']);
+    assert.ok(!('demo_id' in sent), 'demo_id header must not be sent');
+  });
+});
+
 // ─── C2: upstream error passthrough ───────────────────────────────────
 // A capable stub: counts token fetches and returns a scripted sequence of
 // upstream case-status responses, so a test can prove the token cache was

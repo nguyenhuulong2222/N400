@@ -14,10 +14,6 @@ export interface Env {
   USCIS_TOKEN_URL?: string;
   MOCK_MODE?: string;
 
-  // Demo traffic identifier, sent as a `demo_id` header on the outbound Case
-  // Status call only. Non-secret, no PII. Empty or unset means no header.
-  DEMO_ID?: string;
-
   // Rate Limiting binding (wrangler.toml [[ratelimits]]). Optional because the
   // unit tests have no binding and the Worker must serve rather than crash.
   CASE_STATUS_LIMITER?: RateLimit;
@@ -30,10 +26,4 @@ export interface Env {
 export function isMockMode(env: Env): boolean {
   const v = (env.MOCK_MODE ?? '').trim().toLowerCase();
   return v === '1' || v === 'true' || v === 'yes';
-}
-
-/** Trimmed DEMO_ID, or null when unset or blank. */
-export function demoId(env: Env): string | null {
-  const v = (env.DEMO_ID ?? '').trim();
-  return v === '' ? null : v;
 }
