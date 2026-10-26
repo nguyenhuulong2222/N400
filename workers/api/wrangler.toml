@@ -38,6 +38,19 @@ namespace_id = "400221"
   limit = 20
   period = 60
 
+# Global quota guard. One Durable Object instance ("global") counts every live
+# lookup from every location: 5 per second and 300,000 per UTC day, under the
+# USCIS production quota of 10/s and 400,000/day. Rate Limiting bindings above
+# are per location, so they cannot do this.
+#   https://developers.cloudflare.com/durable-objects/
+[[durable_objects.bindings]]
+name = "GLOBAL_QUOTA"
+class_name = "GlobalQuotaGuard"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GlobalQuotaGuard"]
+
 # CORS origins are intentionally NOT configured here. The allowlist is hardcoded
 # in src/cors.ts (API Invariant V) so it cannot be widened by a config typo.
 

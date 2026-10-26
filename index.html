@@ -2862,13 +2862,10 @@
       Start Practice Session →
     </button>
 
-    <!-- Case Status Helper — public availability notice. TEXT ONLY: no link,
-         no button, no onclick, no href, and no path of any kind into
-         #screen-case-status. The ?screen=case-status deep link remains the
-         only way in. Delete this block when the feature goes public. -->
-    <div class="legal-box" id="cs-dev-notice">
-      <strong data-i18n="casestatus.ui.notice.label">CASE STATUS LOOKUP — IN DEVELOPMENT</strong>
-      <span data-i18n="casestatus.ui.notice.body">We are building a tool to look up USCIS case status by receipt number. It is not available yet: we are waiting on production access to the official USCIS Case Status API, and we will not release it while it can only reach a test environment — a real applicant deserves accurate information about their own case. This page will be updated when it goes live.</span>
+    <div class="cs-onboard-card">
+      <div class="section-label" data-i18n="casestatus.ui.onboard.label">Already filed?</div>
+      <p data-i18n="casestatus.ui.onboard.body">Check the status of your USCIS case with your receipt number.</p>
+      <button type="button" class="cs-onboard-link" onclick="goCaseStatus()" data-i18n="casestatus.ui.onboard.cta">Check my case status →</button>
     </div>
   </div>
 
@@ -3463,7 +3460,7 @@
         <li data-i18n="privacy.donot.li5">Any information you type into the interview practice form</li>
       </ul>
       <p data-i18n="privacy.donot.body">All information you enter stays in your browser's memory only and is permanently deleted when you close or refresh the page.</p>
-      <p data-i18n="privacy.donot.exception">The single exception is the optional Case Status Helper (described below), which is in development and not yet available to the public; once it launches it will contact our backend only to perform a case lookup you request.</p>
+      <p data-i18n="privacy.donot.exception">The single exception is the optional Case Status Helper (described below), which contacts our backend only to perform a case lookup you request.</p>
     </section>
 
     <!-- Mobile app disclosure. English-only by design on every language
@@ -3482,7 +3479,7 @@
 
     <section class="page-section">
       <h2 data-i18n="privacy.casestatus.title">Case Status Helper</h2>
-      <p data-i18n="privacy.casestatus.intro">The site is developing an optional Case Status Helper that will let you check the status of a USCIS case. It is not yet available to the public. When it launches, you will type a USCIS receipt number, and here is exactly how that number will be handled:</p>
+      <p data-i18n="privacy.casestatus.intro">The site offers an optional Case Status Helper that lets you check the status of a USCIS case. When you use it, you type a USCIS receipt number. Here is exactly how that number is handled:</p>
       <ul class="page-bullets">
         <li data-i18n-html="privacy.casestatus.li1">The receipt number is sent inside the request body — never in the page address (URL) or a query string on this site — to our backend service at <strong>api.formn400.org</strong>.</li>
         <li data-i18n="privacy.casestatus.li2">Our backend exists only to relay (proxy) the request to the official USCIS Case Status API and return the result to you. We keep credentials on the server so they are never exposed to your browser.</li>
@@ -3562,7 +3559,7 @@
     <!-- Always-Vietnamese summary box per spec — does not switch on lang. -->
     <section class="page-section page-section-summary" lang="vi">
       <p><strong>Tóm tắt bằng tiếng Việt:</strong> formN400.org KHÔNG thu thập, KHÔNG bán, và KHÔNG chia sẻ dữ liệu cá nhân. Không có tài khoản, đăng nhập, quảng cáo, phân tích hay theo dõi. Câu trả lời luyện tập, lựa chọn ngôn ngữ/tiểu bang, và mọi thông tin bạn nhập chỉ tồn tại trong bộ nhớ trình duyệt trong phiên làm việc và sẽ mất khi bạn đóng hoặc tải lại trang.</p>
-      <p><strong>Công cụ Tra cứu Tình trạng Hồ sơ (Case Status Helper):</strong> đây là tính năng tùy chọn, hiện đang được phát triển và chưa mở cho người dùng. Khi tính năng này hoạt động, bạn sẽ nhập số biên nhận (receipt number); số đó sẽ được gửi trong phần thân yêu cầu (không bao giờ nằm trong địa chỉ URL trên trang này) tới máy chủ của chúng tôi tại api.formn400.org, chỉ để chuyển tiếp tới API chính thức của USCIS rồi trả kết quả về cho bạn. Số biên nhận KHÔNG bao giờ được ghi log, lưu trữ, lưu đệm hay giữ lại — nó chỉ tồn tại tạm thời cho đúng một lần tra cứu rồi bị loại bỏ; chúng tôi không gắn nó với danh tính nào và không lưu lịch sử tra cứu.</p>
+      <p><strong>Công cụ Tra cứu Tình trạng Hồ sơ (Case Status Helper):</strong> đây là tính năng tùy chọn và hiện đã hoạt động. Khi bạn dùng, bạn sẽ nhập số biên nhận (receipt number); số đó sẽ được gửi trong phần thân yêu cầu (không bao giờ nằm trong địa chỉ URL trên trang này) tới máy chủ của chúng tôi tại api.formn400.org, chỉ để chuyển tiếp tới API chính thức của USCIS rồi trả kết quả về cho bạn. Số biên nhận KHÔNG bao giờ được ghi log, lưu trữ, lưu đệm hay giữ lại — nó chỉ tồn tại tạm thời cho đúng một lần tra cứu rồi bị loại bỏ; chúng tôi không gắn nó với danh tính nào và không lưu lịch sử tra cứu.</p>
       <p><strong>Lưu giữ &amp; xóa dữ liệu:</strong> chúng tôi không lưu giữ dữ liệu bạn nhập, nên không có gì để bạn yêu cầu xóa. Dữ liệu duy nhất tồn tại là nhật ký truy cập máy chủ tiêu chuẩn do Cloudflare tạo ra; đó là log CDN thông thường, không được chúng tôi liên kết với danh tính bạn.</p>
       <p><strong>Sự cố bảo mật &amp; thay đổi chính sách:</strong> vì không lưu dữ liệu cá nhân nên không có kho dữ liệu để bị xâm phạm; nếu có sự cố, chúng tôi sẽ đăng thông báo rõ ràng ngay trên trang. Nếu có thay đổi quan trọng về chính sách, chúng tôi sẽ thông báo nổi bật kèm bản tóm tắt dễ hiểu và xin sự đồng ý chủ động của bạn — việc tiếp tục sử dụng trang KHÔNG được coi là chấp nhận chính sách mới.</p>
     </section>
@@ -3693,6 +3690,8 @@
       <a href="#" onclick="goExemptions(); return false;" data-i18n="exempt_title">Exemptions &amp; Accommodations</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="/support.html">Support</a>
+      <span class="footer-dot" aria-hidden="true">·</span>
+      <a href="#" onclick="goCaseStatus(); return false;" data-i18n="footer.casestatus">Case Status</a>
       <span class="footer-dot" aria-hidden="true">·</span>
       <a href="#" onclick="goPolicyNotice(); return false;" data-i18n="footer.policy">USCIS Policy Update</a>
     </div>
@@ -4665,7 +4664,7 @@ const SUPPORTED_LANGS = new Set(Object.keys(LANG_META));
 //
 // The static privacy.html carries its own English date and is NOT driven by
 // this constant — keep the two in sync by hand when bumping.
-const PRIVACY_UPDATED = "2026-10-02";
+const PRIVACY_UPDATED = "2026-10-26";
 
 // Locale tag for date formatting, derived from LANG_META.tts (the only BCP-47
 // tag we carry per language), falling back to en-US.
@@ -6169,6 +6168,8 @@ const UI_TEXT = {
   // ─── Footer + back nav ───────────────────────────────────────────────
   "footer.about":               { en:"About",                                vi:"Về dự án",                                            es:"Acerca de",                                            zh:"关于",                                            tl:"Tungkol sa",                                          ko:"소개" , hi:"परिचय", ht:"Sou nou", th:"เกี่ยวกับ", lo:"ກ່ຽວກັບ", hmn:"Hais Txog", my:"အကြောင်း", pt:"Sobre", ru:"О проекте" , fr:"À propos" , uk:"Про нас" , gu:"વિશે" , bn:"সম্পর্কে" , ar:"من نحن" , ur:"تعارف" },
   "footer.privacy":             { en:"Privacy Policy",                       vi:"Chính sách bảo mật",                                  es:"Política de privacidad",                              zh:"隐私政策",                                       tl:"Patakaran sa Privacy",                                ko:"개인정보 보호정책" , hi:"गोपनीयता नीति", ht:"Règleman konfidansyalite", th:"นโยบายความเป็นส่วนตัว", lo:"ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", hmn:"Txoj Cai Tswj Tsis Pub Lwm Tus Paub", my:"ကိုယ်ရေးအချက်အလက် မူဝါဒ", pt:"Política de Privacidade", ru:"Конфиденциальность" , fr:"Politique de confidentialité" , uk:"Політика конфіденційності" , gu:"ગોપનીયતા નીતિ" , bn:"গোপনীয়তা নীতি" , ar:"سياسة الخصوصية" , ur:"رازداری کی پالیسی" },
+  // ─── Footer: N-400 Case Status Helper (Phase WEB-2) ─────────────────
+  "footer.casestatus":          { en: "Case Status" },
 
   // ─── N-400 Case Status Helper screen — English-only by design (Phase WEB-2)
   "cs.title":            { en: "N-400 Case Status Helper" },
@@ -6230,14 +6231,6 @@ const UI_TEXT = {
   "casestatus.ui.format.hint":           { en: "Format: 3 letters + 10 numbers, e.g. IOE1234567890" },
   "casestatus.ui.err.unavailable.title": { en: "Service temporarily unavailable" },
   "casestatus.ui.err.unavailable.body":  { en: "The case status service is temporarily unavailable. Please try again later, or check your status directly at my.uscis.gov." },
-
-  // Public availability notice shown on the onboarding screen. ENGLISH-ONLY,
-  // same rationale as the block above: this is a compliance / availability
-  // disclosure about an official USCIS integration, not UI chrome. Do NOT
-  // translate or machine-translate (Invariant I). Only an `en` value is
-  // defined, so `pick()` renders this identical English text in all 20 langs.
-  "casestatus.ui.notice.label": { en: "CASE STATUS LOOKUP — IN DEVELOPMENT" },
-  "casestatus.ui.notice.body":  { en: "We are building a tool to look up USCIS case status by receipt number. It is not available yet: we are waiting on production access to the official USCIS Case Status API, and we will not release it while it can only reach a test environment — a real applicant deserves accurate information about their own case. This page will be updated when it goes live." },
 
   // ─── Footer: USCIS Policy Update link (added 2026-05-21) ───────────
   "footer.policy":              { en:"USCIS Policy Update",
@@ -6910,9 +6903,9 @@ const UI_TEXT = {
   "privacy.mobile.reminders":   { en:'<strong>Study reminders.</strong> The optional daily reminder is a local notification scheduled on your device only. There is no push service, no push token, no account, and no server involved. Turning the reminder off cancels it on the device.' },
   "privacy.mobile.network":     { en:"The app makes no network requests of its own. All question data is bundled inside the app, so it works with no connection at all; the only time the network is used is when you tap a link, which opens in your own browser." },
   "privacy.fullpolicy":         { en:'Full policy (English): <a href="https://formn400.org/privacy.html" target="_blank" rel="noopener">formn400.org/privacy.html</a>' },
-  "privacy.donot.exception":    { en:"The single exception is the optional Case Status Helper (described below), which is in development and not yet available to the public; once it launches it will contact our backend only to perform a case lookup you request." },
+  "privacy.donot.exception":    { en:"The single exception is the optional Case Status Helper (described below), which contacts our backend only to perform a case lookup you request." },
   "privacy.casestatus.title":   { en:"Case Status Helper" },
-  "privacy.casestatus.intro":   { en:"The site is developing an optional Case Status Helper that will let you check the status of a USCIS case. It is not yet available to the public. When it launches, you will type a USCIS receipt number, and here is exactly how that number will be handled:" },
+  "privacy.casestatus.intro":   { en:"The site offers an optional Case Status Helper that lets you check the status of a USCIS case. When you use it, you type a USCIS receipt number. Here is exactly how that number is handled:" },
   "privacy.casestatus.li1":     { en:'The receipt number is sent inside the request body — never in the page address (URL) or a query string on this site — to our backend service at <strong>api.formn400.org</strong>.' },
   "privacy.casestatus.li2":     { en:"Our backend exists only to relay (proxy) the request to the official USCIS Case Status API and return the result to you. We keep credentials on the server so they are never exposed to your browser." },
   "privacy.casestatus.li3":     { en:"To perform the lookup, your receipt number is transmitted onward to the official USCIS Case Status API, which is operated by USCIS under its own privacy practices." },

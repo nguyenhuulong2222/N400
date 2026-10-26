@@ -42,6 +42,7 @@ rate limiter.
 | 422 | `worker` | `invalid_receipt_format` | Our own validation rejected the format before any upstream call. |
 | 422 | `uscis` | `invalid_receipt_format` | Upstream rejected the format (e.g. an unrecognised 3-letter prefix). |
 | 429 | `worker` | `rate_limited` | Our rate limiter: more than 20 lookups in 60s from one connection. |
+| 429 | `worker` | `global_rate_limited` | Our global quota guard: the whole Worker is at 5 lookups per second or 300,000 per UTC day, from all connections together. |
 | 429 | `uscis` | `rate_limited` | USCIS TPS or daily quota exceeded. |
 | 502 | `worker` | `upstream_unparseable` | Upstream returned 200 with syntactically invalid JSON (a known USCIS sandbox defect). |
 | 503 | `uscis` | `service_unavailable` | Sandbox closed, or upstream outage. |
@@ -249,6 +250,35 @@ sample receipts are for the sandbox only.
    If lookups then fail with 401 `source:"worker"`, re-put the matching
    credentials with `wrangler secret put`.
 
+### Global quota guard (`GlobalQuotaGuard` Durable Object)
+
+The per-IP `CASE_STATUS_LIMITER` is counted per Cloudflare location, so it
+cannot cap our total traffic to USCIS. One Durable Object instance (`global`)
+counts every live lookup from every location: 5 per second and 300,000 per UTC
+day, under the USCIS production quota of 10/s and 400,000/day. It is asked only
+after receipt validation and never in MOCK_MODE, and it is sent an empty GET —
+no receipt, no IP. It fails open: a missing binding or an unreachable guard lets
+the lookup through, and a USCIS 429 is still passed to the user.
+
+On the Workers Free plan, Durable Objects allow 100,000 requests a day. Past
+that the guard stops answering and fails open, so on Free the daily cap is
+effectively the plan limit, not 300,000.
+
+**Rollback once the guard has been deployed.** Adding the class was a Durable
+Object migration (`[[migrations]] tag = "v1"`). Cloudflare refuses a
+`wrangler rollback` across a Durable Object class change, so **rolling back to
+4213a3e1 (or any version before the guard) is not possible.** `git revert` and
+deploy would fail too: it deletes the class without a `deleted_classes`
+migration. To turn the guard off instead:
+
+1. In `wrangler.toml`, comment out only the `[[durable_objects.bindings]]` block.
+   Keep the `[[migrations]]` block and the `GlobalQuotaGuard` export in
+   `src/index.ts`.
+2. `npx wrangler deploy`. With no `GLOBAL_QUOTA` binding the guard fails open,
+   which is exactly the behaviour before it existed.
+
+Rolling back between versions deployed after the guard works as usual.
+
 The sandbox end-to-end check (`npm run test:uscis-sandbox`, sandbox
 credentials in the environment) still targets `api-int.uscis.gov` only.
 
@@ -264,6 +294,7 @@ credentials in the environment) still targets `api-int.uscis.gov` only.
 | `src/errors.ts`     | Upstream error whitelist, receipt masking, client envelope |
 | `src/auth.ts`       | OAuth client-credentials token manager (in-memory cache) |
 | `src/caseStatus.ts` | Upstream `GET {base}/{receipt}` call |
+| `src/globalGuard.ts` | `GlobalQuotaGuard` Durable Object: global 5/s and 300,000/day cap |
 | `scripts/test-uscis-sandbox.mjs` | Local-only sandbox smoke test (redacted) |
 | `scripts/demo-429-burst.mjs` | Rate-limit demonstration (`npm run demo:429`) |
 | `test/*.test.mjs`   | Unit + handler tests (no network) |

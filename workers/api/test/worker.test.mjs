@@ -449,6 +449,91 @@ await check('worker-originated 422 uses the shared envelope', async () => {
   assert.equal(json.error, 'invalid_receipt_format', 'legacy field kept for the deployed frontend');
 });
 
+// ─── Global quota guard ───────────────────────────────────────────────
+// A fake DurableObjectNamespace. `reply` is the guard's answer, or 'throw'.
+function quotaNs(reply) {
+  const ns = {
+    calls: 0,
+    lastUrl: null,
+    idFromName: (name) => ({ name }),
+    get: () => ({
+      fetch: async (url) => {
+        ns.calls++;
+        ns.lastUrl = String(url);
+        if (reply === 'throw') throw new Error('guard down');
+        return Response.json(reply);
+      },
+    }),
+  };
+  return ns;
+}
+
+await check('GLOBAL QUOTA: denied → 429 GLOBAL_RATE_LIMITED source:worker, no upstream call', async () => {
+  const ns = quotaNs({ allowed: false });
+  const counts = await withUpstream({ status: 200, async text() { return '{}'; } }, async (c) => {
+    const res = await worker.fetch(
+      new Request('https://api.local/case-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiptNumber: 'EAC9999103400' }),
+      }),
+      { ...LIVE_ENV, GLOBAL_QUOTA: ns },
+    );
+    assert.equal(res.status, 429);
+    const json = await res.json();
+    assert.equal(json.source, 'worker');
+    assert.equal(json.error, 'global_rate_limited');
+    assert.equal(json.errors[0].code, 'GLOBAL_RATE_LIMITED');
+    assert.match(json.message, /busy/);
+    return c;
+  });
+  assert.equal(counts.token + counts.caseStatus, 0, 'a denied lookup must not reach USCIS');
+  assert.ok(!ns.lastUrl.includes('EAC'), 'the guard must never see the receipt');
+});
+
+for (const [label, reply] of [['allowed', { allowed: true }], ['throws (fail open)', 'throw'], ['unreadable reply (fail open)', {}]]) {
+  await check(`GLOBAL QUOTA: ${label} → lookup proceeds`, async () => {
+    const ns = quotaNs(reply);
+    await withUpstream({ status: 404, async text() { return '{}'; } }, async () => {
+      const res = await worker.fetch(
+        new Request('https://api.local/case-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiptNumber: 'EAC9999103400' }),
+        }),
+        { ...LIVE_ENV, GLOBAL_QUOTA: ns },
+      );
+      assert.equal(res.status, 404);
+      assert.equal((await res.json()).source, 'uscis');
+    });
+    assert.equal(ns.calls, 1);
+  });
+}
+
+await check('GLOBAL QUOTA: invalid receipt → 422 without touching the guard', async () => {
+  const ns = quotaNs({ allowed: false });
+  const res = await worker.fetch(
+    new Request('https://api.local/case-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiptNumber: 'ABC123' }),
+    }),
+    { ...LIVE_ENV, GLOBAL_QUOTA: ns },
+  );
+  assert.equal(res.status, 422);
+  assert.equal(ns.calls, 0);
+});
+
+await check('GLOBAL QUOTA: mock mode never touches the guard', async () => {
+  const ns = quotaNs({ allowed: false });
+  const res = await call('POST', '/case-status', {
+    env: { ...MOCK_ENV, GLOBAL_QUOTA: ns },
+    body: { receiptNumber: 'EAC9999103403' },
+  });
+  assert.notEqual(res.status, 429);
+  assert.equal(ns.calls, 0);
+});
+
 // ─── C3: rate limiting ────────────────────────────────────────────────
 function limiterEnv(behaviour) {
   return {

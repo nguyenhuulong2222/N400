@@ -17,6 +17,10 @@ export interface Env {
   // Rate Limiting binding (wrangler.toml [[ratelimits]]). Optional because the
   // unit tests have no binding and the Worker must serve rather than crash.
   CASE_STATUS_LIMITER?: RateLimit;
+
+  // Global quota guard (wrangler.toml [[durable_objects.bindings]]). Optional
+  // for the same reason: a missing binding fails open.
+  GLOBAL_QUOTA?: DurableObjectNamespace;
 }
 
 /**

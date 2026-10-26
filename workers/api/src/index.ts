@@ -16,6 +16,8 @@ import { fetchCaseStatus, UpstreamTimeoutError } from './caseStatus.ts';
 import { errorBody, extractUpstreamErrors, fallbackFor, safeStatus } from './errors.ts';
 import type { PassthroughError } from './errors.ts';
 
+export { GlobalQuotaGuard } from './globalGuard.ts';
+
 const SERVICE = 'formn400-api';
 // Keep in sync with "version" in package.json.
 const VERSION = '0.2.0';
@@ -93,6 +95,10 @@ async function handleCaseStatus(
     if (canned) return mapUpstream(canned, cors);
     return mockCaseStatus(receipt, cors);
   }
+
+  // After validation, so a 422 never spends a USCIS slot.
+  const overQuota = await enforceGlobalQuota(env, cors);
+  if (overQuota) return overQuota;
 
   let token: string;
   try {
@@ -207,6 +213,33 @@ async function enforceRateLimit(
     'rate_limited',
     'RATE_LIMITED',
     'Too many lookups from this connection. Please wait a minute and try again.',
+  );
+}
+
+// Returns a 429 response when the whole Worker is at its USCIS quota, else null.
+//
+// One Durable Object counts every live lookup from every Cloudflare location
+// (src/globalGuard.ts). It is sent nothing but an empty GET: no receipt, no IP.
+// Fails open like the per-IP limiter: a missing binding, a throwing stub, or a
+// reply we cannot read lets the request through, and USCIS's own 429 is still
+// passed to the user if we are wrong.
+async function enforceGlobalQuota(env: Env, cors: CorsContext): Promise<Response | null> {
+  const ns = env.GLOBAL_QUOTA;
+  if (!ns) return null;
+  try {
+    const stub = ns.get(ns.idFromName('global'));
+    const res = await stub.fetch('https://global-quota/acquire');
+    const { allowed } = (await res.json()) as { allowed?: unknown };
+    if (allowed !== false) return null;
+  } catch {
+    return null;
+  }
+  return workerError(
+    cors,
+    429,
+    'global_rate_limited',
+    'GLOBAL_RATE_LIMITED',
+    'The case status service is busy right now. Please try again in a few minutes.',
   );
 }
 
