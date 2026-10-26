@@ -2347,6 +2347,12 @@
   .cs-card.cs-card-offline h3 { color: #a16207; }
   .cs-card p { margin: 0 0 10px; font-size: 15px; line-height: 1.55; }
   .cs-card p:last-child { margin-bottom: 0; }
+  /* Links rebuilt from USCIS status text by csRichText — uscis.gov only. */
+  .cs-card a.cs-uscis-link { color: var(--navy); text-decoration: underline; text-underline-offset: 2px; }
+  .cs-card a.cs-uscis-link:hover,
+  .cs-card a.cs-uscis-link:focus-visible { color: var(--red); }
+  .cs-ext { margin-left: 2px; font-size: 0.85em; text-decoration: none; display: inline-block; }
+  .cs-para { display: block; margin-top: 8px; }
 
   /* Case facts, as USCIS sent them. Two columns so label and value line up
      without a table; rows are omitted entirely when USCIS omits the field
@@ -4861,9 +4867,10 @@ function csRenderLoading() {
 // no paraphrasing, no interpretation, no next-step guidance authored by us
 // (Invariant VII — no legal advice).
 //
-// USCIS embeds an HTML anchor inside current_case_status_desc_en. We parse it
-// with DOMParser and take doc.body.textContent, which yields the verbatim
-// human-readable text with no markup and no injection path.
+// USCIS embeds an HTML anchor inside current_case_status_desc_en. csRichText
+// parses it into an inert DOMParser document and rebuilds it node by node with
+// createElement/textContent: the text stays verbatim, and only https links to
+// uscis.gov survive as links. USCIS data never reaches innerHTML.
 function csRenderStatus(data) {
   const el = csResultEl();
   if (!el) return;
@@ -4871,8 +4878,8 @@ function csRenderStatus(data) {
   if (!cs) { csRenderUnavailable(); return; }
 
   const title = csPlainText(cs.current_case_status_text_en);
-  const desc  = csPlainText(cs.current_case_status_desc_en);
-  if (!title && !desc) { csRenderUnavailable(); return; }
+  const desc  = csRichText(cs.current_case_status_desc_en);
+  if (!title && !desc.textContent.trim()) { csRenderUnavailable(); return; }
 
   el.innerHTML = '';
   const card = document.createElement('div');
@@ -4880,7 +4887,7 @@ function csRenderStatus(data) {
   const h = document.createElement('h3');
   h.textContent = title;
   const p = document.createElement('p');
-  p.textContent = desc;
+  p.appendChild(desc);
   card.appendChild(h);
   card.appendChild(p);
 
@@ -4920,9 +4927,10 @@ function csRenderStatus(data) {
     const ul = document.createElement('ul');
     for (const row of hist) {
       if (!row || typeof row !== 'object') continue;
-      const text = csPlainText(row.completed_text_en || row.current_case_status_text_en || '');
+      const text = csRichText(row.completed_text_en || row.current_case_status_text_en || '');
       const date = typeof row.date === 'string' ? row.date : '';
-      if (!text && !date) continue;
+      const hasText = text.textContent.trim() !== '';
+      if (!hasText && !date) continue;
       const li = document.createElement('li');
       if (date) {
         const d = document.createElement('span');
@@ -4930,9 +4938,9 @@ function csRenderStatus(data) {
         d.textContent = date;
         li.appendChild(d);
       }
-      if (text) {
+      if (hasText) {
         const tx = document.createElement('span');
-        tx.textContent = text;
+        tx.appendChild(text);
         li.appendChild(tx);
       }
       ul.appendChild(li);
@@ -5068,6 +5076,81 @@ function csPlainText(raw) {
   } catch (e) {
     return raw;
   }
+}
+
+// Rebuild USCIS status markup as a DocumentFragment. The string is parsed into
+// an inert DOMParser document (no scripts run, nothing loads) and walked:
+// text → text, <br> → line break, <p> → paragraph block, <a> → a fresh link
+// only when csUscisHref accepts its href, script/style/template/noscript →
+// dropped with their content, any other tag → its text only.
+// Nothing from USCIS is copied except text and the re-serialized URL.
+function csRichText(raw) {
+  const frag = document.createDocumentFragment();
+  if (typeof raw !== 'string' || raw === '') return frag;
+  let doc;
+  try {
+    doc = new DOMParser().parseFromString(raw, 'text/html');
+  } catch (e) {
+    frag.appendChild(document.createTextNode(raw));
+    return frag;
+  }
+  csAppendSafe(frag, doc.body);
+  return frag;
+}
+
+const CS_DROP_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT']);
+
+function csAppendSafe(out, node) {
+  for (const child of node.childNodes) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      out.appendChild(document.createTextNode(child.textContent));
+    } else if (child.nodeType !== Node.ELEMENT_NODE) {
+      continue; // comments, processing instructions
+    } else if (CS_DROP_TAGS.has(child.tagName)) {
+      continue; // tag and its content dropped entirely
+    } else if (child.tagName === 'BR') {
+      out.appendChild(document.createElement('br'));
+    } else if (child.tagName === 'P') {
+      const para = document.createElement('span');
+      para.className = 'cs-para';
+      csAppendSafe(para, child);
+      out.appendChild(para);
+    } else if (child.tagName === 'A') {
+      const text = child.textContent;
+      const href = csUscisHref(child.getAttribute('href'));
+      if (!href) { out.appendChild(document.createTextNode(text)); continue; }
+      const a = document.createElement('a');
+      a.className = 'cs-uscis-link';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = text;
+      const ext = document.createElement('span');
+      ext.className = 'cs-ext';
+      ext.setAttribute('aria-hidden', 'true');
+      ext.textContent = '↗︎';
+      const sr = document.createElement('span');
+      sr.className = 'sr-only';
+      sr.textContent = ' (' + t('casestatus.ui.link.newtab') + ')';
+      a.appendChild(ext);
+      a.appendChild(sr);
+      out.appendChild(a);
+    } else {
+      csAppendSafe(out, child); // unwrap: keep text, drop tag + attributes
+    }
+  }
+}
+
+// Returns the normalized URL only for https://uscis.gov or *.uscis.gov,
+// otherwise null. No base URL, so relative hrefs throw and are rejected.
+function csUscisHref(raw) {
+  if (typeof raw !== 'string' || raw === '') return null;
+  let u;
+  try { u = new URL(raw); } catch (e) { return null; }
+  if (u.protocol !== 'https:') return null;
+  const h = u.hostname;
+  if (h !== 'uscis.gov' && !h.endsWith('.uscis.gov')) return null;
+  return u.href;
 }
 
 function csRenderError(title, body) {
@@ -6142,6 +6225,7 @@ const UI_TEXT = {
   "casestatus.ui.meta.submitted":        { en: "Submitted" },
   "casestatus.ui.meta.updated":          { en: "Last updated" },
   "casestatus.ui.history.title":         { en: "Status history" },
+  "casestatus.ui.link.newtab":           { en: "opens uscis.gov in a new tab" },
   "casestatus.ui.history.none":          { en: "No earlier status history is available for this case." },
   "casestatus.ui.format.hint":           { en: "Format: 3 letters + 10 numbers, e.g. IOE1234567890" },
   "casestatus.ui.err.unavailable.title": { en: "Service temporarily unavailable" },

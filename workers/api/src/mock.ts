@@ -29,6 +29,20 @@ const NOT_FOUND_MESSAGE =
  * Dates use USCIS's MM-DD-YYYY HH:MM:SS, not ISO, so the frontend cannot
  * quietly assume ISO. History items use the spec's `completed_text_*` names.
  */
+// Descriptions carry the <a> markup the live sandbox sends, so MOCK_MODE
+// exercises the web renderer: the no-history sample links to uscis.gov (mirrors
+// the live EAC9999103400 text); the with-history sample carries a non-USCIS
+// link the web app must show as plain text.
+const DESC_USCIS_LINK =
+  'On January 15, 2025, we received your Form N-400, Application for Naturalization. ' +
+  'If you move, go to <a href="https://www.uscis.gov/addresschange" target="_blank">' +
+  'www.uscis.gov/addresschange</a> to give us your new mailing address. ' +
+  '(Mock response — not a live USCIS result.)';
+const DESC_FOREIGN_LINK =
+  'On January 15, 2025, we received your Form N-400, Application for Naturalization. ' +
+  'See <a href="https://uscis.gov.example.com/status" target="_blank">uscis.gov.example.com/status</a> ' +
+  'for details. (Mock response — this link is not uscis.gov and must not be clickable.)';
+
 function buildCaseStatus(receipt: string, withHistory: boolean): unknown {
   const cs: Record<string, unknown> = {
     receiptNumber: receipt,
@@ -37,9 +51,7 @@ function buildCaseStatus(receipt: string, withHistory: boolean): unknown {
     modifiedDate: '03-02-2025 14:28:46',
     current_case_status_text_en: 'Case Was Received',
     current_case_status_text_es: 'Se recibió su caso',
-    current_case_status_desc_en:
-      'On January 15, 2025, we received your Form N-400, Application for Naturalization. ' +
-      '(Mock response — not a live USCIS result.)',
+    current_case_status_desc_en: withHistory ? DESC_FOREIGN_LINK : DESC_USCIS_LINK,
     current_case_status_desc_es:
       'El 15 de enero de 2025, recibimos su Formulario N-400, Solicitud de Naturalización. ' +
       '(Respuesta simulada — no es un resultado real de USCIS.)',
@@ -52,7 +64,8 @@ function buildCaseStatus(receipt: string, withHistory: boolean): unknown {
           },
           {
             date: '02-10-2025 11:42:13',
-            completed_text_en: 'Interview Was Scheduled',
+            completed_text_en:
+              'Interview Was Scheduled. See <a href="https://www.uscis.gov/n-400">www.uscis.gov/n-400</a>.',
             completed_text_es: 'Se programó la entrevista',
           },
         ]
